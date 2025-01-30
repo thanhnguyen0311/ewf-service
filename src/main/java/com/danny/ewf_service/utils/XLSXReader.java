@@ -81,7 +81,8 @@ public class XLSXReader {
     }
 
 
-    public void importDataToDB() {
+    private void importDataToDB() {
+
         // Validate the data has at least 3 rows (IDs, Column Names, and Data)
         if (data.size() < 3) {
             System.err.println("Insufficient data in the XLSX file.");
@@ -133,6 +134,7 @@ public class XLSXReader {
             }
 
             insertProductStmt.executeBatch(); // Execute batch insert
+
             System.out.println("Data successfully imported into the database!");
         } catch (Exception e) {
             System.err.println("Error during MySQL import: " + e.getMessage());
