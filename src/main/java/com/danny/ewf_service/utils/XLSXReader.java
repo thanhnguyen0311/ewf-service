@@ -11,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +82,7 @@ public class XLSXReader {
     }
 
 
-    private void importDataToDB() {
+    private void importProductToDB() {
 
         // Validate the data has at least 3 rows (IDs, Column Names, and Data)
         if (data.size() < 3) {
@@ -192,11 +193,97 @@ public class XLSXReader {
     }
 
 
+    private void importComponentToDB() {
+        // Database connection details
+        String databaseUser = "root";
+        String databasePassword = "2024";
+        String databaseUrl = "jdbc:mysql://localhost:3306/ewf?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+
+        // Validate that there is enough data to process
+        if (data.size() < 3) {
+            System.err.println("Insufficient data in the XLSX file.");
+            return;
+        }
+
+        // Start processing from the third row (skipping the first two rows)
+        try (Connection conn = DriverManager.getConnection(databaseUrl, databaseUser, databasePassword)) {
+            // Query to check for duplicate SKU
+            String CHECK_SKU_QUERY = "SELECT COUNT(*) FROM components WHERE sku = ?";
+
+            // Query to insert into "components" table
+            String INSERT_COMPONENT_QUERY = "INSERT INTO components (sku, type, quantity, box, dims, box_dims, created_at, updated_at) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
+            PreparedStatement checkSkuStmt = conn.prepareStatement(CHECK_SKU_QUERY);
+            PreparedStatement insertComponentStmt = conn.prepareStatement(INSERT_COMPONENT_QUERY);
+
+            // Loop through each row in the dataset (starting from the third row)
+            for (int i = 2; i < data.size(); i++) {
+                List<String> row = data.get(i);
+
+                // Loop through the 8 items in columns 9 to 72
+                for (int j = 9; j < 73; j += 8) {
+                    try {
+                        String sku = row.get(j);                 // Column 9 + (0 mod 8)
+                        String type = row.get(j + 1);           // Type - Column 10
+                        String quantity = row.get(j + 2);       // Quantity - Column 11
+                        String box = row.get(j + 3);            // Box Quantity - Column 12
+                        String dims = row.get(j + 4);           // Dims - Column 13
+                        String boxDims = row.get(j + 5);        // Box Dims - Column 14
+
+                        // Skip blank SKUs
+                        if (sku == null || sku.isEmpty()) {
+                            continue;
+                        }
+
+                        // Check for duplicate SKUs
+                        checkSkuStmt.setString(1, sku);
+                        ResultSet rs = checkSkuStmt.executeQuery();
+                        if (rs.next() && rs.getInt(1) > 0) {
+                            System.out.println("Duplicate SKU found, skipping: " + sku);
+                            continue;
+                        }
+
+                        // Add values to the insert statement
+                        insertComponentStmt.setString(1, sku);                      // SKU
+                        insertComponentStmt.setString(2, type != null ? type : ""); // Type
+                        insertComponentStmt.setLong(3, parseLongWithDefault(quantity, 0)); // Quantity
+                        insertComponentStmt.setLong(4, parseLongWithDefault(box, 0));      // Box Quantity
+                        insertComponentStmt.setString(5, dims != null ? dims : ""); // Dims
+                        insertComponentStmt.setString(6, boxDims != null ? boxDims : ""); // Box Dims
+
+                        // Add to batch
+                        insertComponentStmt.addBatch();
+                    } catch (Exception e) {
+                        System.err.println("Error while processing row " + (i + 1) + ", column " + (j + 1) + ": " + e.getMessage());
+                    }
+                }
+            }
+
+            // Execute the batch
+            insertComponentStmt.executeBatch();
+            System.out.println("Data successfully imported into the components table!");
+        } catch (Exception e) {
+            System.err.println("Error during database import: " + e.getMessage());
+        }
+    }
+
+
+    private Long parseLongWithDefault(String value, long defaultValue) {
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+
+
     public static void main(String[] args) {
         try {
             XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/product-sheet.xlsx");
             xlsxReader.readXLSX();
-            xlsxReader.importDataToDB();
+//            xlsxReader.importProductToDB();
+            xlsxReader.importComponentToDB();
         } catch (IOException | InvalidFormatException e) {
             System.err.println("Error occurred while reading the XLSX file: " + e.getMessage());
         }

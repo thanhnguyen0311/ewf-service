@@ -96,5 +96,4 @@ public class SQLExecutor {
             System.err.println("Failed to execute SQL: " + sql + " - Error: " + e.getMessage());
         }
     }
-
 }
