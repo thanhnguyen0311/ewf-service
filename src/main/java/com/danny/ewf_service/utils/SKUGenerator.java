@@ -123,7 +123,7 @@ public class SKUGenerator {
         generator.databaseUrl = "jdbc:mysql://localhost:3306/ewf?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         generator.databaseUser = "root";
         generator.databasePassword = "2024";
-//      generator.wipeLocalSKUs();
         generator.generateAndUpdateSKUs();
     }
+
 }
