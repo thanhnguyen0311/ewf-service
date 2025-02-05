@@ -41,8 +41,12 @@ public class XLSXReader {
 
             for (Row row : sheet) {
                 List<String> rowData = new ArrayList<>();
-                for (Cell cell : row) {
-                    rowData.add(getCellValue(cell));
+//                for (Cell cell : row) {
+//                    rowData.add(getCellValue(cell));
+//                }
+                for (int colIndex = 0; colIndex < row.getLastCellNum(); colIndex++) {
+                    Cell cell = row.getCell(colIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    rowData.add(getCellValue(cell)); // Get value for each cell, including blanks
                 }
                 data.add(rowData);
             }
@@ -79,6 +83,7 @@ public class XLSXReader {
             default:
                 return "UNKNOWN";
         }
+
     }
 
 
@@ -276,14 +281,69 @@ public class XLSXReader {
         }
     }
 
+    private void importComponentDetailToDB() {
+        // Database connection details
+        String databaseUser = "root";
+        String databasePassword = "2024";
+        String databaseUrl = "jdbc:mysql://localhost:3306/ewf?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        if (data.size() < 3) {
+            System.err.println("Insufficient data in the XLSX file.");
+            return;
+        }
+
+        // Start processing from the third row (skipping the first two rows)
+        try (Connection conn = DriverManager.getConnection(databaseUrl, databaseUser, databasePassword)) {
+            // Query to check for duplicate SKU
+            String CHECK_SKU_QUERY = "SELECT COUNT(*) FROM components WHERE sku = ?";
+
+            // Query to insert into "components" table
+            String UPDATE_COMPONENT_QUERY = "UPDATE components SET finish = ?, size_shape = ?, updated_at = NOW() WHERE sku = ? ";
+            PreparedStatement checkSkuStmt = conn.prepareStatement(CHECK_SKU_QUERY);
+            PreparedStatement insertComponentStmt = conn.prepareStatement(UPDATE_COMPONENT_QUERY);
+
+            // Loop through each row in the dataset (starting from the third row)
+            for (int i = 1; i < data.size(); i++) {
+                List<String> row = data.get(i);
+                try {
+                    String sku = row.get(0);
+                    String finish = row.get(3);
+                    String sizeShape = row.get(4);
+                    System.out.println("SKU: " + sku + " | Finish : " + finish + " | Size Shape : " + sizeShape);
+                    if (sku == null || sku.isEmpty()) {
+                        continue;
+                    }
+                    checkSkuStmt.setString(1, sku);
+                    ResultSet rs = checkSkuStmt.executeQuery();
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        insertComponentStmt.setString(1, finish != null ? finish : "");
+                        insertComponentStmt.setString(2, sizeShape != null ? sizeShape : "");
+                        insertComponentStmt.setString(3, sku);
+                        insertComponentStmt.addBatch();
+                        System.out.println("Added: " + sku + " | Finish : " + finish + " | Size Shape : " + sizeShape);
+                    }
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                }
+            }
+            // Execute the batch
+            insertComponentStmt.executeBatch();
+            System.out.println("Data successfully imported into the components table!");
+        } catch (Exception e) {
+            System.err.println("Error during database import: " + e.getMessage());
+        }
+    }
 
 
     public static void main(String[] args) {
         try {
-            XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/product-sheet.xlsx");
-            xlsxReader.readXLSX();
+//            XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/product-sheet.xlsx");
+//            xlsxReader.readXLSX();
 //            xlsxReader.importProductToDB();
-            xlsxReader.importComponentToDB();
+
+
+            XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/product-all.xlsx");
+            xlsxReader.readXLSX();
+            xlsxReader.importComponentDetailToDB();
         } catch (IOException | InvalidFormatException e) {
             System.err.println("Error occurred while reading the XLSX file: " + e.getMessage());
         }
