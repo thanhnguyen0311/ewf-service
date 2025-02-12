@@ -1,6 +1,6 @@
 package com.danny.ewf_service;
 
-import com.danny.ewf_service.utils.SQLExecutor;
+import com.danny.ewf_service.utils.imports.SKUGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -10,17 +10,21 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class EwfServiceApplication implements CommandLineRunner {
 
 	@Autowired
-	private SQLExecutor sqlExecutor;
+	private final SKUGenerator skuGenerator;
 
-	public static void main(String[] args) {
+    public EwfServiceApplication(SKUGenerator skuGenerator) {
+        this.skuGenerator = skuGenerator;
+    }
+
+    public static void main(String[] args) {
 		SpringApplication.run(EwfServiceApplication.class, args);
 	}
 
 	@Override
 	public void run(String... args) throws Exception {
-		System.out.println("Starting application...");
-		// Automatically execute all SQL scripts at startup
-		sqlExecutor.executeAllSQLScripts();
+		String filePath = "src/main/resources/data/all_sku.xlsx";
+		skuGenerator.importSkus(filePath);
+		skuGenerator.generateAndUpdateSKUs();
 		System.out.println("Application started successfully!");
 	}
 }
