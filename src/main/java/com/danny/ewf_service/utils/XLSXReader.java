@@ -41,8 +41,12 @@ public class XLSXReader {
 
             for (Row row : sheet) {
                 List<String> rowData = new ArrayList<>();
-                for (Cell cell : row) {
-                    rowData.add(getCellValue(cell));
+//                for (Cell cell : row) {
+//                    rowData.add(getCellValue(cell));
+//                }
+                for (int colIndex = 0; colIndex < row.getLastCellNum(); colIndex++) {
+                    Cell cell = row.getCell(colIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    rowData.add(getCellValue(cell)); // Get value for each cell, including blanks
                 }
                 data.add(rowData);
             }
@@ -79,6 +83,7 @@ public class XLSXReader {
             default:
                 return "UNKNOWN";
         }
+
     }
 
 
@@ -276,14 +281,268 @@ public class XLSXReader {
         }
     }
 
+    private void importComponentDetailToDB() {
+        // Database connection details
+        String databaseUser = "root";
+        String databasePassword = "2024";
+        String databaseUrl = "jdbc:mysql://localhost:3306/ewf?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        if (data.size() < 3) {
+            System.err.println("Insufficient data in the XLSX file.");
+            return;
+        }
 
+        // Start processing from the third row (skipping the first two rows)
+        try (Connection conn = DriverManager.getConnection(databaseUrl, databaseUser, databasePassword)) {
+            // Query to check for duplicate SKU
+            String CHECK_SKU_QUERY = "SELECT COUNT(*) FROM components WHERE sku = ?";
+
+            // Query to insert into "components" table
+            String UPDATE_COMPONENT_QUERY = "UPDATE components SET finish = ?, size_shape = ?, updated_at = NOW() WHERE sku = ? ";
+            PreparedStatement checkSkuStmt = conn.prepareStatement(CHECK_SKU_QUERY);
+            PreparedStatement insertComponentStmt = conn.prepareStatement(UPDATE_COMPONENT_QUERY);
+
+            // Loop through each row in the dataset (starting from the third row)
+            for (int i = 1; i < data.size(); i++) {
+                List<String> row = data.get(i);
+                try {
+                    String sku = row.get(0);
+                    String finish = row.get(3);
+                    String sizeShape = row.get(4);
+                    System.out.println("SKU: " + sku + " | Finish : " + finish + " | Size Shape : " + sizeShape);
+                    if (sku == null || sku.isEmpty()) {
+                        continue;
+                    }
+                    checkSkuStmt.setString(1, sku);
+                    ResultSet rs = checkSkuStmt.executeQuery();
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        insertComponentStmt.setString(1, finish != null ? finish : "");
+                        insertComponentStmt.setString(2, sizeShape != null ? sizeShape : "");
+                        insertComponentStmt.setString(3, sku);
+                        insertComponentStmt.addBatch();
+                        System.out.println("Added: " + sku + " | Finish : " + finish + " | Size Shape : " + sizeShape);
+                    }
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                }
+            }
+            // Execute the batch
+            insertComponentStmt.executeBatch();
+            System.out.println("Data successfully imported into the components table!");
+        } catch (Exception e) {
+            System.err.println("Error during database import: " + e.getMessage());
+        }
+    }
+
+    private void filterDuplicateSKUs() {
+        String databaseUser = "root";
+        String databasePassword = "2024";
+        String databaseUrl = "jdbc:mysql://localhost:3306/ewf?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+
+        try (Connection conn = DriverManager.getConnection(databaseUrl, databaseUser, databasePassword)) {
+
+            // Step 1: Create a temporary table with the list of rows to keep
+            String CREATE_TEMP_TABLE_QUERY =
+                    "CREATE TEMPORARY TABLE temp_components AS " +
+                            "SELECT MIN(id) AS id " +
+                            "FROM components " +
+                            "GROUP BY sku";
+            try (PreparedStatement createTempTableStmt = conn.prepareStatement(CREATE_TEMP_TABLE_QUERY)) {
+                createTempTableStmt.executeUpdate();
+            }
+
+            // Step 2: Delete duplicate rows from the 'components' table, excluding the ones in the temporary table
+            String DELETE_DUPLICATES_QUERY =
+                    "DELETE FROM components " +
+                            "WHERE id NOT IN (SELECT id FROM temp_components)";
+            try (PreparedStatement deleteDuplicatesStmt = conn.prepareStatement(DELETE_DUPLICATES_QUERY)) {
+                int rowsDeleted = deleteDuplicatesStmt.executeUpdate();
+                System.out.println("Successfully deleted " + rowsDeleted + " duplicate rows from the components table.");
+            }
+
+            // Step 3: Drop the temporary table (optional, it will drop automatically when the session ends)
+            String DROP_TEMP_TABLE_QUERY = "DROP TEMPORARY TABLE IF EXISTS temp_components";
+            try (PreparedStatement dropTempTableStmt = conn.prepareStatement(DROP_TEMP_TABLE_QUERY)) {
+                dropTempTableStmt.executeUpdate();
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error while removing duplicate SKUs: " + e.getMessage());
+        }
+    }
+
+
+    private void addComponentsProductRelationshiptoDB() {
+        String databaseUser = "root";
+        String databasePassword = "2024";
+        String databaseUrl = "jdbc:mysql://localhost:3306/ewf?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+
+        // Queries
+        String GET_PRODUCT_ID_QUERY = "SELECT id FROM products WHERE sku = ?";
+        String GET_COMPONENT_ID_QUERY = "SELECT id FROM components WHERE sku = ?";
+        String INSERT_RELATIONSHIP_QUERY = "INSERT INTO product_components (product_id, component_id) VALUES (?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(databaseUrl, databaseUser, databasePassword);
+             PreparedStatement getProductIdStmt = conn.prepareStatement(GET_PRODUCT_ID_QUERY);
+             PreparedStatement getComponentIdStmt = conn.prepareStatement(GET_COMPONENT_ID_QUERY);
+             PreparedStatement insertRelationshipStmt = conn.prepareStatement(INSERT_RELATIONSHIP_QUERY)) {
+
+            // Loop through each row in the dataset (starting from the third row, so index = 2)
+            for (int i = 2; i < data.size(); i++) {
+                List<String> row = data.get(i);
+
+                try {
+                    // Step 1: Get the SKU from column 3 and query product ID
+                    String productSKU = row.get(3); // Column 3 (0-indexed)
+                    if (productSKU == null || productSKU.isEmpty()) {
+                        System.out.println("can't find "  + productSKU + " in products table");
+                        continue; // Skip rows without a product SKU
+                    }
+                    getProductIdStmt.setString(1, productSKU);
+                    ResultSet productResultSet = getProductIdStmt.executeQuery();
+
+                    Integer productId = null;
+                    if (productResultSet.next()) {
+                        productId = productResultSet.getInt("id");
+                    } else {
+                        System.err.println("Product SKU not found in database: " + productSKU);
+                        continue; // Skip if the product SKU is not found
+                    }
+
+                    // Step 2: Get component SKUs from columns 9 and 17 and query their IDs
+                    String componentSKU1 = row.get(9); // Column 9 (0-indexed)
+                    String componentSKU2 = row.get(17); // Column 17 (0-indexed)
+
+                    List<Integer> componentIds = new ArrayList<>();
+                    for (String componentSKU : new String[]{componentSKU1, componentSKU2}) {
+                        if (componentSKU == null || componentSKU.isEmpty()) {
+                            continue; // Skip empty component SKUs
+                        }
+                        getComponentIdStmt.setString(1, componentSKU);
+                        ResultSet componentResultSet = getComponentIdStmt.executeQuery();
+                        if (componentResultSet.next()) {
+                            componentIds.add(componentResultSet.getInt("id"));
+                        } else {
+                            System.err.println("Component SKU not found in database: " + componentSKU);
+                        }
+                    }
+
+                    // Step 3: Insert product-component relationships into the database
+                    for (Integer componentId : componentIds) {
+                        insertRelationshipStmt.setInt(1, productId); // Product ID
+                        insertRelationshipStmt.setInt(2, componentId); // Component ID
+                        insertRelationshipStmt.addBatch(); // Add to batch for efficient database execution
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("Error processing row " + (i + 1) + ": " + e.getMessage());
+                }
+            }
+
+            // Execute the batch insert for relationships
+            insertRelationshipStmt.executeBatch();
+            System.out.println("Product-component relationships successfully added to the database.");
+
+        } catch (Exception e) {
+            System.err.println("Error while adding product-component relationships to the database: " + e.getMessage());
+        }
+    }
+
+    private void addProductPrices() {
+        String databaseUser = "root";
+        String databasePassword = "2024";
+        String databaseUrl = "jdbc:mysql://localhost:3306/ewf?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+
+        // Query to find the `local_sku` in the `local` table using the `sku` in the `products` table
+        String FIND_LOCAL_SKU_QUERY =
+                "SELECT l.local_sku " +
+                        "FROM products p " +
+                        "INNER JOIN local l ON l.id = p.local_id " +
+                        "WHERE p.sku = ?";
+
+        // Query to update the `price` in the `local` table
+        String UPDATE_LOCAL_PRICE_QUERY =
+                "UPDATE local SET price = ? WHERE local_sku = ?";
+
+        // Ensure the XLSX file has rows (data)
+        if (data.size() < 2) {
+            System.err.println("Insufficient data in the XLSX file.");
+            return;
+        }
+
+        try (Connection conn = DriverManager.getConnection(databaseUrl, databaseUser, databasePassword);
+             PreparedStatement findLocalSkuStmt = conn.prepareStatement(FIND_LOCAL_SKU_QUERY);
+             PreparedStatement updateLocalPriceStmt = conn.prepareStatement(UPDATE_LOCAL_PRICE_QUERY)) {
+
+            for (int i = 0; i < data.size(); i++) { // Skip header row (row 0) for XLSX
+                List<String> row = data.get(i);
+
+                try {
+                    // Read SKU and Price from XLSX row
+                    String sku = row.get(0);   // Column 1: SKU
+                    String price = row.get(1); // Column 2: Price
+
+                    if (sku == null || sku.isEmpty() || price == null || price.isEmpty()) {
+                        System.out.println("Skipped invalid or empty row: SKU or Price missing.");
+                        continue; // Skip invalid rows
+                    }
+
+                    // Step 1: Use SKU to find the corresponding `local_sku`
+                    findLocalSkuStmt.setString(1, sku); // Match SKU in `products`
+                    ResultSet rs = findLocalSkuStmt.executeQuery();
+
+                    if (rs.next()) {
+                        // Found a matching local_sku
+                        String localSku = rs.getString("local_sku");
+
+                        // Step 2: Update the price in the `local` table
+                        updateLocalPriceStmt.setDouble(1, Double.parseDouble(price)); // Set the new price
+                        updateLocalPriceStmt.setString(2, localSku); // Targeted `local_sku`
+                        int rowsUpdated = updateLocalPriceStmt.executeUpdate();
+
+                        if (rowsUpdated > 0) {
+                            System.out.println("Updated price for Local SKU: " + localSku);
+                        } else {
+                            System.out.println("Failed to update price for Local SKU: " + localSku);
+                        }
+                    } else {
+                        // No matching row found for the SKU in the `products` table
+                        System.out.println("SKU not found in products table for row: " + sku);
+                    }
+
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid price format in row: " + (i + 1) + " - " + e.getMessage());
+                } catch (Exception e) {
+                    System.err.println("Error processing row: " + (i + 1) + " - " + e.getMessage());
+                }
+            }
+
+            System.out.println("Local table prices updated successfully!");
+
+        } catch (Exception e) {
+            System.err.println("Error while updating local table: " + e.getMessage());
+        }
+    }
 
     public static void main(String[] args) {
         try {
-            XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/product-sheet.xlsx");
-            xlsxReader.readXLSX();
+
+//            XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/product-sheet.xlsx");
+//            xlsxReader.readXLSX();
 //            xlsxReader.importProductToDB();
-            xlsxReader.importComponentToDB();
+
+//            XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/product-all.xlsx");
+//            xlsxReader.readXLSX();
+//            xlsxReader.importComponentDetailToDB();
+
+//            XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/product-all.xlsx");
+//            xlsxReader.readXLSX();
+//            xlsxReader.filterDuplicateSKUs();
+
+
+            XLSXReader xlsxReader = new XLSXReader("src/main/resources/data/data_prices.xlsx");
+            xlsxReader.readXLSX();
+            xlsxReader.addProductPrices();
+
         } catch (IOException | InvalidFormatException e) {
             System.err.println("Error occurred while reading the XLSX file: " + e.getMessage());
         }

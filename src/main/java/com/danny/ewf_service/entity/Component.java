@@ -29,8 +29,17 @@ public class Component {
     @Column(name = "box")
     private Long box;
 
+    @Column(name = "finish")
+    private String finish;
+
+    @Column(name = "size_shape")
+    private String sizeShape;
+
     @Column(name = "dims")
     private String dims;
+
+    @Column(name = "inventory")
+    private Long inventory;
 
     @Column(name = "box_dims")
     private String box_dims;
