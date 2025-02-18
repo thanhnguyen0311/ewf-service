@@ -27,23 +27,4 @@ public class LocalProduct {
     @OneToOne(mappedBy = "localProduct")
     private Product product;
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getLocalSku() {
-        return localSku;
-    }
-
-    public Long getPrice() {
-        return price;
-    }
-
-    public String getLocalTitle() {
-        return localTitle;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
 }

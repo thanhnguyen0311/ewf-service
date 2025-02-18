@@ -1,6 +1,8 @@
 package com.danny.ewf_service.service.impl;
 
+import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.ProductService;
 import org.springframework.stereotype.Service;
@@ -14,9 +16,9 @@ public class ProductServiceImpl implements ProductService {
         this.productRepository = productRepository;
     }
 
-    public Product findBySku(String sku) {
-        return productRepository.findBySku(sku)
-                .orElseThrow(() -> new RuntimeException("Product not found with SKU: " + sku));
+    public ProductResponseDto findBySku(String sku) {
+        Product product = productRepository.findBySku(sku).orElseThrow(() -> new RuntimeException("Product not found with SKU: " + sku));
+        return IProductMapper.INSTANCE.productToProductResponseDto(product);
     }
 
 }

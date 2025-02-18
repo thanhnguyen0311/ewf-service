@@ -1,5 +1,6 @@
 package com.danny.ewf_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,34 +22,19 @@ public class Product {
     @Column(name = "sku")
     private String sku;
 
+    @Column(name="price")
+    private Long price;
+
     @Column(name = "description")
     private String description;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "local_id", referencedColumnName = "id")
+    @JsonIgnore
     private LocalProduct localProduct;
 
 
     @Column(name = "images")
     private String images;
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getSku() {
-        return sku;
-    }
-
-    public String getImages() {
-        return images;
-    }
-
-    public LocalProduct getLocalProduct() {
-        return localProduct;
-    }
 }

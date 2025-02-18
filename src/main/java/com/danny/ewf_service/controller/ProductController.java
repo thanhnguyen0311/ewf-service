@@ -1,6 +1,7 @@
 package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +22,8 @@ public class ProductController {
     @GetMapping("/{sku}")
     public ResponseEntity<?> getProductBySku(@PathVariable String sku) {
         try {
-            Product product = productService.findBySku(sku);
-            System.out.println("SELECT: " + product.getLocalProduct().getPrice() + product.getImages());
+            ProductResponseDto product = productService.findBySku(sku);
+            System.out.println("SELECT: " + product.getPrice() + product.getImages());
             return ResponseEntity.ok().body(product);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

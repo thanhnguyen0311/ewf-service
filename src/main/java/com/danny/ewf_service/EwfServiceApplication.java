@@ -24,11 +24,11 @@ public class EwfServiceApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		String filePath = "src/main/resources/data/ewfmain.csv";
-		if (firstRun) {
-			titleGenerator.generateLocalTitle();
-			firstRun = false;
-		}
+//		String filePath = "src/main/resources/data/ewfmain.csv";
+//		if (firstRun) {
+//			titleGenerator.generateLocalTitle();
+//			firstRun = false;
+//		}
 		System.out.println("Application started successfully!");
 	}
 }
