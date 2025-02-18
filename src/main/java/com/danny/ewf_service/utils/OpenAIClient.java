@@ -22,7 +22,6 @@ public class OpenAIClient {
 
     @Autowired
     private final DatasourceConfig datasourceConfig;
-    private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
     private final ObjectMapper mapper;
 
     public OpenAIClient(DatasourceConfig datasourceConfig) {
