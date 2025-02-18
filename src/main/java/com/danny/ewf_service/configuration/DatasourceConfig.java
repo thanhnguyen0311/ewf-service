@@ -15,9 +15,14 @@ public class DatasourceConfig {
 
     private String password;
 
+    private String openAIkey;
+
     public void printDatasourceInfo() {
         System.out.println("URL: " + url);
         System.out.println("Username: " + username);
+    }
+    public String getOpenAIkey(){
+        return openAIkey;
     }
 
     public String getPassword() {
@@ -42,5 +47,9 @@ public class DatasourceConfig {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setOpenAIkey(String apikey) {
+        this.openAIkey = apikey;
     }
 }

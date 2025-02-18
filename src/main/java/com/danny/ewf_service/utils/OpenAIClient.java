@@ -1,33 +1,32 @@
 package com.danny.ewf_service.utils;
 
+import com.danny.ewf_service.configuration.DatasourceConfig;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Service
 public class OpenAIClient {
+
+    @Autowired
+    private final DatasourceConfig datasourceConfig;
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-    private final String apiKey = "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";
     private final ObjectMapper mapper;
 
-    public OpenAIClient() {
+    public OpenAIClient(DatasourceConfig datasourceConfig) {
+        this.datasourceConfig = datasourceConfig;
         this.mapper = new ObjectMapper();
     }
 
@@ -52,8 +51,7 @@ public class OpenAIClient {
         content.add(imageContent);
         System.out.println(content.toString());
 
-        String apiKey = "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";
-        OpenAiService service = new OpenAiService(apiKey);
+        OpenAiService service = new OpenAiService(datasourceConfig.getOpenAIkey());
         ChatMessage userMessage = new ChatMessage(ChatMessageRole.USER.value(), content.toString());
         messages.add(userMessage);
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
