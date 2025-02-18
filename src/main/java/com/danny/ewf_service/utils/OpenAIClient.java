@@ -29,7 +29,7 @@ public class OpenAIClient {
         this.mapper = new ObjectMapper();
     }
 
-    public String generateTitle() throws IOException {
+    public String generateTitleFromImage(String userContent, String imageUrl) {
         // Replace this placeholder key with a secure method for storing and retrieving your actual API key
         List<ChatMessage> messages = new ArrayList<>();
 
@@ -38,17 +38,16 @@ public class OpenAIClient {
         // Add text prompt
         ObjectNode textContent = mapper.createObjectNode();
         textContent.put("type", "text");
-        textContent.put("text", "What's in this image?");
+        textContent.put("text", userContent);
         content.add(textContent);
 
         // Add image URL
         ObjectNode imageContent = mapper.createObjectNode();
         imageContent.put("type", "image_url");
         ObjectNode imageUrl_node = mapper.createObjectNode();
-        imageUrl_node.put("url", "https://st4.depositphotos.com/14431644/22076/i/450/depositphotos_220767694-stock-photo-handwriting-text-writing-example-concept.jpg");
+        imageUrl_node.put("url", imageUrl);
         imageContent.set("image_url", imageUrl_node);
         content.add(imageContent);
-        System.out.println(content.toString());
 
         OpenAiService service = new OpenAiService(datasourceConfig.getOpenAIkey());
         ChatMessage userMessage = new ChatMessage(ChatMessageRole.USER.value(), content.toString());

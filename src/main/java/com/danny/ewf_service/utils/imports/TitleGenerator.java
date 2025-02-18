@@ -63,21 +63,19 @@ public class TitleGenerator {
 
             ImageProcessor.ImageUrls imageUrls = imageProcessor.parseImageJson(localProduct.getProduct().getImages());
             for (String imgLink : imageUrls.getImg()) {
-                isLinkAlive = imageCheck.isImageLinkAlive(imgLink);
-                userContent = "New SKU: " + localProduct.getLocalSku() + "\nImage URL: " + imgLink;
-                if(isLinkAlive) {
-                    try {
-//                        String imageUrl = "https://gratisography.com/wp-content/uploads/2024/11/gratisography-augmented-reality-800x525.jpg";
-//                        String prompt = "What's in this image?";
+                if (imgLink.contains("DCH") && imgLink.contains(localProduct.getProduct().getSku())) {
+                    isLinkAlive = imageCheck.isImageLinkAlive(imgLink);
+                    userContent = "Generate title from image for product with sku :" + localProduct.getLocalSku() + "\nExample: '1MZABS-W9E-96 Elegant 3-Piece Dropleaf Dining Set with 2 Upholstered Chairs in Light Beige Linen, 36x54 Inch, White Finish'.";
+                    if (isLinkAlive) {
+                        try {
+                            String result = openAIClient.generateTitleFromImage(userContent, imgLink);
+                            System.out.println("OpenAI: " + result + " | " + imgLink);
 
-//                        String result = openAIClient.analyzeImage(imageUrl, prompt);
-                        String result = openAIClient.generateTitle();
-                        System.out.println("Analysis result: " + result);
-
-                        TimeUnit.MINUTES.sleep(5);
-                        break;
-                    } catch (Exception e) {
-                        throw new RuntimeException("Error generating title", e);
+                            TimeUnit.MINUTES.sleep(1);
+                            break;
+                        } catch (Exception e) {
+                            throw new RuntimeException("Error generating title", e);
+                        }
                     }
                 }
             }
