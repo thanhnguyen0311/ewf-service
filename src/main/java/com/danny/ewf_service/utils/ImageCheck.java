@@ -28,8 +28,13 @@ public class ImageCheck {
             String contentType = connection.getContentType();
 
             // Check if response is successful and content type is an image
-            return (responseCode == HttpURLConnection.HTTP_OK) &&
-                    (contentType != null && contentType.startsWith("image/"));
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                System.out.println("Link alive: " + imageUrl);
+                return contentType != null && contentType.startsWith("image/");
+            } else {
+                System.out.println("Link died: " + imageUrl);
+                return false;
+            }
 
         } catch (Exception e) {
             return false;

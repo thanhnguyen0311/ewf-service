@@ -36,6 +36,11 @@ public class ImagesGenerator {
         this.getCellValue = getCellValue;
     }
 
+    public void importImagesFromSirv(String filepath){
+        String updateImagesSQL = "UPDATE products SET images = ? WHERE sku = ?";
+
+    }
+
     public void generateImages(String filePath) {
         String updateImagesSQL = "UPDATE products SET images = ? WHERE sku = ?";
 

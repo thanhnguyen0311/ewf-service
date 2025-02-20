@@ -8,11 +8,10 @@ import lombok.*;
 @Setter
 @Getter
 @ToString
-public class ProductResponseDto {
+public class ProductSearchResponseDto {
     private Long id;
     private String sku;
     private Long price;
-    private Long localPrice;
-    private String images;
+    private String image;
     private String finish;
 }

@@ -49,7 +49,7 @@ public class OpenAIClient {
         imageContent.set("image_url", imageUrl_node);
         content.add(imageContent);
 
-        OpenAiService service = new OpenAiService(datasourceConfig.getOpenAIkey());
+        OpenAiService service = new OpenAiService("openkey");
         ChatMessage userMessage = new ChatMessage(ChatMessageRole.USER.value(), content.toString());
         messages.add(userMessage);
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest

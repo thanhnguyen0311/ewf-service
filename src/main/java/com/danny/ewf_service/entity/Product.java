@@ -25,6 +25,9 @@ public class Product {
     @Column(name="price")
     private Long price;
 
+    @Column(name = "category")
+    private String category;
+
     @Column(name = "description")
     private String description;
 
@@ -32,6 +35,9 @@ public class Product {
     @JoinColumn(name = "local_id", referencedColumnName = "id")
     @JsonIgnore
     private LocalProduct localProduct;
+
+    @Column(name = "finish")
+    private String finish;
 
 
     @Column(name = "images")
