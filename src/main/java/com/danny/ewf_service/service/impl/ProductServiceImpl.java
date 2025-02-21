@@ -42,4 +42,9 @@ public class ProductServiceImpl implements ProductService {
         return productSearchResponseDtoList;
     }
 
+    @Override
+    public ProductResponseDto findById(Long id) {
+        return IProductMapper.INSTANCE.productToProductResponseDto(productRepository.findById(id).orElseThrow());
+    }
+
 }
