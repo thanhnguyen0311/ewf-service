@@ -12,14 +12,12 @@ import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface IProductMapper {
-    IProductMapper INSTANCE = Mappers.getMapper(IProductMapper.class);
     ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // For JSON parsing
 
 
