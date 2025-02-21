@@ -17,6 +17,8 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     @Autowired
+    private final IProductMapper productMapper;
+    @Autowired
     private final ProductRepository productRepository;
 
 
@@ -24,27 +26,27 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponseDto findBySku(String sku) {
         Product product = productRepository.findBySku(sku).orElseThrow(() -> new RuntimeException("Product not found with SKU: " + sku));
-        return IProductMapper.INSTANCE.productToProductResponseDto(product);
+        return productMapper.productToProductResponseDto(product);
     }
 
     @Override
     public List<ProductResponseDto> findAll() {
         List<Product> products = productRepository.findAllProducts();
-        return IProductMapper.INSTANCE.productListToProductResponseDtoList(products);
+        return productMapper.productListToProductResponseDtoList(products);
     }
 
     @Override
     public List<ProductSearchResponseDto> getAllProductsSearch() {
         List<Product> products = productRepository.findAllProducts();
-        List<ProductSearchResponseDto> productSearchResponseDtoList = IProductMapper.INSTANCE.productToProductSearchResponseDtoList(products);
-        List<ProductSearchResponseDto> productSearchResponseDtoList2 = IProductMapper.INSTANCE.productWithDifferentSkuToProductSearchResponseDtoList(products);
+        List<ProductSearchResponseDto> productSearchResponseDtoList = productMapper.productToProductSearchResponseDtoList(products);
+        List<ProductSearchResponseDto> productSearchResponseDtoList2 = productMapper.productWithDifferentSkuToProductSearchResponseDtoList(products);
         productSearchResponseDtoList.addAll(productSearchResponseDtoList2);
         return productSearchResponseDtoList;
     }
 
     @Override
     public ProductResponseDto findById(Long id) {
-        return IProductMapper.INSTANCE.productToProductResponseDto(productRepository.findById(id).orElseThrow());
+        return productMapper.productToProductResponseDto(productRepository.findById(id).orElseThrow());
     }
 
 }
