@@ -18,6 +18,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private final IProductMapper productMapper;
+
     @Autowired
     private final ProductRepository productRepository;
 
