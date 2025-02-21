@@ -16,6 +16,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
+
 @Mapper
 public interface IProductMapper {
     IProductMapper INSTANCE = Mappers.getMapper(IProductMapper.class);
@@ -24,6 +25,7 @@ public interface IProductMapper {
 
     @Mapping(target = "id", source="product.id")
     @Mapping(target = "sku", source="product.sku")
+    @Mapping(target = "localSku", source="product.localProduct.localSku")
     @Mapping(target = "price", source="product.price")
     @Mapping(target = "localPrice", source="product.localProduct.price")
     @Mapping(target = "images", source="product.images")
@@ -54,7 +56,7 @@ public interface IProductMapper {
     @Named("extractFirstImage")
     default String extractFirstImage(String imagesJson) {
         try {
-            if (imagesJson == null || imagesJson.isEmpty()) {
+            if (imagesJson == null || imagesJson.trim().isEmpty()) {
                 return "";
             }
 
@@ -62,37 +64,41 @@ public interface IProductMapper {
 
             if (jsonNode.isArray()) {
                 for (JsonNode node : jsonNode) {
-                    String imgLink = node.asText();
-                    if (imgLink.contains("/DNS/")) {
-                        return imgLink; // Return the first image containing "/DNS/"
+                    if (node != null && node.asText().contains("/DNS/")) {
+                        return node.asText();
                     }
                 }
-                return jsonNode.get(0).asText(); // Fallback to the first image
+                return jsonNode.has(0) ? jsonNode.get(0).asText("") : "";
             }
 
-            // Case 2: If the input is an object, map it to `ImageUrls` and process
-            ImageUrls imageUrls = OBJECT_MAPPER.convertValue(jsonNode, ImageUrls.class);
 
-            if (imageUrls.getImg() != null && !imageUrls.getImg().isEmpty()) {
-                for (String imgLink : imageUrls.getImg()) {
-                    if (imgLink.contains("/DNS/")) {
-                        return imgLink; // Return the first match
-                    }
-                }
-                return imageUrls.getImg().get(0); // Fallback to the first image
-            }
+            if (jsonNode.isObject()) {
+                ImageUrls imageUrls = OBJECT_MAPPER.convertValue(jsonNode, ImageUrls.class);
 
-            if (imageUrls.getDim() != null && !imageUrls.getDim().isEmpty()) {
-                for (String dimLink : imageUrls.getDim()) {
-                    if (dimLink.contains("/DNS/")) {
-                        return dimLink; // Return the first match
+                if (imageUrls.getImg() != null && !imageUrls.getImg().isEmpty()) {
+                    for (String imgLink : imageUrls.getImg()) {
+                        if (imgLink.contains("/DNS/")) {
+                            return imgLink;
+                        }
                     }
+                    return imageUrls.getImg().get(0);
                 }
-                return imageUrls.getDim().get(0); // Fallback to the first dimension
+
+                if (imageUrls.getDim() != null && !imageUrls.getDim().isEmpty()) {
+                    for (String dimLink : imageUrls.getDim()) {
+                        if (dimLink.contains("/DNS/")) {
+                            return dimLink;
+                        }
+                    }
+                    return imageUrls.getDim().get(0);
+                }
             }
         } catch (JsonProcessingException e) {
-            return "";
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return "";
     }
 }

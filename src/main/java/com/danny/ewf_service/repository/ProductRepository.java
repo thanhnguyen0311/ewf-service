@@ -14,6 +14,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p JOIN FETCH p.localProduct WHERE p.sku = :sku")
     Optional<Product> findBySku(@Param("sku") String sku);
 
+    @Query("SELECT p FROM Product p JOIN FETCH p.localProduct WHERE p.id = :id")
+    Optional<Product> findProductById(@Param("id") Long id);
+
     @Query("SELECT p FROM Product p JOIN FETCH p.localProduct WHERE p.category = :category")
     List<Product> findByCategory(@Param("category") String category);
 

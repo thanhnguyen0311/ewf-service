@@ -11,6 +11,7 @@ import lombok.*;
 public class ProductResponseDto {
     private Long id;
     private String sku;
+    private String localSku;
     private Long price;
     private Long localPrice;
     private String images;

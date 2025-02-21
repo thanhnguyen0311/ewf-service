@@ -12,4 +12,6 @@ public interface ProductService {
     List<ProductResponseDto> findAll();
 
     List<ProductSearchResponseDto> getAllProductsSearch();
+
+    ProductResponseDto findById(Long id);
 }

@@ -67,4 +67,13 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/search/{id}")
+    public ResponseEntity<ProductResponseDto> findProductById(@PathVariable Long id) {
+        try {
+            ProductResponseDto product = productService.findById(id);
+            return ResponseEntity.ok().body(product);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
