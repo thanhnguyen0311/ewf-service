@@ -2,7 +2,7 @@ package com.danny.ewf_service.utils.imports;
 
 
 import com.danny.ewf_service.entity.Customer;
-import com.danny.ewf_service.payload.request.CustomerImportDTO;
+import com.danny.ewf_service.payload.request.CustomerImportDto;
 import com.danny.ewf_service.repository.CustomerRepository;
 import com.danny.ewf_service.utils.GetCellValue;
 import jakarta.transaction.Transactional;
@@ -28,7 +28,7 @@ public class CustomerImport {
 
     @Transactional
     public void importFromExcel() {
-        List<CustomerImportDTO> customers = new ArrayList<>();
+        List<CustomerImportDto> customers = new ArrayList<>();
 
         try (InputStream file = getClass().getResourceAsStream("/data/Book1.xlsx");
              Workbook workbook = new XSSFWorkbook(file)) {
@@ -38,7 +38,7 @@ public class CustomerImport {
                 if (row == null) {
                     continue;
                 }
-
+                
                 // Extract cell values
                 String name = getCellValue.getCellValueAsString(row.getCell(15)); // Column 16 (index 15)
                 String address = getCellValue.getCellValueAsString(row.getCell(16)); // Column 17 (index 16)
@@ -50,7 +50,7 @@ public class CustomerImport {
                         .replaceAll("\\D", ""); // Remove non-numeric characters
 
                 // Map to DTO
-                CustomerImportDTO customer = new CustomerImportDTO();
+                CustomerImportDto customer = new CustomerImportDto();
                 customer.setName(name);
                 customer.setAddress(address);
                 customer.setAddress2(address2);
@@ -69,18 +69,24 @@ public class CustomerImport {
             throw new RuntimeException("Error reading Excel file", e);
         }
     }
-    private void saveCustomers(List<CustomerImportDTO> customers) {
-        customers.forEach(customerDTO -> {
-            Customer customer = new Customer(); // Assume Customer is a JPA Entity
-            customer.setName(customerDTO.getName());
-            customer.setAddress(customerDTO.getAddress());
-            customer.setAddress2(customerDTO.getAddress2());
-            customer.setCity(customerDTO.getCity());
-            customer.setState(customerDTO.getState());
-            customer.setZipCode(customerDTO.getZipcode());
-            customer.setPhone(customerDTO.getPhone());
+    private void saveCustomers(List<CustomerImportDto> customers) {
 
-            customerRepository.save(customer); // Persist to database
+        customers.forEach(customerDTO -> {
+
+            boolean exists = customerRepository.existsByPhone(customerDTO.getPhone());
+            if (!exists) {
+
+                Customer customer = new Customer(); // Assume Customer is a JPA Entity
+                customer.setName(customerDTO.getName());
+                customer.setAddress(customerDTO.getAddress());
+                customer.setAddress2(customerDTO.getAddress2());
+                customer.setCity(customerDTO.getCity());
+                customer.setState(customerDTO.getState());
+                customer.setZipCode(customerDTO.getZipcode());
+                customer.setPhone(customerDTO.getPhone());
+
+                customerRepository.save(customer); // Persist to database
+            }
         });
     }
 

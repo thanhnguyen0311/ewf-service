@@ -1,15 +1,14 @@
 package com.danny.ewf_service.payload.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerImportDTO {
+@Builder
+@Setter
+@Getter
+@ToString
+public class CustomerImportDto {
     private String name;
     private String address;
     private String address2;
