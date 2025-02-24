@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+
     @Query("SELECT p FROM Product p JOIN FETCH p.localProduct WHERE p.sku = :sku")
     Optional<Product> findBySku(@Param("sku") String sku);
 
@@ -22,4 +23,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p JOIN FETCH p.localProduct")
     List<Product> findAllProducts();
+
+    Optional<Product> findBySkuIgnoreCase(String sku);
+
 }

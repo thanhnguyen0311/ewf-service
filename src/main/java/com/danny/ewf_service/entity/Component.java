@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Component {
+
     @Id
     @GeneratedValue
     private Long id;
@@ -55,4 +56,5 @@ public class Component {
 
     @Column(name = "metadata", columnDefinition = "JSON")
     private String metadata;
+
 }

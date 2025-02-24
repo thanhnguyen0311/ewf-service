@@ -31,7 +31,7 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "local_id", referencedColumnName = "id")
     @JsonIgnore
     private LocalProduct localProduct;
