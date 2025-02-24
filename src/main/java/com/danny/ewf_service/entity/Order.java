@@ -42,6 +42,9 @@ public class Order {
     @Column(name = "carrier")
     private String carrier;
 
+    @Column(name = "order_status")
+    private String status;
+
     @Column(name = "payment_method")
     private String paymentMethod;
 

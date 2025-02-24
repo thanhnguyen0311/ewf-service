@@ -21,5 +21,8 @@ public class OrderListResponseDto {
     private Double price;
     private String customerName;
     private String customerPhone;
+    private String status;
+    private String tracking;
+    private String PONumber;
 
 }

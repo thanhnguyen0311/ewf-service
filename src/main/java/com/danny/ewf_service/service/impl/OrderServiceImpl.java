@@ -20,7 +20,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<Order> getOrdersByPageAndSort(int page) {
-        PageRequest pageable = PageRequest.of(page, 20, Sort.by("orderDate").ascending());
+
+        PageRequest pageable = PageRequest.of(page, 20, Sort.by("orderDate").descending());
         return orderRepository.findAll(pageable);
     }
 

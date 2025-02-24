@@ -53,7 +53,6 @@ public class OrderImport {
 
                 // Extract cell values
                 String type = getCellValue.getCellValueAsString(row.getCell(0));
-                if (type != null && type.contains("DirectSales")) type = "direct";
                 String phone = getCellValue.getCellValueAsString(row.getCell(21))
                         .replaceAll("\\D", ""); // Remove non-numeric characters;
                 String invoiceNumber = getCellValue.getCellValueAsString(row.getCell(1));
@@ -100,6 +99,8 @@ public class OrderImport {
             optionalOrder.ifPresentOrElse(
                     existingOrder -> {
                         addProductToOrder(existingOrder, orderImportDto.getSku(), orderImportDto.getQuantity());
+                        Double newPrice = existingOrder.getOrderPrices().getPrice() + orderImportDto.getPrice();
+                        existingOrder.getOrderPrices().setPrice(newPrice);
                         orderRepository.save(existingOrder);
                     },
                     () -> {
