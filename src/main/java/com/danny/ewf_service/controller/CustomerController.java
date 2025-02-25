@@ -1,5 +1,6 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.payload.request.PhoneNumberRequestDto;
 import com.danny.ewf_service.payload.response.CustomerSearchDto;
 import com.danny.ewf_service.service.CustomerService;
 import lombok.AllArgsConstructor;
@@ -20,9 +21,10 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @PostMapping("/search")
-    public ResponseEntity<List<CustomerSearchDto>> findCustomerByPhone(@RequestBody String phoneNumber) {
+    public ResponseEntity<List<CustomerSearchDto>> findCustomerByPhone(@RequestBody PhoneNumberRequestDto phoneNumber) {
         try{
-            List<CustomerSearchDto> customers = customerService.findCustomersByPartialPhone(phoneNumber);
+            System.out.println(phoneNumber.getPhoneNumber());
+            List<CustomerSearchDto> customers = customerService.findCustomersByPartialPhone(phoneNumber.getPhoneNumber());
             return ResponseEntity.ok(customers);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(null);

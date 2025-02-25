@@ -15,4 +15,5 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     @Query("SELECT c FROM Customer c WHERE c.phone LIKE CONCAT('%', :partialPhone, '%')")
     List<Customer> findByPartialPhoneNumber(@Param("partialPhone") String partialPhone);
+
 }
