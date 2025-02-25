@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class Component {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "sku")
@@ -33,17 +33,13 @@ public class Component {
     @Column(name = "finish")
     private String finish;
 
-    @Column(name = "size_shape")
-    private String sizeShape;
 
-    @Column(name = "dims")
-    private String dims;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "dimensions_id", referencedColumnName = "id")
+    private Dimension dimensions;
 
     @Column(name = "inventory")
     private Long inventory;
-
-    @Column(name = "box_dims")
-    private String box_dims;
 
     @Column(name = "type")
     private String type;

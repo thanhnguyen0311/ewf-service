@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p JOIN FETCH p.localProduct WHERE p.sku = :sku")
-    Optional<Product> findBySku(@Param("sku") String sku);
+    Optional<Product> findProductBySku(@Param("sku") String sku);
 
     @Query("SELECT p FROM Product p JOIN FETCH p.localProduct WHERE p.id = :id")
     Optional<Product> findProductById(@Param("id") Long id);
@@ -25,5 +25,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllProducts();
 
     Optional<Product> findBySkuIgnoreCase(String sku);
+
+    Optional<Product> findBySku(String sku);
 
 }

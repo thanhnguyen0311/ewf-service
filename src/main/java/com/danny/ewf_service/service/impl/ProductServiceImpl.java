@@ -25,7 +25,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto findBySku(String sku) {
-        Product product = productRepository.findBySku(sku).orElseThrow(() -> new RuntimeException("Product not found with SKU: " + sku));
+        Product product = productRepository.findProductBySku(sku).orElseThrow(() -> new RuntimeException("Product not found with SKU: " + sku));
         return productMapper.productToProductResponseDto(product);
     }
 
