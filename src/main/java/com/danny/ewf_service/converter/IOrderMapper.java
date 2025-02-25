@@ -10,7 +10,6 @@ import java.util.Map;
 
 @Mapper(componentModel = "spring")
 public interface IOrderMapper {
-
     @Mapping(target = "id", source="order.id")
     @Mapping(target = "invoiceNumber", source="order.invoiceNumber")
     @Mapping(target = "type", source="order.type")
@@ -30,11 +29,9 @@ public interface IOrderMapper {
         return metadata.containsKey("Tracking") ? metadata.get("Tracking").toString() : null;
     }
 
-
     default String extractPONumber(Order order) {
         Map<String, Object> metadata = order.getMetadataAsMap();
         return metadata.containsKey("PONumber") ? metadata.get("PONumber").toString() : null;
     }
-
 
 }
