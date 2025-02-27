@@ -30,7 +30,7 @@ public class ComponentsImport {
     };
 
     private final String[] REQUIRED_HEADERS_INVENTORY = {
-            "", "On Hand"
+            "", "Item", "Reorder Pt (Min)", "On Hand"
     };
     @Autowired
     private final ProductComponentRepository productComponentRepository;
@@ -231,15 +231,18 @@ public class ComponentsImport {
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
 
-                if (columns.length < 2) {
+                if (columns.length < 4) {
                     continue; // Skip invalid rows
                 }
 
-                String componentSku = columns[0].trim();  // Column 2: Product SKU
-                String quantity = columns[1].trim(); // Column 5: Component SKU
+                String componentSku = columns[1].trim();  // Column 2: Product SKU
+                String quantity = columns[3].trim(); // Column 5: Component SKU
+
+
                 if (componentSku.isEmpty() || quantity.isEmpty()) {
                     continue;
                 }
+                if (componentSku.equals("20-DEC")) componentSku = "DEC-20";
                 if (componentSku.equals("Total Inventory")) continue;
                 try {
                     Component component;

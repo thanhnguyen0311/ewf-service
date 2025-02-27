@@ -29,6 +29,23 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
             p.id
             ORDER BY
             MIN(FLOOR(c.inventory / pc.quantity)) ASC""", nativeQuery = true)
-    Page<Object[]> calculateProductInventory(Pageable pageable);
+    Page<Object[]> calculateProductInventoryByQuantityASC(Pageable pageable);
+
+
+    @Query(value = """
+         SELECT
+            p.id AS product_id,
+            MIN(FLOOR(c.inventory / pc.quantity)) AS inventory
+            FROM
+            product_components pc
+            JOIN components c ON pc.component_id = c.id
+            JOIN products p ON pc.product_id = p.id
+            WHERE
+            c.inventory IS NOT NULL
+            GROUP BY
+            p.id
+            ORDER BY
+            p.id DESC""", nativeQuery = true)
+    Page<Object[]> calculateProductInventoryByIdDESC(Pageable pageable);
 }
 

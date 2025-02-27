@@ -6,5 +6,8 @@ import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 
 public interface InventoryService {
 
-    PagingResponse<ProductInventoryResponseDto> inventoryProductList(int page);
+    PagingResponse<ProductInventoryResponseDto> inventoryProductListByQuantityASC(int page);
+
+    PagingResponse<ProductInventoryResponseDto> inventoryProductListByIdDESC(int page);
+
 }

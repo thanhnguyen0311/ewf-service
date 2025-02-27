@@ -24,7 +24,7 @@ public class InventoryController {
     public ResponseEntity<?> getProductsInventory(@RequestParam(defaultValue = "0") int page) {
         try {
             page -= 1;
-            PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList = inventoryService.inventoryProductList(page);
+            PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList = inventoryService.inventoryProductListByIdDESC(page);
             return ResponseEntity.ok(productInventoryResponseDtoList);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Not found");

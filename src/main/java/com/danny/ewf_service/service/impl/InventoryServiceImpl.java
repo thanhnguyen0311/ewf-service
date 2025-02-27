@@ -32,10 +32,25 @@ public class InventoryServiceImpl implements InventoryService {
     private final IProductMapper productMapper;
 
     @Override
-    public PagingResponse<ProductInventoryResponseDto> inventoryProductList(int page) {
+    public PagingResponse<ProductInventoryResponseDto> inventoryProductListByQuantityASC(int page) {
         Pageable pageable = PageRequest.of(page, 30);
-        Page<Object[]> result = productComponentRepository.calculateProductInventory(pageable);
-        List<Object[]> content = result.getContent();
+        Page<Object[]> result = productComponentRepository.calculateProductInventoryByQuantityASC(pageable);
+        return inventoryProductResponse(result);
+    }
+
+    @Override
+    public PagingResponse<ProductInventoryResponseDto> inventoryProductListByIdDESC(int page) {
+        Pageable pageable = PageRequest.of(page, 30);
+        Page<Object[]> result = productComponentRepository.calculateProductInventoryByIdDESC(pageable);
+        return inventoryProductResponse(result);
+    }
+
+    private Long parseObjectToLong(Object object){
+        return Long.parseLong(String.valueOf(object));
+    }
+
+    private PagingResponse<ProductInventoryResponseDto> inventoryProductResponse(Page<Object[]> pageObject){
+        List<Object[]> content = pageObject.getContent();
         List<Long> productIds = new ArrayList<>();
 
         for (Object[] row : content) {
@@ -46,7 +61,7 @@ public class InventoryServiceImpl implements InventoryService {
         List<ProductInventoryResponseDto> productInventoryResponseDtos =
                 productMapper.productListToProductInventoryResponseDtoList(products);
 
-        Map<Long, Long> productInventoryMap = result.getContent().stream()
+        Map<Long, Long> productInventoryMap = pageObject.getContent().stream()
                 .collect(Collectors.toMap(
                         row -> parseObjectToLong(row[0]),  // Key: productId
                         row -> parseObjectToLong(row[1])   // Value: inventory
@@ -59,14 +74,10 @@ public class InventoryServiceImpl implements InventoryService {
 
         return new PagingResponse<>(
                 productInventoryResponseDtos,
-                result.getNumber(),                                        // Current Page
-                result.getTotalPages(),                                    // Total Pages
-                result.getSize(),                                          // Page Size
-                result.getTotalElements()                                  // Total Elements
+                pageObject.getNumber(),                                        // Current Page
+                pageObject.getTotalPages(),                                    // Total Pages
+                pageObject.getSize(),                                          // Page Size
+                pageObject.getTotalElements()                                  // Total Elements
         );
-    }
-
-    private Long parseObjectToLong(Object object){
-        return Long.parseLong(String.valueOf(object));
     }
 }
