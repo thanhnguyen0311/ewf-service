@@ -1,6 +1,5 @@
 package com.danny.ewf_service.utils.imports;
 
-import com.danny.ewf_service.configuration.DatasourceConfig;
 import com.danny.ewf_service.entity.LocalProduct;
 import com.danny.ewf_service.service.LocalService;
 import com.danny.ewf_service.utils.ImageCheck;
@@ -28,20 +27,15 @@ public class TitleGenerator {
     @Autowired
     private final OpenAIClient openAIClient;
 
-
-    @Autowired
-    private final DatasourceConfig datasourceConfig;
-
     @Autowired
     private final ImageProcessor imageProcessor;
 
     @Autowired
     private final LocalService localService;
 
-    public TitleGenerator(ImageCheck imageCheck, OpenAIClient openAIClient, DatasourceConfig datasourceConfig, ImageProcessor imageProcessor, LocalService localService) {
+    public TitleGenerator(ImageCheck imageCheck, OpenAIClient openAIClient, ImageProcessor imageProcessor, LocalService localService) {
         this.imageCheck = imageCheck;
         this.openAIClient = openAIClient;
-        this.datasourceConfig = datasourceConfig;
         this.imageProcessor = imageProcessor;
         this.localService = localService;
     }
@@ -85,7 +79,7 @@ public class TitleGenerator {
     public void importTitlesFromFile(String filePath) {
         String updateTitleSQL = "UPDATE products SET title = ? WHERE sku = ?";
 
-        try (Connection connection = DriverManager.getConnection(datasourceConfig.getUrl(), datasourceConfig.getUsername(), datasourceConfig.getPassword());
+        try (Connection connection = DriverManager.getConnection("","","");
              PreparedStatement updateStatement = connection.prepareStatement(updateTitleSQL);
              BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 

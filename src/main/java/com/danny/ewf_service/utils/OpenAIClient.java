@@ -1,18 +1,15 @@
 package com.danny.ewf_service.utils;
 
-import com.danny.ewf_service.configuration.DatasourceConfig;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,12 +17,9 @@ import java.util.List;
 @Service
 public class OpenAIClient {
 
-    @Autowired
-    private final DatasourceConfig datasourceConfig;
     private final ObjectMapper mapper;
 
-    public OpenAIClient(DatasourceConfig datasourceConfig) {
-        this.datasourceConfig = datasourceConfig;
+    public OpenAIClient() {
         this.mapper = new ObjectMapper();
     }
 

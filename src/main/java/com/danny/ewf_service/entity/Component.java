@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "components")
@@ -53,4 +55,6 @@ public class Component {
     @Column(name = "metadata", columnDefinition = "JSON")
     private String metadata;
 
+    @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductComponent> productComponents = new ArrayList<>();
 }
