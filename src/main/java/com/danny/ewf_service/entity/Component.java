@@ -20,7 +20,7 @@ public class Component {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "sku")
+    @Column(name = "sku", unique = true, nullable = false)
     private String sku;
 
     @Column(name = "name")
