@@ -10,9 +10,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import com.danny.ewf_service.payload.response.PagingResponse;
+
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,11 +32,12 @@ public class InventoryServiceImpl implements InventoryService {
     private final IProductMapper productMapper;
 
     @Override
-    public List<ProductInventoryResponseDto> inventoryProductList(int page) {
+    public PagingResponse<ProductInventoryResponseDto> inventoryProductList(int page) {
         Pageable pageable = PageRequest.of(page, 30);
         Page<Object[]> result = productComponentRepository.calculateProductInventory(pageable);
         List<Object[]> content = result.getContent();
         List<Long> productIds = new ArrayList<>();
+
         for (Object[] row : content) {
             productIds.add(parseObjectToLong(row[0]));
         }
@@ -55,8 +57,13 @@ public class InventoryServiceImpl implements InventoryService {
 
         });
 
-
-        return productInventoryResponseDtos;
+        return new PagingResponse<>(
+                productInventoryResponseDtos,
+                result.getNumber(),                                        // Current Page
+                result.getTotalPages(),                                    // Total Pages
+                result.getSize(),                                          // Page Size
+                result.getTotalElements()                                  // Total Elements
+        );
     }
 
     private Long parseObjectToLong(Object object){
