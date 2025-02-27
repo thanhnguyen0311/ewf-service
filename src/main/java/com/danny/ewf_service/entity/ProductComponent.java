@@ -5,6 +5,10 @@ import lombok.*;
 
 @Entity
 @Data
+@Table(name = "product_components",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"product_id", "component_id"})
+        })
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,9 +16,14 @@ public class ProductComponent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false, referencedColumnName = "id")
+    private Product product;
 
-    private Long productId;
-    private Long componentId;
+    @ManyToOne
+    @JoinColumn(name = "component_id", nullable = false, referencedColumnName = "id")
+    private Component component;
+
     private Long quantity;
 
 }

@@ -1,9 +1,12 @@
 package com.danny.ewf_service.utils.imports;
 
-import com.danny.ewf_service.configuration.DatasourceConfig;
+import com.danny.ewf_service.entity.LocalProduct;
+import com.danny.ewf_service.repository.LocalRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.FileWriter;
 import java.sql.*;
+import java.util.Optional;
 import java.util.Random;
 
 import org.apache.poi.ss.usermodel.*;
@@ -11,18 +14,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class SKUGenerator {
 
     private static final Random RANDOM = new Random();
     private static final String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-
     @Autowired
-    private final DatasourceConfig datasourceConfig;
+    private final LocalRepository localRepository;
 
-    public SKUGenerator(DatasourceConfig datasourceConfig) {
-        this.datasourceConfig = datasourceConfig;
-    }
 
 
     public void importSkus(String filePath){
@@ -37,7 +37,7 @@ public class SKUGenerator {
 
 
         try (Workbook workbook = new XSSFWorkbook(filePath);
-             Connection connection = DriverManager.getConnection(datasourceConfig.getUrl(), datasourceConfig.getUsername(), datasourceConfig.getPassword());
+             Connection connection = DriverManager.getConnection("","","");
              PreparedStatement checkStmt = connection.prepareStatement(checkSkuSQL);
              PreparedStatement checkLocalSkuStmt = connection.prepareStatement(checkLocalSkuSQL);
              PreparedStatement insertSkuStmt = connection.prepareStatement(insertSkuSQL, Statement.RETURN_GENERATED_KEYS);
@@ -141,45 +141,51 @@ public class SKUGenerator {
 
 
 
-    private String generateNewSKU(String originalSKU) {
+    public String generateNewSKU(String originalSKU) {
+
         int length = originalSKU.length();
         StringBuilder sb;
+        Optional<LocalProduct> optionalLocalProduct;
+        do {
+            if (length < 6) {
+                // Keep first 2 characters unchanged
+                sb = new StringBuilder(originalSKU.substring(0, Math.min(2, length)));
 
-        if (length < 6) {
-            // Keep first 2 characters unchanged
-            sb = new StringBuilder(originalSKU.substring(0, Math.min(2, length)));
+                // Replace characters after position 2
+                for (int i = 2; i < length; i++) {
+                    char currentChar = originalSKU.charAt(i);
 
-            // Replace characters after position 2
-            for (int i = 2; i < length; i++) {
-                char currentChar = originalSKU.charAt(i);
+                    if (currentChar == '-') {
+                        // Retain "-" character at its current position
+                        sb.append(currentChar);
+                    } else {
+                        // Replace other characters with random characters from ALLOWED_CHARACTERS
+                        int randomIndex = RANDOM.nextInt(ALLOWED_CHARACTERS.length());
+                        sb.append(ALLOWED_CHARACTERS.charAt(randomIndex));
+                    }
+                }
+            } else {
+                // Keep first 5 characters unchanged for SKUs with length >= 6
+                sb = new StringBuilder(originalSKU.substring(0, Math.min(5, length)));
 
-                if (currentChar == '-') {
-                    // Retain "-" character at its current position
-                    sb.append(currentChar);
-                } else {
-                    // Replace other characters with random characters from ALLOWED_CHARACTERS
-                    int randomIndex = RANDOM.nextInt(ALLOWED_CHARACTERS.length());
-                    sb.append(ALLOWED_CHARACTERS.charAt(randomIndex));
+                // Replace characters from position 5 onwards
+                for (int i = 5; i < length; i++) {
+                    char currentChar = originalSKU.charAt(i);
+
+                    if (currentChar == '-') {
+                        // Retain "-" character at its current position
+                        sb.append(currentChar);
+                    } else {
+                        // Replace other characters with random characters from ALLOWED_CHARACTERS
+                        int randomIndex = RANDOM.nextInt(ALLOWED_CHARACTERS.length());
+                        sb.append(ALLOWED_CHARACTERS.charAt(randomIndex));
+                    }
                 }
             }
-        } else {
-            // Keep first 5 characters unchanged for SKUs with length >= 6
-            sb = new StringBuilder(originalSKU.substring(0, Math.min(5, length)));
 
-            // Replace characters from position 5 onwards
-            for (int i = 5; i < length; i++) {
-                char currentChar = originalSKU.charAt(i);
+            optionalLocalProduct = localRepository.findByLocalSku(sb.toString());
+        } while (optionalLocalProduct.isPresent());
 
-                if (currentChar == '-') {
-                    // Retain "-" character at its current position
-                    sb.append(currentChar);
-                } else {
-                    // Replace other characters with random characters from ALLOWED_CHARACTERS
-                    int randomIndex = RANDOM.nextInt(ALLOWED_CHARACTERS.length());
-                    sb.append(ALLOWED_CHARACTERS.charAt(randomIndex));
-                }
-            }
-        }
         return sb.toString();
     }
 

@@ -1,11 +1,13 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.LocalProduct;
 import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.entity.ProductComponent;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import java.io.BufferedReader;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -25,6 +28,10 @@ public class ComponentsImport {
     private final String[] REQUIRED_HEADERS = {
             "ListID", "Group Name", "Is Active", "Description", "Group Line Item Name", "Group Line Item Qty"
     };
+
+    private final String[] REQUIRED_HEADERS_INVENTORY = {
+            "", "On Hand"
+    };
     @Autowired
     private final ProductComponentRepository productComponentRepository;
 
@@ -32,7 +39,11 @@ public class ComponentsImport {
     private final ProductRepository productRepository;
 
     @Autowired
+    private final ProductService productService;
+
+    @Autowired
     private final ComponentRepository componentRepository;
+
 
     @Transactional
     public void importComponentsFromData() {
@@ -46,7 +57,7 @@ public class ComponentsImport {
 
             // Read the header row
             String headerRow = reader.readLine();
-            if (headerRow == null || !validateHeaderRow(headerRow)) {
+            if (headerRow == null || !validateHeaderRow(headerRow, REQUIRED_HEADERS)) {
                 throw new RuntimeException("Invalid CSV format");
             }
 
@@ -110,15 +121,15 @@ public class ComponentsImport {
         }
     }
 
-    private boolean validateHeaderRow(String headerRow) {
+    private boolean validateHeaderRow(String headerRow, String [] headersRequired) {
         String[] headers = headerRow.split(",");
 
-        if (headers.length != REQUIRED_HEADERS.length) {
+        if (headers.length != headersRequired.length) {
             return false;
         }
 
         for (int i = 0; i < headers.length; i++) {
-            if (!headers[i].trim().equalsIgnoreCase(REQUIRED_HEADERS[i])) {
+            if (!headers[i].trim().equalsIgnoreCase(headersRequired[i])) {
                 return false;
             }
         }
@@ -133,7 +144,7 @@ public class ComponentsImport {
             String line;
             String headerRow = reader.readLine();
 
-            if (headerRow == null || !validateHeaderRow(headerRow)) {
+            if (headerRow == null || !validateHeaderRow(headerRow, REQUIRED_HEADERS)) {
                 throw new RuntimeException("Invalid CSV format");
             }
 
@@ -150,7 +161,10 @@ public class ComponentsImport {
                 if (productSku.isEmpty() || componentSku.isEmpty() || quantityStr.isEmpty()) {
                     continue;
                 }
+
+
                 // Parse quantity
+
                 Long quantity;
                 try {
                     quantity = Long.parseLong(quantityStr);
@@ -160,15 +174,30 @@ public class ComponentsImport {
                 }
 
                 try {
-                    Product product = productRepository.findBySku(productSku)
-                            .orElseThrow(() -> new RuntimeException("Product not found: " + productSku));
+                    Product product;
+                    Optional<Product> optionalProduct = productRepository.findBySku(productSku);
+                    if (optionalProduct.isPresent()) {
+                        product = optionalProduct.get();
+                    } else {
+                        product = new Product();
+                        product.setSku(productSku);
+                        productService.saveProduct(product);
+                        System.out.println("\u001B[32m" + "Successfully created Product SKU : " + productSku + "\u001B[0m");
+                    }
 
                     Component component = componentRepository.findBySku(componentSku)
                             .orElseThrow(() -> new RuntimeException("Component not found: " + componentSku));
 
+                    boolean mappingExists = productComponentRepository.findByProductIdAndComponentId(product.getId(), component.getId()).isPresent();
+                    if (mappingExists) {
+                        System.out.println("Mapping already exists between Product: " + productSku + " and Component: " + componentSku);
+                        continue;
+                    }
+
+
                     ProductComponent productComponent = ProductComponent.builder()
-                            .productId(product.getId())
-                            .componentId(component.getId())
+                            .product(product)
+                            .component(component)
                             .quantity(quantity)
                             .build();
 
@@ -178,6 +207,24 @@ public class ComponentsImport {
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for product " + productSku + " and component " + componentSku + ": " + e.getMessage());
                 }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
+
+    @Transactional
+    public void importComponentsInventory(){
+        try (InputStream file = getClass().getResourceAsStream("/data/import_components.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+            String headerRow = reader.readLine();
+
+            if (headerRow == null || !validateHeaderRow(headerRow, REQUIRED_HEADERS_INVENTORY)) {
+                throw new RuntimeException("Invalid CSV format");
             }
 
         } catch (Exception e) {
