@@ -227,6 +227,8 @@ public class ComponentsImport {
                 throw new RuntimeException("Invalid CSV format");
             }
 
+
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading CSV file", e);
