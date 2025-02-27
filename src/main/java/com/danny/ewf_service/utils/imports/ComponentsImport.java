@@ -1,7 +1,6 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
-import com.danny.ewf_service.entity.LocalProduct;
 import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.entity.ProductComponent;
 import com.danny.ewf_service.repository.ComponentRepository;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -129,7 +129,8 @@ public class ComponentsImport {
         }
 
         for (int i = 0; i < headers.length; i++) {
-            if (!headers[i].trim().equalsIgnoreCase(headersRequired[i])) {
+            if (headers[i].isEmpty() || Objects.equals(headersRequired[i], "")) continue;
+            if (!Objects.equals(headers[i].trim(),headersRequired[i])) {
                 return false;
             }
         }
@@ -217,7 +218,7 @@ public class ComponentsImport {
 
     @Transactional
     public void importComponentsInventory(){
-        try (InputStream file = getClass().getResourceAsStream("/data/import_components.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/item_inventory.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
@@ -227,8 +228,38 @@ public class ComponentsImport {
                 throw new RuntimeException("Invalid CSV format");
             }
 
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
 
+                if (columns.length < 2) {
+                    continue; // Skip invalid rows
+                }
 
+                String componentSku = columns[0].trim();  // Column 2: Product SKU
+                String quantity = columns[1].trim(); // Column 5: Component SKU
+                if (componentSku.isEmpty() || quantity.isEmpty()) {
+                    continue;
+                }
+                if (componentSku.equals("Total Inventory")) continue;
+                try {
+                    Component component;
+                    Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
+                    if (optionalComponent.isPresent()) {
+                        component = optionalComponent.get();
+                        System.out.println("Successfully Updated Component SKU : " + componentSku);
+                    } else {
+                        component = new Component();
+                        component.setSku(componentSku);
+                        component.setQuantity(0L);
+                        component.setBox(0L);
+                        System.out.println("\u001B[32m" + "Successfully created Component SKU : " + componentSku + "\u001B[0m");
+                    }
+                    component.setInventory(Long.parseLong(quantity));
+                    componentRepository.save(component);
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + componentSku + ": " + e.getMessage());
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading CSV file", e);

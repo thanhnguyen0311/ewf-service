@@ -20,7 +20,7 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            componentsImport.importProductComponentMapping();
+            componentsImport.importComponentsInventory();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

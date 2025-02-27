@@ -3,6 +3,7 @@ package com.danny.ewf_service.converter;
 
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -98,5 +99,11 @@ public interface IProductMapper {
 
         return "";
     }
+
+    @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
+    @Mapping(target = "id", source = "product.id")
+    @Mapping(target = "sku", source = "product.sku")
+    ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
+    List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
 }
 

@@ -13,5 +13,8 @@ public class ProductInventoryResponseDto {
     private String sku;
     private Long quantity;
     private String image;
-
+    private Long inProduction;
+    private Long inTransit;
+    private Long ordered;
+    private Long pendingOrders;
 }
