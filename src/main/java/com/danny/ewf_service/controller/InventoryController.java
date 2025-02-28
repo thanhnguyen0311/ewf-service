@@ -35,7 +35,7 @@ public class InventoryController {
         try {
             PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList =
                     inventoryService.inventoryProductSearchBySku(
-                            productInventorySearchRequestDto.getPage()
+                            productInventorySearchRequestDto.getPage()-1
                             ,productInventorySearchRequestDto.getSku());
             return ResponseEntity.ok(productInventoryResponseDtoList);
         } catch (RuntimeException e) {
