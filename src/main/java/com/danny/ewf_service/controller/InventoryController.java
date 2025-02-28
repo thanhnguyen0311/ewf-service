@@ -1,6 +1,5 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.payload.request.PhoneNumberRequestDto;
 import com.danny.ewf_service.payload.request.ProductInventorySearchRequestDto;
 import com.danny.ewf_service.payload.response.PagingResponse;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
@@ -9,7 +8,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/inventory")
@@ -17,19 +15,20 @@ import java.util.List;
 public class InventoryController {
 
     private final InventoryService inventoryService;
+//
+//    @GetMapping("/products")
+//    public ResponseEntity<?> getProductsInventory(@RequestParam(defaultValue = "0") int page) {
+//        try {
+//            page -= 1;
+//            PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList = inventoryService.inventoryProductListByIdDESC(page);
+//            return ResponseEntity.ok(productInventoryResponseDtoList);
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.status(404).body("Not found");
+//        } catch (Exception e) {
+//            return ResponseEntity.internalServerError().body("Error fetching product");
+//        }
+//    }
 
-    @GetMapping("/products")
-    public ResponseEntity<?> getProductsInventory(@RequestParam(defaultValue = "0") int page) {
-        try {
-            page -= 1;
-            PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList = inventoryService.inventoryProductListByIdDESC(page);
-            return ResponseEntity.ok(productInventoryResponseDtoList);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body("Not found");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error fetching product");
-        }
-    }
     @PostMapping("/products/search")
     public ResponseEntity<?> findProductInventory(@RequestBody ProductInventorySearchRequestDto productInventorySearchRequestDto) {
         try {

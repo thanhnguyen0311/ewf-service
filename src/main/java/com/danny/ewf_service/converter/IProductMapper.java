@@ -82,14 +82,14 @@ public interface IProductMapper {
                     return imageUrls.getImg().get(0);
                 }
 
-                if (imageUrls.getDim() != null && !imageUrls.getDim().isEmpty()) {
-                    for (String dimLink : imageUrls.getDim()) {
-                        if (dimLink.contains("/DNS/")) {
-                            return dimLink;
-                        }
-                    }
-                    return imageUrls.getDim().get(0);
-                }
+//                if (imageUrls.getDim() != null && !imageUrls.getDim().isEmpty()) {
+//                    for (String dimLink : imageUrls.getDim()) {
+//                        if (dimLink.contains("/DNS/")) {
+//                            return dimLink;
+//                        }
+//                    }
+//                    return imageUrls.getDim().get(0);
+//                }
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
