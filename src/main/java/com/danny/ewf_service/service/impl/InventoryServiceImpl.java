@@ -45,6 +45,13 @@ public class InventoryServiceImpl implements InventoryService {
         return inventoryProductResponse(result);
     }
 
+    @Override
+    public PagingResponse<ProductInventoryResponseDto> inventoryProductSearchBySku(int page, String sku) {
+        Pageable pageable = PageRequest.of(page, 30);
+        Page<Object[]> result = productComponentRepository.calculateProductInventorySearchBySku(pageable, sku);
+        return inventoryProductResponse(result);
+    }
+
     private Long parseObjectToLong(Object object){
         return Long.parseLong(String.valueOf(object));
     }

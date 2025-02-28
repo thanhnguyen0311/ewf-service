@@ -1,5 +1,7 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.payload.request.PhoneNumberRequestDto;
+import com.danny.ewf_service.payload.request.ProductInventorySearchRequestDto;
 import com.danny.ewf_service.payload.response.PagingResponse;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.service.InventoryService;
@@ -21,6 +23,20 @@ public class InventoryController {
         try {
             page -= 1;
             PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList = inventoryService.inventoryProductListByIdDESC(page);
+            return ResponseEntity.ok(productInventoryResponseDtoList);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Not found");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching product");
+        }
+    }
+    @PostMapping("/products/search")
+    public ResponseEntity<?> findProductInventory(@RequestBody ProductInventorySearchRequestDto productInventorySearchRequestDto) {
+        try {
+            PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList =
+                    inventoryService.inventoryProductSearchBySku(
+                            productInventorySearchRequestDto.getPage()-1
+                            ,productInventorySearchRequestDto.getSku());
             return ResponseEntity.ok(productInventoryResponseDtoList);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Not found");
