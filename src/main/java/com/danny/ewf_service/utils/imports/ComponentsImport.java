@@ -190,11 +190,11 @@ public class ComponentsImport {
                             .orElseThrow(() -> new RuntimeException("Component not found: " + componentSku));
 
                     boolean mappingExists = productComponentRepository.findByProductIdAndComponentId(product.getId(), component.getId()).isPresent();
+
                     if (mappingExists) {
                         System.out.println("Mapping already exists between Product: " + productSku + " and Component: " + componentSku);
                         continue;
                     }
-
 
                     ProductComponent productComponent = ProductComponent.builder()
                             .product(product)
@@ -242,6 +242,7 @@ public class ComponentsImport {
                 if (componentSku.isEmpty() || quantity.isEmpty()) {
                     continue;
                 }
+
                 if (componentSku.equals("20-DEC")) componentSku = "DEC-20";
                 if (componentSku.equals("Total Inventory")) continue;
                 try {

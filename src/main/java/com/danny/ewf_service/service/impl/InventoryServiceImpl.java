@@ -6,7 +6,6 @@ import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.repository.inventory.ProductInventorySearching;
-import com.danny.ewf_service.repository.specification.ProductComponentSpecifications;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
