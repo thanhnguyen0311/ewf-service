@@ -15,19 +15,18 @@ import org.springframework.web.bind.annotation.*;
 public class InventoryController {
 
     private final InventoryService inventoryService;
-//
-//    @GetMapping("/products")
-//    public ResponseEntity<?> getProductsInventory(@RequestParam(defaultValue = "0") int page) {
-//        try {
-//            page -= 1;
-//            PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList = inventoryService.inventoryProductListByIdDESC(page);
-//            return ResponseEntity.ok(productInventoryResponseDtoList);
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(404).body("Not found");
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError().body("Error fetching product");
-//        }
-//    }
+
+    @GetMapping("/components")
+    public ResponseEntity<?> getProductsInventory() {
+        try {
+
+            return ResponseEntity.ok(new PagingResponse<>());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Not found");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching product");
+        }
+    }
 
     @PostMapping("/products/search")
     public ResponseEntity<?> findProductInventory(@RequestBody ProductInventorySearchRequestDto productInventorySearchRequestDto) {
