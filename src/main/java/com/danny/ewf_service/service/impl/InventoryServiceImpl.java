@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.repository.inventory.ProductInventorySearching;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class InventoryServiceImpl implements InventoryService {
     @Autowired
     private final IProductMapper productMapper;
 
+    @Autowired
+    private final ProductInventorySearching productInventorySearching;
+
     @Override
     public PagingResponse<ProductInventoryResponseDto> inventoryProductListByQuantityASC(int page) {
         Pageable pageable = PageRequest.of(page, 30);
@@ -39,9 +43,9 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public PagingResponse<ProductInventoryResponseDto> inventoryProductListByIdDESC(int page) {
+    public PagingResponse<ProductInventoryResponseDto> inventoryProductSearchBySku(int page, String sku) {
         Pageable pageable = PageRequest.of(page, 30);
-        Page<Object[]> result = productComponentRepository.calculateProductInventoryByIdDESC(pageable);
+        Page<Object[]> result = productInventorySearching.productInventorySearchBySku(pageable, sku);
         return inventoryProductResponse(result);
     }
 

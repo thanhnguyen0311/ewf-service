@@ -8,6 +8,5 @@ public interface InventoryService {
 
     PagingResponse<ProductInventoryResponseDto> inventoryProductListByQuantityASC(int page);
 
-    PagingResponse<ProductInventoryResponseDto> inventoryProductListByIdDESC(int page);
-
+    PagingResponse<ProductInventoryResponseDto> inventoryProductSearchBySku(int page, String sku);
 }

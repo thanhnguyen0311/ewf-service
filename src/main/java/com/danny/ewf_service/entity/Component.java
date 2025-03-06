@@ -35,6 +35,12 @@ public class Component {
     @Column(name = "finish")
     private String finish;
 
+    @Column(name = "category")
+    private String category;
+
+    @Column(name = "images")
+    private String images;
+
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "dimensions_id", referencedColumnName = "id")

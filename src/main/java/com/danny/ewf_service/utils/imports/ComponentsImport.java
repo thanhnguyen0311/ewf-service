@@ -16,10 +16,7 @@ import java.io.InputStreamReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -190,11 +187,11 @@ public class ComponentsImport {
                             .orElseThrow(() -> new RuntimeException("Component not found: " + componentSku));
 
                     boolean mappingExists = productComponentRepository.findByProductIdAndComponentId(product.getId(), component.getId()).isPresent();
+
                     if (mappingExists) {
                         System.out.println("Mapping already exists between Product: " + productSku + " and Component: " + componentSku);
                         continue;
                     }
-
 
                     ProductComponent productComponent = ProductComponent.builder()
                             .product(product)
@@ -242,6 +239,7 @@ public class ComponentsImport {
                 if (componentSku.isEmpty() || quantity.isEmpty()) {
                     continue;
                 }
+
                 if (componentSku.equals("20-DEC")) componentSku = "DEC-20";
                 if (componentSku.equals("Total Inventory")) continue;
                 try {
@@ -269,4 +267,30 @@ public class ComponentsImport {
         }
     }
 
+    public void checkSingleProduct(){
+        List<Component> componentList = componentRepository.findAll();
+        Product product;
+        for (Component component : componentList) {
+            Optional<Product> optionalProduct = productRepository.findBySku(component.getSku());
+            if (optionalProduct.isPresent()) {
+                component.setType("Single");
+                componentRepository.save(component);
+                boolean mappingExists = productComponentRepository.findByProductIdAndComponentId(optionalProduct.get().getId(), component.getId()).isPresent();
+                if (mappingExists) {
+                    System.out.println("Mapping already exists between Product: " + optionalProduct.get().getSku() + " and Component: " + component.getSku());
+                    continue;
+                }
+                ProductComponent productComponent = ProductComponent.builder()
+                        .product(optionalProduct.get())
+                        .component(component)
+                        .quantity(1L)
+                        .build();
+                productComponentRepository.save(productComponent);
+
+            } else {
+                component.setType("Group");
+                componentRepository.save(component);
+            }
+        }
+    }
 }
