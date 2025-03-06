@@ -1,15 +1,21 @@
 package com.danny.ewf_service.utils.exports;
 
+import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.entity.ProductComponent;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.ImageCheck;
-import com.danny.ewf_service.utils.ImageProcessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -21,41 +27,66 @@ public class ImagesExport {
     @Autowired
     private final CsvWriter csvWriter;
 
-    @Autowired
-    private final ImageProcessor imageProcessor;
-    
+    private final ObjectMapper mapper;
+
     @Autowired
     private final ProductRepository productRepository;
 
+    @Autowired
+    private final ProductService productService;
 
-    public void exportImagesShopifyByCategory(String category) {
-        List<Product> products = productRepository.findByCategory(category);
-        String[] header = {"Handle", "Title", "Image Src"};
 
+    public void exportImagesShopifyMain(String filePath) throws JsonProcessingException {
+        List<Product> products = productRepository.findAll();
+        String[] header = {"Handle", "Title", "Image Src", "Image Position"};
+        String skuExportListPath = "src/main/resources/data/CUSTOMFIELD_EWFDIRECT.csv";
+        Set<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
         List<String[]> rows = new ArrayList<>();
-        ImageProcessor.ImageUrls imageUrls = new ImageProcessor.ImageUrls();
+        ImageUrls productImages;
+        ImageUrls componentImages;
         rows.add(header);
-        int count;
-        String[] row;
+        int imgPos;
+        int count = 0;
         for (Product product : products) {
-            count = 0;
-            imageUrls = imageProcessor.parseImageJson(product.getImages());
-            for (String imgLink : imageUrls.getImg()) {
-                if (imageCheck.isImageLinkAlive(imgLink)) {
-                    if (count ==0) {
-                        row = new String[]{product.getSku().toLowerCase(), product.getLocalProduct().getLocalTitle(), imgLink};
-                    } else {
-                        row = new String[]{product.getSku().toLowerCase(), "", imgLink};
-                    }
-                    rows.add(row);
-                    count++;
+            if (!skus.contains(product.getSku().toLowerCase())) continue;
+            imgPos = 1;
+            productImages = mapper.readValue(product.getImages(), ImageUrls.class);
+
+            imgPos = addImagesToRows(product.getSku().toLowerCase(), product.getLocalProduct().getLocalTitle(), productImages, rows, imgPos);
+
+
+            List<ProductComponent> components = product.getProductComponents();
+            for (ProductComponent productComponent : components) {
+                if (Objects.equals(productComponent.getComponent().getType(), "Single")) {
+                    componentImages = mapper.readValue(productComponent.getComponent().getImages(), ImageUrls.class);
+                    imgPos = addImagesToRows(product.getSku().toLowerCase(), "", componentImages, rows, imgPos);
                 }
             }
-            for (String dim : imageUrls.getDim()) {
-                row = new String[]{product.getSku().toLowerCase(), "", dim};
-                rows.add(row);
+            List<Product> mergedProducts = productService.findMergedProducts(product);
+            if (mergedProducts != null) {
+                for (Product mergedProduct : mergedProducts) {
+                    productImages = mapper.readValue(mergedProduct.getImages(), ImageUrls.class);
+                    imgPos = addImagesToRows(mergedProduct.getSku().toLowerCase(), product.getLocalProduct().getLocalTitle(), productImages, rows, imgPos);
+                    System.out.println("Found " + mergedProduct.getSku() + " for " + product.getSku());
+                }
             }
+            count++;
         }
-        csvWriter.exportToCsv(rows, "floor_images.csv");
+        System.out.println(count + " products exported");
+        csvWriter.exportToCsv(rows, filePath);
     }
+
+
+    private int addImagesToRows(String sku, String title, ImageUrls imageUrls, List<String[]> rows, int imgPos) {
+        for (String imgLink : imageUrls.getImg()) {
+            rows.add(new String[]{sku, (imgPos == 1 ? title : ""), imgLink, String.valueOf(imgPos)});
+            imgPos++;
+        }
+        for (String dim : imageUrls.getDim()) {
+            rows.add(new String[]{sku, (imgPos == 1 ? title : ""), dim, String.valueOf(imgPos)});
+            imgPos++;
+        }
+        return imgPos;
+    }
+
 }

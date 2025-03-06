@@ -18,4 +18,5 @@ public interface ProductService {
 
     void saveProduct(Product product);
 
+    List<Product> findMergedProducts(Product product);
 }

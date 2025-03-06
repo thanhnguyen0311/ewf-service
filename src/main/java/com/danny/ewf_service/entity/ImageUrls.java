@@ -10,9 +10,12 @@ import java.util.*;
 @Setter
 @Getter
 @ToString
+@Data
 public class ImageUrls {
     private List<String> dim = new ArrayList<>();
     private List<String> img = new ArrayList<>();
+
+
 
     public String buildJsonString() {
         Map<String, List<String>> imagesMap = new HashMap<>();

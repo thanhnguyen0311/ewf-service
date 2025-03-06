@@ -34,7 +34,7 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "local_id", referencedColumnName = "id")
     private LocalProduct localProduct;
 
@@ -44,6 +44,8 @@ public class Product {
     @Column(name = "finish")
     private String finish;
 
+    @Column(name = "title")
+    private String title;
 
     @Column(name = "images")
     private String images;
