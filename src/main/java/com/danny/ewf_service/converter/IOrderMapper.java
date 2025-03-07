@@ -10,6 +10,7 @@ import java.util.Map;
 
 @Mapper(componentModel = "spring")
 public interface IOrderMapper {
+
     @Mapping(target = "id", source="order.id")
     @Mapping(target = "invoiceNumber", source="order.invoiceNumber")
     @Mapping(target = "type", source="order.type")

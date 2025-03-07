@@ -1,6 +1,7 @@
 package com.danny.ewf_service.repository;
 
 import com.danny.ewf_service.entity.Product;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

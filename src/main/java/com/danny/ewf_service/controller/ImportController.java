@@ -1,8 +1,5 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.entity.Product;
-import com.danny.ewf_service.repository.ProductRepository;
-import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.exports.ImagesExport;
 import com.danny.ewf_service.utils.imports.ComponentsImport;
 import com.danny.ewf_service.utils.imports.ImagesImport;
@@ -10,8 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
 
 @RequestMapping("/import")
 @RestController
@@ -28,6 +23,8 @@ public class ImportController {
 //            imagesImport.updateProductImages();
             imagesExport.exportImagesShopifyMain("ewfmain.csv");
 //            componentsImport.checkSingleProduct();
+//            imagesImport.updateComponentImages();
+//            imagesExport.updateImagesShopifyFromList("houston.csv");
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

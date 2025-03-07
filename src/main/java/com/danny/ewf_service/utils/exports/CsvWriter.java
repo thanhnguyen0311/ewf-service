@@ -4,10 +4,7 @@ import com.opencsv.CSVWriter;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class CsvWriter {
@@ -59,5 +56,28 @@ public class CsvWriter {
         }
         return skuSet;
     }
+    public Map<String, String> skuTitleListFromCsv(String csvFilePath){
+        Map<String, String> csvMap = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+            String line;
+            boolean isFirstRow = true;
 
+            while ((line = reader.readLine()) != null) {
+                if (isFirstRow) {
+                    isFirstRow = false;
+                    continue;
+                }
+
+                String[] columns = line.split(",");
+                if (columns.length > 0) {
+                    if (columns[0].trim().isEmpty()) continue;
+                    csvMap.put(columns[0].trim().toLowerCase(), columns[1]);
+                }
+            }
+            System.out.println("Product count: " + csvMap.size());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return csvMap;
+    }
 }

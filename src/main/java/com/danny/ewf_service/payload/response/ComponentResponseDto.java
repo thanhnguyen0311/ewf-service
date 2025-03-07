@@ -2,8 +2,6 @@ package com.danny.ewf_service.payload.response;
 
 import lombok.*;
 
-import java.util.List;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -11,13 +9,11 @@ import java.util.List;
 @Getter
 @ToString
 @Data
-public class ProductResponseDto {
+public class ComponentResponseDto {
     private Long id;
     private String sku;
-    private String localSku;
-    private String images;
+    private String image;
     private String finish;
     private String category;
-    private List<ProductResponseDto> subProducts;
-    private List<ComponentResponseDto> components;
+    private Long inventory;
 }
