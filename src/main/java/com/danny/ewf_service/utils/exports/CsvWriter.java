@@ -25,7 +25,6 @@ public class CsvWriter {
         try (CSVWriter writer = new CSVWriter(new FileWriter(csvFilePath))) {
             for (String[] row : rows) {
                 writer.writeNext(row);
-                System.out.println(Arrays.toString(row));
             }
 
             System.out.println("CSV file successfully exported to: " + csvFilePath);

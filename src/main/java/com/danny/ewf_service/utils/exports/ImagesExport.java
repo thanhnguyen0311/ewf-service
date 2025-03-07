@@ -48,6 +48,7 @@ public class ImagesExport {
         int imgPos;
         int count = 0;
         for (Product product : products) {
+            if (product.getLocalProduct().getLocalTitle() == null || product.getLocalProduct().getLocalTitle().isEmpty()) continue;
             if (!skus.contains(product.getSku().toLowerCase())) continue;
             imgPos = 1;
             productImages = mapper.readValue(product.getImages(), ImageUrls.class);
@@ -66,7 +67,7 @@ public class ImagesExport {
             if (mergedProducts != null) {
                 for (Product mergedProduct : mergedProducts) {
                     productImages = mapper.readValue(mergedProduct.getImages(), ImageUrls.class);
-                    imgPos = addImagesToRows(mergedProduct.getSku().toLowerCase(), product.getLocalProduct().getLocalTitle(), productImages, rows, imgPos);
+                    imgPos = addImagesToRows(product.getSku().toLowerCase(), "", productImages, rows, imgPos);
                     System.out.println("Found " + mergedProduct.getSku() + " for " + product.getSku());
                 }
             }
@@ -83,7 +84,7 @@ public class ImagesExport {
             imgPos++;
         }
         for (String dim : imageUrls.getDim()) {
-            rows.add(new String[]{sku, (imgPos == 1 ? title : ""), dim, String.valueOf(imgPos)});
+            rows.add(new String[]{sku, "", dim, String.valueOf(imgPos)});
             imgPos++;
         }
         return imgPos;
