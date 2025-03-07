@@ -41,7 +41,6 @@ public class Component {
     @Column(name = "images")
     private String images;
 
-
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "dimensions_id", referencedColumnName = "id")
     private Dimension dimensions;
@@ -60,6 +59,9 @@ public class Component {
 
     @Column(name = "metadata", columnDefinition = "JSON")
     private String metadata;
+
+    @Column(name = "discontinue")
+    private Boolean discontinue;
 
     @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductComponent> productComponents = new ArrayList<>();
