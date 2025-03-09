@@ -1,6 +1,5 @@
 package com.danny.ewf_service.converter;
 
-
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
@@ -20,13 +19,12 @@ import java.util.List;
 public interface IProductMapper {
     ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // For JSON parsing
 
-
     @Mapping(target = "id", source="product.id")
     @Mapping(target = "sku", source="product.sku")
     @Mapping(target = "localSku", source="product.localProduct.localSku")
-    @Mapping(target = "price", source="product.price")
-    @Mapping(target = "localPrice", source="product.localProduct.price")
     @Mapping(target = "images", source="product.images")
+    @Mapping(target = "finish", source = "product.finish")
+    @Mapping(target = "category", source = "product.category")
     ProductResponseDto productToProductResponseDto(Product product);
     List<ProductResponseDto> productListToProductResponseDtoList(List<Product> products);
 
@@ -47,6 +45,7 @@ public interface IProductMapper {
     @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
     @Mapping(target = "finish", source = "product.finish")
     ProductSearchResponseDto productWithDifferentSkuToProductSearchResponseDto(Product product);
+
     @IterableMapping(qualifiedByName = "productWithDifferentSkuToSearchResponse")
     List<ProductSearchResponseDto> productWithDifferentSkuToProductSearchResponseDtoList(List<Product> products);
 
@@ -81,15 +80,6 @@ public interface IProductMapper {
                     }
                     return imageUrls.getImg().get(0);
                 }
-
-//                if (imageUrls.getDim() != null && !imageUrls.getDim().isEmpty()) {
-//                    for (String dimLink : imageUrls.getDim()) {
-//                        if (dimLink.contains("/DNS/")) {
-//                            return dimLink;
-//                        }
-//                    }
-//                    return imageUrls.getDim().get(0);
-//                }
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -100,10 +90,13 @@ public interface IProductMapper {
         return "";
     }
 
+
     @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
     ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
     List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
+
+
 }
 

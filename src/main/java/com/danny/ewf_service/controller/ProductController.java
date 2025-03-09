@@ -22,7 +22,6 @@ public class ProductController {
     public ResponseEntity<?> getProductBySku(@PathVariable String sku) {
         try {
             ProductResponseDto product = productService.findBySku(sku);
-            System.out.println("SELECT: " + product.getPrice() + product.getImages());
             return ResponseEntity.ok().body(product);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
