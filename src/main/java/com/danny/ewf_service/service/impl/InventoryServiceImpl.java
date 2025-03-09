@@ -49,6 +49,15 @@ public class InventoryServiceImpl implements InventoryService {
         return inventoryProductResponse(result);
     }
 
+    @Override
+    public Long getInventoryProductCountById(Long id) {
+        Long productInventory = productComponentRepository.countByProductId(id);
+        if (productInventory == null) {
+            productInventory = 0L;
+        }
+        return productInventory;
+    }
+
     private Long parseObjectToLong(Object object){
         return Long.parseLong(String.valueOf(object));
     }

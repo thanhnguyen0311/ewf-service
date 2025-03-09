@@ -5,7 +5,6 @@ import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
-import com.danny.ewf_service.payload.response.SubProductResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,13 +28,6 @@ public interface IProductMapper {
     ProductResponseDto productToProductResponseDto(Product product);
     List<ProductResponseDto> productListToProductResponseDtoList(List<Product> products);
 
-    @Mapping(target = "id", source="product.id")
-    @Mapping(target = "sku", source="product.sku")
-    @Mapping(target = "localSku", source="product.localProduct.localSku")
-    @Mapping(target = "images", source="product.images")
-    @Mapping(target = "finish", source = "product.finish")
-    @Mapping(target = "category", source = "product.category")
-    SubProductResponseDto productToSubProductResponseDto(Product product);
 
 
     @Named("productToSearchResponse")

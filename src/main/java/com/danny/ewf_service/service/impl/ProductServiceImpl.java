@@ -6,11 +6,11 @@ import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.entity.ProductComponent;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
-import com.danny.ewf_service.payload.response.SubProductResponseDto;
 import com.danny.ewf_service.repository.LocalRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.ComponentService;
+import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.imports.SKUGenerator;
 import jakarta.transaction.Transactional;
@@ -18,7 +18,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,10 +35,14 @@ public class ProductServiceImpl implements ProductService {
     private final IProductMapper productMapper;
 
     private final ProductRepository productRepository;
+
     @Autowired
     private final ComponentService componentService;
 
     private final ProductComponentRepository productComponentRepository;
+
+    @Autowired
+    private InventoryService inventoryService;
 
     public interface ProductProjection {
         Long getId();
@@ -71,11 +74,13 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponseDto findById(Long id) {
         Product product = productRepository.findProductById(id).orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
         ProductResponseDto productResponseDto = productMapper.productToProductResponseDto(product);
+        productResponseDto.setInventory(inventoryService.getInventoryProductCountById(product.getId()));
         productResponseDto.setComponents(componentService.findComponents(product));
         List<Product> subProductResponseDtoList = findMergedProducts(product);
-        List<SubProductResponseDto> subProductResponseDtos = new ArrayList<>();
+        List<ProductResponseDto> subProductResponseDtos = new ArrayList<>();
         for (Product subProduct : subProductResponseDtoList) {
-            SubProductResponseDto subProductResponseDto = productMapper.productToSubProductResponseDto(subProduct);
+            ProductResponseDto subProductResponseDto = productMapper.productToProductResponseDto(subProduct);
+            subProductResponseDto.setInventory(inventoryService.getInventoryProductCountById(subProduct.getId()));
             subProductResponseDto.setComponents(componentService.findComponents(subProduct));
             subProductResponseDtos.add(subProductResponseDto);
         }

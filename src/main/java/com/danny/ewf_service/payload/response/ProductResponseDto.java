@@ -19,6 +19,7 @@ public class ProductResponseDto {
     private String images;
     private String finish;
     private String category;
-    private List<SubProductResponseDto> subProducts = new ArrayList<>();
+    private Long inventory;
+    private List<ProductResponseDto> subProducts = new ArrayList<>();
     private List<ComponentResponseDto> components = new ArrayList<>();
 }
