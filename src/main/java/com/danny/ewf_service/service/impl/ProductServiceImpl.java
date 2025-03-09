@@ -9,6 +9,7 @@ import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
 import com.danny.ewf_service.repository.LocalRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.imports.SKUGenerator;
 import jakarta.transaction.Transactional;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,7 +35,14 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
+    private final ComponentService componentService;
+
     private final ProductComponentRepository productComponentRepository;
+
+    public interface ProductProjection {
+        Long getId();
+        String getSku();
+    }
 
     @Override
     public ProductResponseDto findBySku(String sku) {
@@ -60,7 +67,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto findById(Long id) {
-        return productMapper.productToProductResponseDto(productRepository.findById(id).orElseThrow());
+        Product product = productRepository.findProductById(id).orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
+        ProductResponseDto productResponseDto = productMapper.productToProductResponseDto(product);
+        productResponseDto.setComponents(componentService.findComponents(product));
+        List<Product> subProductResponseDtoList = findMergedProducts(product);
+        for (Product subProduct : subProductResponseDtoList) {
+            ProductResponseDto subProductResponseDto = productMapper.productToProductResponseDto(subProduct);
+            subProductResponseDto.setComponents(componentService.findComponents(subProduct));
+            productResponseDto.getSubProducts().add(subProductResponseDto);
+        }
+        return productResponseDto;
     }
 
 
@@ -94,23 +110,37 @@ public class ProductServiceImpl implements ProductService {
             // Check if a product exists for each combination
             for (List<ProductComponent> combination : combinations) {
                 // Extract SKUs of components in the combination
-                List<String> componentSkus = combination.stream()
-                        .map(pc -> pc.getComponent().getSku())
+                List<Long> componentIds = combination.stream()
+                        .map(pc -> pc.getComponent().getId())
                         .collect(Collectors.toList());
-                Optional<Object[]> result = productComponentRepository.findProductByExactComponents(componentSkus, componentSkus.size());
-                if (result.isPresent() && result.get().length > 0) {
-                    Object[] resultArray = result.get();
-                    if (resultArray[0] instanceof Object[] firstRow) {
-                        if (firstRow.length > 1) {
-                            Object sku = firstRow[1];
-                            Optional<Product> productOptional = productRepository.findBySku((String) sku);
-                            productOptional.ifPresent(mergedProducts::add);
-                        }
-                    }
+                for (Long componentId : componentIds) {
+                    System.out.println(componentId);
                 }
+                Optional<ProductProjection> result = productComponentRepository.findProductByExactComponents(componentIds, componentIds.size());
+
+                if (result.isPresent()) {
+                    ProductProjection productProjection = result.get();
+                    System.out.println(productProjection.getId());
+
+                    System.out.println(productProjection.getSku());
+                    Optional<Product> productOptional = productRepository.findProductBySku(productProjection.getSku());
+                    productOptional.ifPresent(mergedProducts::add);
+                } else {
+                    System.out.println("No matching product found.");
+                }
+
+//                if (result.isPresent() && result.get().length > 0) {
+//                    Object[] resultArray = result.get();
+//                    if (resultArray[0] instanceof Object[] firstRow) {
+//                        if (firstRow.length > 1) {
+//                            Object sku = firstRow[1];
+//                            Optional<Product> productOptional = productRepository.findBySku((String) sku);
+//                            productOptional.ifPresent(mergedProducts::add);
+//                        }
+//                    }
+//                }
             }
         }
-
         return mergedProducts;
     }
 

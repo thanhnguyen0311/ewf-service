@@ -1,8 +1,10 @@
 package com.danny.ewf_service.utils.exports;
 
+import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.entity.ProductComponent;
+import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.ImageCheck;
@@ -12,17 +14,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 public class ImagesExport {
 
-    @Autowired
-    private final ImageCheck imageCheck;
 
     @Autowired
     private final CsvWriter csvWriter;
@@ -35,6 +32,60 @@ public class ImagesExport {
     @Autowired
     private final ProductService productService;
 
+    @Autowired
+    private final ComponentRepository componentRepository;
+
+
+    public void updateImagesShopifyFromList(String filePath) throws JsonProcessingException {
+        String[] header = {"Handle", "Title", "Image Src", "Image Position"};
+        String skuExportListPath = "src/main/resources/data/products_export.csv";
+        Map<String, String> skuTitleMapping = csvWriter.skuTitleListFromCsv(skuExportListPath);
+        List<String[]> rows = new ArrayList<>();
+        ImageUrls productImages;
+        ImageUrls componentImages;
+        rows.add(header);
+        int imgPos;
+        int count = 0;
+
+        for (Map.Entry<String, String> entry : skuTitleMapping.entrySet()) {
+            Product product = productRepository.findBySku(entry.getKey()).orElse(null);
+            if (product != null) {
+                imgPos = 1;
+                productImages = mapper.readValue(product.getImages(), ImageUrls.class);
+                imgPos = addImagesToRows(entry.getKey(), entry.getValue(), productImages, rows, imgPos);
+
+                List<ProductComponent> components = product.getProductComponents();
+
+                for (ProductComponent productComponent : components) {
+                    if (Objects.equals(productComponent.getComponent().getType(), "Single")) {
+                        componentImages = mapper.readValue(productComponent.getComponent().getImages(), ImageUrls.class);
+                        imgPos = addImagesToRows(entry.getKey(), "", componentImages, rows, imgPos);
+                    }
+                }
+
+                List<Product> mergedProducts = productService.findMergedProducts(product);
+
+                if (mergedProducts != null) {
+                    for (Product mergedProduct : mergedProducts) {
+                        productImages = mapper.readValue(mergedProduct.getImages(), ImageUrls.class);
+                        imgPos = addImagesToRows(entry.getKey(), "", productImages, rows, imgPos);
+                        System.out.println("Found " + mergedProduct.getSku() + " for " + product.getSku());
+                    }
+                }
+            } else {
+                Component component = componentRepository.findBySku(entry.getKey().toUpperCase()).orElse(null);
+                if (component != null) {
+                    imgPos = 1;
+                    componentImages = mapper.readValue(component.getImages(), ImageUrls.class);
+                    addImagesToRows(entry.getKey(), entry.getValue(), componentImages, rows, imgPos);
+                }
+            }
+            count++;
+        }
+
+        System.out.println(count + " products exported");
+        csvWriter.exportToCsv(rows, filePath);
+    }
 
     public void exportImagesShopifyMain(String filePath) throws JsonProcessingException {
         List<Product> products = productRepository.findAll();
@@ -89,5 +140,4 @@ public class ImagesExport {
         }
         return imgPos;
     }
-
 }
