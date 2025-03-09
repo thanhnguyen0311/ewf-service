@@ -36,31 +36,19 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
 
 
 
-//    @Query(value = """
-//        SELECT p.id, p.sku
-//        FROM product_components pc
-//        JOIN components c ON pc.component_id = c.id
-//        JOIN products p ON pc.product_id = p.id
-//        WHERE c.id IN (:ids)
-//        GROUP BY p.id
-//        HAVING COUNT(DISTINCT c.sku) = :skuCount
-//        AND (SELECT COUNT(DISTINCT pc2.component_id)
-//             FROM product_components pc2
-//             WHERE pc2.product_id = p.id) = :skuCount
-//        LIMIT 1
-//    """, nativeQuery = true)
-
     @Query(value = """
-    SELECT p.id AS id, p.sku AS sku
-    FROM product_components pc
-    JOIN components c ON pc.component_id = c.id
-    JOIN products p ON pc.product_id = p.id
-    WHERE c.id IN (:ids)
-    GROUP BY p.id, p.sku
-    HAVING COUNT(DISTINCT c.id) = :skuCount
-    AND COUNT(DISTINCT pc.component_id) = :skuCount
-    LIMIT 1
-""", nativeQuery = true)
+        SELECT p.id, p.sku
+        FROM product_components pc
+        JOIN components c ON pc.component_id = c.id
+        JOIN products p ON pc.product_id = p.id
+        WHERE c.id IN (:ids)
+        GROUP BY p.id
+        HAVING COUNT(DISTINCT c.sku) = :skuCount
+        AND (SELECT COUNT(DISTINCT pc2.component_id)
+             FROM product_components pc2
+             WHERE pc2.product_id = p.id) = :skuCount
+        LIMIT 1 
+    """, nativeQuery = true)
     Optional<ProductServiceImpl.ProductProjection> findProductByExactComponents(@Param("ids") List<Long> ids, @Param("skuCount") int skuCount);
 }
 

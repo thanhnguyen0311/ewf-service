@@ -12,13 +12,12 @@ import java.util.List;
 @Getter
 @ToString
 @Data
-public class ProductResponseDto {
+public class SubProductResponseDto {
     private Long id;
     private String sku;
     private String localSku;
     private String images;
     private String finish;
     private String category;
-    private List<SubProductResponseDto> subProducts = new ArrayList<>();
     private List<ComponentResponseDto> components = new ArrayList<>();
 }
