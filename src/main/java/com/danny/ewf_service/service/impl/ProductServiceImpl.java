@@ -6,6 +6,7 @@ import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.entity.ProductComponent;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
+import com.danny.ewf_service.payload.response.SubProductResponseDto;
 import com.danny.ewf_service.repository.LocalRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
@@ -17,6 +18,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final IProductMapper productMapper;
 
     private final ProductRepository productRepository;
-
+    @Autowired
     private final ComponentService componentService;
 
     private final ProductComponentRepository productComponentRepository;
@@ -71,11 +73,13 @@ public class ProductServiceImpl implements ProductService {
         ProductResponseDto productResponseDto = productMapper.productToProductResponseDto(product);
         productResponseDto.setComponents(componentService.findComponents(product));
         List<Product> subProductResponseDtoList = findMergedProducts(product);
+        List<SubProductResponseDto> subProductResponseDtos = new ArrayList<>();
         for (Product subProduct : subProductResponseDtoList) {
-            ProductResponseDto subProductResponseDto = productMapper.productToProductResponseDto(subProduct);
+            SubProductResponseDto subProductResponseDto = productMapper.productToSubProductResponseDto(subProduct);
             subProductResponseDto.setComponents(componentService.findComponents(subProduct));
-            productResponseDto.getSubProducts().add(subProductResponseDto);
+            subProductResponseDtos.add(subProductResponseDto);
         }
+        productResponseDto.setSubProducts(subProductResponseDtos);
         return productResponseDto;
     }
 
@@ -120,25 +124,9 @@ public class ProductServiceImpl implements ProductService {
 
                 if (result.isPresent()) {
                     ProductProjection productProjection = result.get();
-                    System.out.println(productProjection.getId());
-
-                    System.out.println(productProjection.getSku());
                     Optional<Product> productOptional = productRepository.findProductBySku(productProjection.getSku());
                     productOptional.ifPresent(mergedProducts::add);
-                } else {
-                    System.out.println("No matching product found.");
                 }
-
-//                if (result.isPresent() && result.get().length > 0) {
-//                    Object[] resultArray = result.get();
-//                    if (resultArray[0] instanceof Object[] firstRow) {
-//                        if (firstRow.length > 1) {
-//                            Object sku = firstRow[1];
-//                            Optional<Product> productOptional = productRepository.findBySku((String) sku);
-//                            productOptional.ifPresent(mergedProducts::add);
-//                        }
-//                    }
-//                }
             }
         }
         return mergedProducts;

@@ -60,6 +60,9 @@ public class Component {
     @Column(name = "metadata", columnDefinition = "JSON")
     private String metadata;
 
+    @Column(name = "discontinue")
+    private Boolean discontinue;
+
     @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductComponent> productComponents = new ArrayList<>();
 }
