@@ -51,8 +51,36 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto findBySku(String sku) {
-        Product product = productRepository.findProductBySku(sku).orElseThrow(() -> new RuntimeException("Product not found with SKU: " + sku));
-        return productMapper.productToProductResponseDto(product);
+        Product product = productRepository.findProductBySku(sku.toUpperCase()).orElseThrow(() -> new RuntimeException("Product not found with sku: " + sku));
+        ProductResponseDto productResponseDto = productMapper.productToProductResponseDto(product);
+        productResponseDto.setInventory(inventoryService.getInventoryProductCountById(product.getId()));
+        productResponseDto.setComponents(componentService.findComponents(product));
+        List<Product> subProductResponseDtoList = findMergedProducts(product);
+        List<ProductResponseDto> subProductResponseDtos = new ArrayList<>();
+        ProductResponseDto subProductResponseDto;
+        if (subProductResponseDtoList != null) {
+            for (Product subProduct : subProductResponseDtoList) {
+                subProductResponseDto = productMapper.productToProductResponseDto(subProduct);
+                subProductResponseDto.setInventory(inventoryService.getInventoryProductCountById(subProduct.getId()));
+                subProductResponseDto.setComponents(componentService.findComponents(subProduct));
+                subProductResponseDto.setInventory(productComponentRepository.countByProductId(subProduct.getId()));
+                subProductResponseDtos.add(subProductResponseDto);
+            }
+        }
+        List<String> subSingleSkus = productComponentRepository.findSingleProductsByProductSku(product.getId());
+        Product subProduct;
+        for (String subSingleSku : subSingleSkus) {
+            if (subSingleSku.equals(product.getSku())) continue;
+            Optional<Product> subProductOptional = productRepository.findProductBySku(subSingleSku);
+            if (subProductOptional.isPresent()) {
+                subProduct = subProductOptional.get();
+                subProductResponseDto = productMapper.productToProductResponseDto(subProduct);
+                subProductResponseDto.setInventory(inventoryService.getInventoryProductCountById(subProduct.getId()));
+                subProductResponseDtos.add(subProductResponseDto);
+            }
+        }
+        productResponseDto.setSubProducts(subProductResponseDtos);
+        return productResponseDto;
     }
 
     @Override
@@ -68,26 +96,6 @@ public class ProductServiceImpl implements ProductService {
         List<ProductSearchResponseDto> productSearchResponseDtoList2 = productMapper.productWithDifferentSkuToProductSearchResponseDtoList(products);
         productSearchResponseDtoList.addAll(productSearchResponseDtoList2);
         return productSearchResponseDtoList;
-    }
-
-    @Override
-    public ProductResponseDto findById(Long id) {
-        Product product = productRepository.findProductById(id).orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
-        ProductResponseDto productResponseDto = productMapper.productToProductResponseDto(product);
-        productResponseDto.setInventory(inventoryService.getInventoryProductCountById(product.getId()));
-        productResponseDto.setComponents(componentService.findComponents(product));
-        List<Product> subProductResponseDtoList = findMergedProducts(product);
-        List<ProductResponseDto> subProductResponseDtos = new ArrayList<>();
-        if (subProductResponseDtoList != null) {
-            for (Product subProduct : subProductResponseDtoList) {
-                ProductResponseDto subProductResponseDto = productMapper.productToProductResponseDto(subProduct);
-                subProductResponseDto.setInventory(inventoryService.getInventoryProductCountById(subProduct.getId()));
-                subProductResponseDto.setComponents(componentService.findComponents(subProduct));
-                subProductResponseDtos.add(subProductResponseDto);
-            }
-            productResponseDto.setSubProducts(subProductResponseDtos);
-        }
-        return productResponseDto;
     }
 
 

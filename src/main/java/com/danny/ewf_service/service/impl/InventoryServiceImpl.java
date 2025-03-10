@@ -1,11 +1,15 @@
 package com.danny.ewf_service.service.impl;
 
+import com.danny.ewf_service.converter.IComponentMapper;
 import com.danny.ewf_service.converter.IProductMapper;
+import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.repository.inventory.ProductInventorySearching;
+import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,12 @@ public class InventoryServiceImpl implements InventoryService {
     private final IProductMapper productMapper;
 
     @Autowired
+    private final IComponentMapper componentMapper;
+
+    @Autowired
+    private final ComponentService componentService;
+
+    @Autowired
     private final ProductInventorySearching productInventorySearching;
 
     @Override
@@ -56,6 +66,12 @@ public class InventoryServiceImpl implements InventoryService {
             productInventory = 0L;
         }
         return productInventory;
+    }
+
+    @Override
+    public List<ComponentInventoryResponseDto> findAllComponentsInventory() {
+        List<Component> components = componentService.findAllComponents();
+        return componentMapper.componentListToComponentInventoryResponseDtoList(components);
     }
 
     private Long parseObjectToLong(Object object){
@@ -82,7 +98,6 @@ public class InventoryServiceImpl implements InventoryService {
 
         productInventoryResponseDtos.forEach(dto -> {
             dto.setQuantity(productInventoryMap.get(dto.getId()));
-
         });
 
         return new PagingResponse<>(
