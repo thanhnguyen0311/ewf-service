@@ -35,6 +35,23 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
     Page<Object[]> calculateProductInventoryByQuantityASC(Pageable pageable);
 
 
+    @Query(value = """
+        SELECT
+            MIN(FLOOR(c.inventory / pc.quantity)) AS inventory
+        FROM
+            product_components pc
+        JOIN
+            components c ON pc.component_id = c.id
+        JOIN
+            products p ON pc.product_id = p.id
+        WHERE
+            p.id = :productId
+            AND c.inventory IS NOT NULL
+        GROUP BY
+            p.id
+        """, nativeQuery = true)
+    Long countByProductId(@Param("productId") Long productId);
+
 
     @Query(value = """
         SELECT p.id, p.sku
