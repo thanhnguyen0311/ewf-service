@@ -26,14 +26,11 @@ public class Component {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "quantity")
-    private Long quantity;
-
-    @Column(name = "box")
-    private Long box;
-
     @Column(name = "finish")
     private String finish;
+
+    @Column(name = "manufacturer")
+    private String manufacturer;
 
     @Column(name = "category")
     private String category;

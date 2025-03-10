@@ -1,5 +1,6 @@
 package com.danny.ewf_service.payload.response;
 
+import com.danny.ewf_service.entity.ImageUrls;
 import lombok.*;
 
 @AllArgsConstructor
@@ -11,14 +12,12 @@ import lombok.*;
 @Data
 public class ComponentInventoryResponseDto {
     private Long id;
-    private String manufacture;
+    private String manufacturer;
     private String sku;
-    private Long name;
-    private String image;
+    private String name;
+    private ImageUrls images;
     private Long inventory;
     private String category;
-    private Long onPO;
-    private Long inTransit;
-    private Long inventoryVN;
+    private String finish;
     private Boolean discontinue;
 }

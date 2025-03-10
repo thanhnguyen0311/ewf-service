@@ -1,12 +1,15 @@
 package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.payload.request.ProductInventorySearchRequestDto;
+import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.PagingResponse;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -19,8 +22,8 @@ public class InventoryController {
     @GetMapping("/components")
     public ResponseEntity<?> getProductsInventory() {
         try {
-
-            return ResponseEntity.ok(new PagingResponse<>());
+            List<ComponentInventoryResponseDto> componentInventoryResponseDtos = inventoryService.findAllComponentsInventory();
+            return ResponseEntity.ok(componentInventoryResponseDtos);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Not found");
         } catch (Exception e) {

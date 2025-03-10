@@ -14,8 +14,6 @@ public interface ProductService {
 
     List<ProductSearchResponseDto> getAllProductsSearch();
 
-    ProductResponseDto findById(Long id);
-
     void saveProduct(Product product);
 
     List<Product> findMergedProducts(Product product);

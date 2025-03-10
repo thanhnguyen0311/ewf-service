@@ -104,8 +104,6 @@ public class ComponentsImport {
 
                 Component component = Component.builder()
                         .sku(sku)
-                        .quantity(0L)
-                        .box(0L)
                         .inventory(0L)
                         .build();
                 componentRepository.save(component);
@@ -251,8 +249,6 @@ public class ComponentsImport {
                     } else {
                         component = new Component();
                         component.setSku(componentSku);
-                        component.setQuantity(0L);
-                        component.setBox(0L);
                         System.out.println("\u001B[32m" + "Successfully created Component SKU : " + componentSku + "\u001B[0m");
                     }
                     component.setInventory(Long.parseLong(quantity));
