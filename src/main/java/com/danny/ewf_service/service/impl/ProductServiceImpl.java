@@ -122,13 +122,14 @@ public class ProductServiceImpl implements ProductService {
                 List<Long> componentIds = combination.stream()
                         .map(pc -> pc.getComponent().getId())
                         .collect(Collectors.toList());
-                for (Long componentId : componentIds) {
-                    System.out.println(componentId);
-                }
+
                 Optional<ProductProjection> result = productComponentRepository.findProductByExactComponents(componentIds, componentIds.size());
 
                 if (result.isPresent()) {
                     ProductProjection productProjection = result.get();
+
+                    if (productProjection.getSku().equals(product.getSku())) continue;
+
                     Optional<Product> productOptional = productRepository.findProductBySku(productProjection.getSku());
                     productOptional.ifPresent(mergedProducts::add);
                 }

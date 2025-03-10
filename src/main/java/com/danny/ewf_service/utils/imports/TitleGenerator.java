@@ -3,8 +3,8 @@ package com.danny.ewf_service.utils.imports;
 import com.danny.ewf_service.entity.LocalProduct;
 import com.danny.ewf_service.service.LocalService;
 import com.danny.ewf_service.utils.ImageCheck;
-import com.danny.ewf_service.utils.ImageProcessor;
 import com.danny.ewf_service.utils.OpenAIClient;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.TimeUnit;
@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class TitleGenerator {
 
     @Autowired
@@ -27,18 +28,10 @@ public class TitleGenerator {
     @Autowired
     private final OpenAIClient openAIClient;
 
-    @Autowired
-    private final ImageProcessor imageProcessor;
 
     @Autowired
     private final LocalService localService;
 
-    public TitleGenerator(ImageCheck imageCheck, OpenAIClient openAIClient, ImageProcessor imageProcessor, LocalService localService) {
-        this.imageCheck = imageCheck;
-        this.openAIClient = openAIClient;
-        this.imageProcessor = imageProcessor;
-        this.localService = localService;
-    }
 
     public void generateLocalTitle() {
         List<LocalProduct> localProductList = localService.getAllLocalProducts();
@@ -55,24 +48,24 @@ public class TitleGenerator {
             }
 
 
-            ImageProcessor.ImageUrls imageUrls = imageProcessor.parseImageJson(localProduct.getProduct().getImages());
-            for (String imgLink : imageUrls.getImg()) {
-                if (imgLink.contains("DCH") && imgLink.contains(localProduct.getProduct().getSku())) {
-                    isLinkAlive = imageCheck.isImageLinkAlive(imgLink);
-                    userContent = "Generate title from image for product with sku :" + localProduct.getLocalSku() + "\nExample: '1MZABS-W9E-96 Elegant 3-Piece Dropleaf Dining Set with 2 Upholstered Chairs in Light Beige Linen, 36x54 Inch, White Finish'.";
-                    if (isLinkAlive) {
-                        try {
-                            String result = openAIClient.generateTitleFromImage(userContent, imgLink);
-                            System.out.println("OpenAI: " + result + " | " + imgLink);
-
-                            TimeUnit.MINUTES.sleep(1);
-                            break;
-                        } catch (Exception e) {
-                            throw new RuntimeException("Error generating title", e);
-                        }
-                    }
-                }
-            }
+//            ImageProcessor.ImageUrls imageUrls = imageProcessor.parseImageJson(localProduct.getProduct().getImages());
+//            for (String imgLink : imageUrls.getImg()) {
+//                if (imgLink.contains("DCH") && imgLink.contains(localProduct.getProduct().getSku())) {
+//                    isLinkAlive = imageCheck.isImageLinkAlive(imgLink);
+//                    userContent = "Generate title from image for product with sku :" + localProduct.getLocalSku() + "\nExample: '1MZABS-W9E-96 Elegant 3-Piece Dropleaf Dining Set with 2 Upholstered Chairs in Light Beige Linen, 36x54 Inch, White Finish'.";
+//                    if (isLinkAlive) {
+//                        try {
+//                            String result = openAIClient.generateTitleFromImage(userContent, imgLink);
+//                            System.out.println("OpenAI: " + result + " | " + imgLink);
+//
+//                            TimeUnit.MINUTES.sleep(1);
+//                            break;
+//                        } catch (Exception e) {
+//                            throw new RuntimeException("Error generating title", e);
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 

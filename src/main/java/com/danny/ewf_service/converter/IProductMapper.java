@@ -22,7 +22,7 @@ public interface IProductMapper {
     @Mapping(target = "id", source="product.id")
     @Mapping(target = "sku", source="product.sku")
     @Mapping(target = "localSku", source="product.localProduct.localSku")
-    @Mapping(target = "images", source="product.images")
+    @Mapping(target = "images", source="product.images", qualifiedByName = "extractImages")
     @Mapping(target = "finish", source = "product.finish")
     @Mapping(target = "category", source = "product.category")
     ProductResponseDto productToProductResponseDto(Product product);
@@ -51,6 +51,21 @@ public interface IProductMapper {
     @IterableMapping(qualifiedByName = "productWithDifferentSkuToSearchResponse")
     List<ProductSearchResponseDto> productWithDifferentSkuToProductSearchResponseDtoList(List<Product> products);
 
+
+
+    @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
+    @Mapping(target = "id", source = "product.id")
+    @Mapping(target = "sku", source = "product.sku")
+    ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
+    List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
+
+
+
+
+    @Named("extractImages")
+    default ImageUrls extractImages(String imagesJson) {
+        return new ImageUrls().parseImageJson(imagesJson);
+    }
 
     @Named("extractFirstImage")
     default String extractFirstImage(String imagesJson) {
@@ -91,13 +106,6 @@ public interface IProductMapper {
 
         return "";
     }
-
-
-    @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
-    @Mapping(target = "id", source = "product.id")
-    @Mapping(target = "sku", source = "product.sku")
-    ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
-    List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
 
 
 }
