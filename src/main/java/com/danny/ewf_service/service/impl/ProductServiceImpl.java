@@ -78,13 +78,15 @@ public class ProductServiceImpl implements ProductService {
         productResponseDto.setComponents(componentService.findComponents(product));
         List<Product> subProductResponseDtoList = findMergedProducts(product);
         List<ProductResponseDto> subProductResponseDtos = new ArrayList<>();
-        for (Product subProduct : subProductResponseDtoList) {
-            ProductResponseDto subProductResponseDto = productMapper.productToProductResponseDto(subProduct);
-            subProductResponseDto.setInventory(inventoryService.getInventoryProductCountById(subProduct.getId()));
-            subProductResponseDto.setComponents(componentService.findComponents(subProduct));
-            subProductResponseDtos.add(subProductResponseDto);
+        if (subProductResponseDtoList != null) {
+            for (Product subProduct : subProductResponseDtoList) {
+                ProductResponseDto subProductResponseDto = productMapper.productToProductResponseDto(subProduct);
+                subProductResponseDto.setInventory(inventoryService.getInventoryProductCountById(subProduct.getId()));
+                subProductResponseDto.setComponents(componentService.findComponents(subProduct));
+                subProductResponseDtos.add(subProductResponseDto);
+            }
+            productResponseDto.setSubProducts(subProductResponseDtos);
         }
-        productResponseDto.setSubProducts(subProductResponseDtos);
         return productResponseDto;
     }
 
