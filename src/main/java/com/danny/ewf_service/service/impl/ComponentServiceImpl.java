@@ -4,9 +4,12 @@ import com.danny.ewf_service.converter.IComponentMapper;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.entity.ProductComponent;
+import com.danny.ewf_service.entity.Report;
 import com.danny.ewf_service.payload.response.ComponentResponseDto;
 import com.danny.ewf_service.repository.ComponentRepository;
+import com.danny.ewf_service.repository.ReportRepository;
 import com.danny.ewf_service.service.ComponentService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,9 @@ public class ComponentServiceImpl implements ComponentService {
 
     @Autowired
     private final ComponentRepository componentRepository;
+
+    @Autowired
+    private final ReportRepository reportRepository;
 
     @Override
     public List<ComponentResponseDto> findComponents(Product product) {
@@ -41,5 +47,18 @@ public class ComponentServiceImpl implements ComponentService {
     @Override
     public List<Component> findAllComponents() {
         return componentRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public void linkComponentsToReports() {
+        List<Component> components = componentRepository.findAll();
+        for (Component component : components) {
+            Report report = new Report();
+            report = reportRepository.save(report);
+            component.setReport(report);
+            System.out.println(component.getSku());
+            componentRepository.save(component);
+        }
     }
 }

@@ -9,6 +9,7 @@ import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
 import com.danny.ewf_service.repository.LocalRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.repository.ReportRepository;
 import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.ProductService;
@@ -40,6 +41,7 @@ public class ProductServiceImpl implements ProductService {
     private final ComponentService componentService;
 
     private final ProductComponentRepository productComponentRepository;
+
 
     @Autowired
     private InventoryService inventoryService;
