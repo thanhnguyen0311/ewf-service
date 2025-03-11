@@ -27,6 +27,7 @@ public interface IComponentMapper {
     @Mapping(target = "images", source = "component.images", qualifiedByName = "extractImages")
     @Mapping(target = "finish", source = "component.finish")
     @Mapping(target = "category", source = "component.category")
+    @Mapping(target = "salesReport", source = "component.report.salesReport")
     @Mapping(target = "inventory", source = "component.inventory")
     @Mapping(target = "manufacturer", source = "component.manufacturer")
     @Mapping(target = "name", source = "component.name")

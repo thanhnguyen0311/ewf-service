@@ -11,4 +11,6 @@ public interface ComponentService {
     List<ComponentResponseDto>  findComponents (Product product);
 
     List<Component> findAllComponents();
+
+    void linkComponentsToReports();
 }

@@ -161,7 +161,7 @@ public class ComponentsImport {
 
                 // Parse quantity
 
-                Long quantity;
+                long quantity;
                 try {
                     quantity = Long.parseLong(quantityStr);
                 } catch (NumberFormatException e) {
@@ -204,7 +204,6 @@ public class ComponentsImport {
                     System.err.println("Error processing row for product " + productSku + " and component " + componentSku + ": " + e.getMessage());
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading CSV file", e);
@@ -227,19 +226,19 @@ public class ComponentsImport {
                 String[] columns = line.split(",");
 
                 if (columns.length < 4) {
-                    continue; // Skip invalid rows
+                    continue;
                 }
 
                 String componentSku = columns[1].trim();  // Column 2: Product SKU
-                String quantity = columns[3].trim(); // Column 5: Component SKU
+                String quantity = columns[3].trim(); // Column 4: Component SKU
 
 
                 if (componentSku.isEmpty() || quantity.isEmpty()) {
                     continue;
                 }
 
-                if (componentSku.equals("20-DEC")) componentSku = "DEC-20";
-                if (componentSku.equals("Total Inventory")) continue;
+                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025")) componentSku = "DEC-20";
+                if (componentSku.equals("Total Inventory")) return;
                 try {
                     Component component;
                     Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
@@ -251,7 +250,7 @@ public class ComponentsImport {
                         component.setSku(componentSku);
                         System.out.println("\u001B[32m" + "Successfully created Component SKU : " + componentSku + "\u001B[0m");
                     }
-                    component.setInventory(Long.parseLong(quantity));
+                    component.setInventory((long) Math.ceil(Double.parseDouble(quantity)));
                     componentRepository.save(component);
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + componentSku + ": " + e.getMessage());
@@ -282,11 +281,49 @@ public class ComponentsImport {
                         .quantity(1L)
                         .build();
                 productComponentRepository.save(productComponent);
-
             } else {
                 component.setType("Group");
                 componentRepository.save(component);
             }
+        }
+    }
+
+    public void importReports(){
+        try (InputStream file = getClass().getResourceAsStream("/data/report.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+            String headerRow = reader.readLine();
+
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+
+                String componentSku = columns[0].trim();  // Column 2: Product SKU
+                String quantity = columns[1].trim(); // Column 4: Component SKU
+
+
+                if (componentSku.isEmpty() || quantity.isEmpty()) {
+                    continue;
+                }
+
+                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025")) componentSku = "DEC-20";
+
+                try {
+                    Component component;
+                    Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
+                    if (optionalComponent.isPresent()) {
+                        component = optionalComponent.get();
+                        component.getReport().setPoorSellingReport((long) Math.ceil(Double.parseDouble(quantity)));
+                        componentRepository.save(component);
+                        System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + quantity);
+                    }
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + componentSku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
         }
     }
 }

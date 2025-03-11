@@ -14,6 +14,7 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
+@ToString
 public class Component {
 
     @Id
@@ -42,14 +43,15 @@ public class Component {
     @JoinColumn(name = "dimensions_id", referencedColumnName = "id")
     private Dimension dimensions;
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "report_id", referencedColumnName = "id")
+    private Report report = new Report();
+
     @Column(name = "inventory")
-    private Long inventory;
+    private Long inventory = 0L;
 
     @Column(name = "type")
     private String type;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

@@ -13,6 +13,7 @@ import lombok.*;
 public class ComponentInventoryResponseDto {
     private Long id;
     private String manufacturer;
+    private Long salesReport;
     private String sku;
     private String name;
     private ImageUrls images;
