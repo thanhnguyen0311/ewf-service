@@ -46,13 +46,13 @@ public class ComponentServiceImpl implements ComponentService {
 
     @Override
     public List<Component> findAllComponents() {
-        return componentRepository.findAll();
+        return componentRepository.findAllComponents();
     }
 
     @Override
     @Transactional
     public void linkComponentsToReports() {
-        List<Component> components = componentRepository.findAll();
+        List<Component> components = componentRepository.findAllComponents();
         for (Component component : components) {
             Report report = new Report();
             report = reportRepository.save(report);

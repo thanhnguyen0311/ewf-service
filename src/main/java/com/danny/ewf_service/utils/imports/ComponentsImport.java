@@ -293,16 +293,19 @@ public class ComponentsImport {
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
-            String headerRow = reader.readLine();
-
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
 
                 String componentSku = columns[0].trim();  // Column 2: Product SKU
-                String quantity = columns[1].trim(); // Column 4: Component SKU
+                String quantity;
+                // Column 4: Component SKU
+                if (columns.length < 2) {
+                    quantity = "0";
+                } else {
+                    quantity = columns[1].trim();
+                }
 
-
-                if (componentSku.isEmpty() || quantity.isEmpty()) {
+                if (componentSku.isEmpty()) {
                     continue;
                 }
 
@@ -313,7 +316,7 @@ public class ComponentsImport {
                     Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
                     if (optionalComponent.isPresent()) {
                         component = optionalComponent.get();
-                        component.getReport().setPoorSellingReport((long) Math.ceil(Double.parseDouble(quantity)));
+                        component.getReport().setInTransit((long) Math.ceil(Double.parseDouble(quantity)));
                         componentRepository.save(component);
                         System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + quantity);
                     }
