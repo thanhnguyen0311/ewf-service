@@ -19,6 +19,12 @@ public class Report {
     @Column(name="sales_report")
     private Long salesReport = 0L;
 
+    @Column(name="on_po")
+    private Long onPO = 0L;
+
+    @Column(name="in_transit")
+    private Long inTransit = 0L;
+
     @Column(name="missing_report")
     private Long missingReport = 0L;
 

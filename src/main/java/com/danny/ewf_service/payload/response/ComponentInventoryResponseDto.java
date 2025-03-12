@@ -21,4 +21,9 @@ public class ComponentInventoryResponseDto {
     private String category;
     private String finish;
     private Boolean discontinue;
+    private Long report120Days = 0L;
+    private Long inStock = 0L;
+    private Long onPO = 0L;
+    private Long inTransit = 0L;
+    private Double rating = 0.0;
 }
