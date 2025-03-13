@@ -316,7 +316,8 @@ public class ComponentsImport {
                     Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
                     if (optionalComponent.isPresent()) {
                         component = optionalComponent.get();
-                        component.getReport().setInTransit((long) Math.ceil(Double.parseDouble(quantity)));
+//                        component.getReport().setInProduction((long) Math.ceil(Double.parseDouble(quantity)));
+                        component.setDiscontinue(true);
                         componentRepository.save(component);
                         System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + quantity);
                     }

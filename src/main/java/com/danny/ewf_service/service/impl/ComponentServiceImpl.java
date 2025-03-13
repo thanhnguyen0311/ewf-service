@@ -61,4 +61,9 @@ public class ComponentServiceImpl implements ComponentService {
             componentRepository.save(component);
         }
     }
+
+    @Override
+    public Component findComponentById(Long id) {
+        return componentRepository.findComponentById(id);
+    }
 }

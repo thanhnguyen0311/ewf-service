@@ -13,4 +13,6 @@ public interface ComponentService {
     List<Component> findAllComponents();
 
     void linkComponentsToReports();
+
+    Component findComponentById(Long id);
 }

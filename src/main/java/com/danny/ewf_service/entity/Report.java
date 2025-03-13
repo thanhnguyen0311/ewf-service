@@ -25,6 +25,15 @@ public class Report {
     @Column(name="in_transit")
     private Long inTransit = 0L;
 
+    @Column(name="to_ship")
+    private Long toShip = 0L;
+
+    @Column(name="stock_vn")
+    private Long stockVN = 0L;
+
+    @Column(name="in_production")
+    private Long inProduction = 0L;
+
     @Column(name="missing_report")
     private Long missingReport = 0L;
 

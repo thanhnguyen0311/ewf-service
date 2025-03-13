@@ -27,7 +27,7 @@ public class ImportController {
 //            componentsImport.checkSingleProduct();
 //            imagesImport.updateComponentImages();
 //            imagesExport.updateImagesShopifyFromList("houston.csv");
-            componentsImport.importReports();
+//            componentsImport.importReports();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

@@ -26,4 +26,8 @@ public class ComponentInventoryResponseDto {
     private Long onPO = 0L;
     private Long inTransit = 0L;
     private Double rating = 0.0;
+    private Long toShip = 0L;
+    private Long stockVN = 0L;
+    private Long inProduction = 0L;
+    private String stockStatus = "";
 }
