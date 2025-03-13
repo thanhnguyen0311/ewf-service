@@ -4,8 +4,10 @@ import com.danny.ewf_service.converter.IComponentMapper;
 import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
 import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
+import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.repository.inventory.ProductInventorySearching;
@@ -40,6 +42,9 @@ public class InventoryServiceImpl implements InventoryService {
     private final IComponentMapper componentMapper;
 
     @Autowired
+    private final ComponentRepository componentRepository;
+
+    @Autowired
     private final ComponentService componentService;
 
     @Autowired
@@ -72,6 +77,21 @@ public class InventoryServiceImpl implements InventoryService {
     public List<ComponentInventoryResponseDto> findAllComponentsInventory() {
         List<Component> components = componentService.findAllComponents();
         return componentMapper.componentListToComponentInventoryResponseDtoList(components);
+    }
+
+    @Override
+    public ComponentInventoryResponseDto updateComponent(ComponentInventoryRequestDto componentInventoryRequestDto) {
+        Component component = componentService.findComponentById(componentInventoryRequestDto.getId());
+        component.setName(componentInventoryRequestDto.getName());
+        component.setInventory(componentInventoryRequestDto.getInventory());
+        component.setDiscontinue(componentInventoryRequestDto.getDiscontinue());
+        component.getReport().setInProduction(componentInventoryRequestDto.getInProduction());
+        component.getReport().setOnPO(componentInventoryRequestDto.getOnPO());
+        component.getReport().setToShip(componentInventoryRequestDto.getToShip());
+        component.getReport().setInTransit(componentInventoryRequestDto.getInTransit());
+        component.getReport().setStockVN(componentInventoryRequestDto.getStockVN());
+        componentRepository.save(component);
+        return componentMapper.componentToComponentInventoryResponseDto(component);
     }
 
     private Long parseObjectToLong(Object object){
