@@ -30,4 +30,5 @@ public class ComponentInventoryResponseDto {
     private Long stockVN = 0L;
     private Long inProduction = 0L;
     private String stockStatus = "";
+    private String toBeShipped;
 }

@@ -64,4 +64,7 @@ public class Component {
 
     @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductComponent> productComponents = new ArrayList<>();
+
+    @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContainerComponent> containerComponents = new ArrayList<>();
 }

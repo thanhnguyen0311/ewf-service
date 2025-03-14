@@ -3,17 +3,20 @@ package com.danny.ewf_service.service.impl;
 import com.danny.ewf_service.converter.IComponentMapper;
 import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.Configuration;
 import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
 import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.repository.ComponentRepository;
+import com.danny.ewf_service.repository.ConfigurationRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.repository.inventory.ProductInventorySearching;
 import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;
+import org.mapstruct.Context;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -40,6 +43,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Autowired
     private final IComponentMapper componentMapper;
+
+    @Autowired
+    private final ConfigurationRepository configurationRepository;
 
     @Autowired
     private final ComponentRepository componentRepository;
@@ -76,7 +82,12 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public List<ComponentInventoryResponseDto> findAllComponentsInventory() {
         List<Component> components = componentService.findAllComponents();
-        return componentMapper.componentListToComponentInventoryResponseDtoList(components);
+        double toBeShippedRate = Double.parseDouble(configurationRepository.findByName("to_be_shippped_rate").getValue());
+        List<ComponentInventoryResponseDto> componentInventoryResponseDtos = componentMapper.componentListToComponentInventoryResponseDtoList(components);
+        for (ComponentInventoryResponseDto componentInventoryResponseDto : componentInventoryResponseDtos) {
+            componentInventoryResponseDto.setToBeShipped(calculateToBeShipped(componentInventoryResponseDto, toBeShippedRate));
+        }
+        return componentInventoryResponseDtos;
     }
 
     @Override
@@ -91,7 +102,10 @@ public class InventoryServiceImpl implements InventoryService {
         component.getReport().setInTransit(componentInventoryRequestDto.getInTransit());
         component.getReport().setStockVN(componentInventoryRequestDto.getStockVN());
         componentRepository.save(component);
-        return componentMapper.componentToComponentInventoryResponseDto(component);
+        double toBeShippedRate = Double.parseDouble(configurationRepository.findByName("to_be_shippped_rate").getValue());
+        ComponentInventoryResponseDto componentInventoryResponseDto = componentMapper.componentToComponentInventoryResponseDto(component);
+        componentInventoryResponseDto.setToBeShipped(calculateToBeShipped(componentInventoryResponseDto, toBeShippedRate));
+        return componentInventoryResponseDto;
     }
 
     private Long parseObjectToLong(Object object){
@@ -127,5 +141,19 @@ public class InventoryServiceImpl implements InventoryService {
                 pageObject.getSize(),                                          // Page Size
                 pageObject.getTotalElements()                                  // Total Elements
         );
+    }
+
+    private String calculateToBeShipped(ComponentInventoryResponseDto componentInventoryResponseDto, double toBeShippedRate) {
+        double calculatedValue = toBeShippedRate * componentInventoryResponseDto.getReport120Days()
+                - (componentInventoryResponseDto.getInStock()
+                + componentInventoryResponseDto.getToShip()
+                + componentInventoryResponseDto.getInTransit());
+        double additionalNeeded = Math.min(calculatedValue, componentInventoryResponseDto.getInProduction() + componentInventoryResponseDto.getStockVN());
+        long result = Math.round(additionalNeeded);
+        if (additionalNeeded < 0) {
+            return "Dư " + (-result);
+        } else {
+            return "Thiếu " + result;
+        }
     }
 }
