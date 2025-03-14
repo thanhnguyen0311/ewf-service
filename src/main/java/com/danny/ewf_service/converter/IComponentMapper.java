@@ -1,9 +1,11 @@
 package com.danny.ewf_service.converter;
 
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.Configuration;
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ComponentResponseDto;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
