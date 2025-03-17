@@ -36,6 +36,17 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
 
 
     @Query(value = """
+          SELECT p.*, MIN(FLOOR(c.inventory / pc.quantity)) AS inventory
+             FROM product_components pc
+             JOIN components c ON pc.component_id = c.id
+             JOIN products p ON pc.product_id = p.id
+             WHERE c.inventory IS NOT NULL
+             GROUP BY p.id
+             ORDER BY inventory ASC
+         """, nativeQuery = true)
+    List<Object[]> calculateAllProductInventoryByQuantityASC();
+
+    @Query(value = """
             SELECT c.sku 
             FROM product_components pc 
             JOIN components c ON pc.component_id = c.id 

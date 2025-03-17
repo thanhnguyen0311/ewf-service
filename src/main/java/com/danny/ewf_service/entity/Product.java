@@ -44,6 +44,12 @@ public class Product {
     @Column(name = "finish")
     private String finish;
 
+    @Column(name = "shipping")
+    private String shippingMethod;
+
+    @Column(name = "discontinued")
+    private Boolean discontinued;
+
     @Column(name = "title")
     private String title;
 

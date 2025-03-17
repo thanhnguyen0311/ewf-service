@@ -1,16 +1,20 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.LocalProduct;
+import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.repository.LocalRepository;
+import com.danny.ewf_service.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.BufferedReader;
 import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.Optional;
 import java.util.Random;
 
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,110 +27,40 @@ public class SKUGenerator {
     @Autowired
     private final LocalRepository localRepository;
 
+    @Autowired
+    private final ProductRepository productRepository;
 
 
-    public void importSkus(String filePath){
+    public void importSkus() {
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
-        String checkSkuSQL = "SELECT id FROM products WHERE sku = ?";
-        String insertSkuSQL = "INSERT INTO products (sku) VALUES (?)";
-        String insertLocalSQL = "INSERT INTO local (local_sku) VALUES (?)";
-        String updateProductsSQL = "UPDATE products SET local_id = ? WHERE id = ?";
-        String checkLocalSkuSQL = "SELECT COUNT(*) FROM local WHERE local_sku = ?";
-        String generatedLocalSku;
-
-
-
-        try (Workbook workbook = new XSSFWorkbook(filePath);
-             Connection connection = DriverManager.getConnection("","","");
-             PreparedStatement checkStmt = connection.prepareStatement(checkSkuSQL);
-             PreparedStatement checkLocalSkuStmt = connection.prepareStatement(checkLocalSkuSQL);
-             PreparedStatement insertSkuStmt = connection.prepareStatement(insertSkuSQL, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement insertLocalStmt = connection.prepareStatement(insertLocalSQL, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement updateProductsStmt = connection.prepareStatement(updateProductsSQL)) {
-
-            Sheet sheet = workbook.getSheetAt(0); // Get first sheet
+            String line;
             int newSkus = 0;
             int existingSkus = 0;
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+                String productSku = columns[0].trim();
 
-            // Iterate through each row in the first column
-            for (Row row : sheet) {
-                Cell cell = row.getCell(0); // Get first cell of the row
-                if (cell == null) continue;
+                if (productSku.isEmpty()) {
+                    continue;
+                }
 
-                String sku = cell.getStringCellValue().trim(); // Get SKU value from cell
-                if (sku.isEmpty()) continue;
-
-                // Check if SKU already exists
-                checkStmt.setString(1, sku);
-                ResultSet checkResult = checkStmt.executeQuery();
-                if (checkResult.next()) {
-                    // SKU already exists
-                    System.out.println("SKU already exists: " + sku);
+                Optional<Product> optionalProduct = productRepository.findBySku(productSku);
+                if (optionalProduct.isPresent()) {
+                    System.out.println("Existing SKU found: " + productSku);
                     existingSkus++;
-                    continue;
+                } else {
+                    Product product = new Product();
+                    product.setSku(productSku);
+                    LocalProduct localProduct = new LocalProduct();
+                    localProduct.setLocalSku(generateNewSKU(productSku));
+                    product.setLocalProduct(localProduct);
+                    productRepository.save(product);
+                    System.out.println("Inserted new SKU: " + productSku + ", Local SKU: " + localProduct.getLocalSku() );
+                    newSkus++;
                 }
-
-                // SKU not found, insert into products table
-                insertSkuStmt.setString(1, sku);
-                int affectedRows = insertSkuStmt.executeUpdate();
-                if (affectedRows == 0) {
-                    System.err.println("Failed to insert SKU: " + sku);
-                    continue;
-                }
-
-                // Get the newly generated product ID
-                int productId;
-                try (ResultSet generatedKeys = insertSkuStmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        productId = generatedKeys.getInt(1);
-                    } else {
-                        throw new SQLException("Failed to obtain product ID for SKU: " + sku);
-                    }
-                }
-
-                // Generate new local SKU
-                do {
-                    // Generate a new local SKU
-                    generatedLocalSku = generateNewSKU(sku);
-
-                    // Check if it already exists in the local table
-                    checkLocalSkuStmt.setString(1, generatedLocalSku);
-                    try (ResultSet rs = checkLocalSkuStmt.executeQuery()) {
-                        rs.next();
-                        if (rs.getInt(1) == 0) {
-                            break;
-                        }
-                    }
-                } while (true); // Repeat until a unique SKU is found
-
-
-                // Insert new local SKU into local table
-                insertLocalStmt.setString(1, generatedLocalSku);
-                affectedRows = insertLocalStmt.executeUpdate();
-                if (affectedRows == 0) {
-                    System.err.println("Failed to insert local SKU: " + generatedLocalSku);
-                    continue;
-                }
-
-                // Get the newly generated local ID
-                int localId;
-                try (ResultSet generatedKeys = insertLocalStmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        localId = generatedKeys.getInt(1);
-                    } else {
-                        throw new SQLException("Failed to obtain local ID for local SKU: " + generatedLocalSku);
-                    }
-                }
-
-                // Update the products table with the new local ID
-                updateProductsStmt.setInt(1, localId);
-                updateProductsStmt.setInt(2, productId);
-                updateProductsStmt.executeUpdate();
-
-                System.out.println("Inserted new SKU: " + sku + ", Local SKU: " + generatedLocalSku);
-                newSkus++;
             }
-
             // Print summary
             System.out.println("\nImport Summary:");
             System.out.println("New SKUs inserted: " + newSkus);
@@ -138,7 +72,6 @@ public class SKUGenerator {
             e.printStackTrace();
         }
     }
-
 
 
     public String generateNewSKU(String originalSKU) {
