@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface InventoryService {
 
-    PagingResponse<ProductInventoryResponseDto> inventoryProductListByQuantityASC(int page);
+    List<ProductInventoryResponseDto> inventoryProductListByQuantityASC();
 
     PagingResponse<ProductInventoryResponseDto> inventoryProductSearchBySku(int page, String sku);
 

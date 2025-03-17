@@ -5,6 +5,7 @@ import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Configuration;
 import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.entity.ProductWithQuantity;
 import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
 import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
@@ -57,10 +58,17 @@ public class InventoryServiceImpl implements InventoryService {
     private final ProductInventorySearching productInventorySearching;
 
     @Override
-    public PagingResponse<ProductInventoryResponseDto> inventoryProductListByQuantityASC(int page) {
-        Pageable pageable = PageRequest.of(page, 30);
-        Page<Object[]> result = productComponentRepository.calculateProductInventoryByQuantityASC(pageable);
-        return inventoryProductResponse(result);
+    public List<ProductInventoryResponseDto> inventoryProductListByQuantityASC() {
+        List<Object[]> rawResult = productComponentRepository.calculateAllProductInventoryByQuantityASC();
+        List<ProductWithQuantity> productWithQuantities = rawResult.stream()
+                .map(result -> new ProductWithQuantity(
+                        (Product) result[0],          // The entire Product entity
+                        ((Number) result[1]).longValue() // The calculated inventory (quantity)
+                ))
+                .toList();
+
+
+        return new ArrayList<>();
     }
 
     @Override
