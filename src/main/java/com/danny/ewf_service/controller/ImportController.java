@@ -25,13 +25,15 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
+//            String fileName = "hdd.csv";
+//            imagesExport.exportImagesShopifyMain(fileName);
 //            imagesImport.updateProductImages();
 //            imagesExport.exportImagesShopifyMain("ewfmain.csv");
 //            componentsImport.checkSingleProduct();
 //            imagesImport.updateComponentImages();
 //            imagesExport.updateImagesShopifyFromList("houston.csv");
-//            componentsImport.importReports();
-            productsImport.importProductDetails();
+            componentsImport.importDimensions();
+//            productsImport.importProductDetails();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

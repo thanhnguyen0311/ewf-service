@@ -1,6 +1,7 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Product;
 import com.danny.ewf_service.entity.ProductComponent;
 import com.danny.ewf_service.repository.ComponentRepository;
@@ -320,6 +321,53 @@ public class ComponentsImport {
                         component.setDiscontinue(true);
                         componentRepository.save(component);
                         System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + quantity);
+                    }
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + componentSku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
+
+    @Transactional
+    public void importDimensions(){
+        try (InputStream file = getClass().getResourceAsStream("/data/report.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            Set<String> componentSkus = new HashSet<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+                String componentSku = columns[0].trim();  // Column 2: Product SKU
+                double boxLength = Double.parseDouble(columns[1].trim());
+                double boxWidth = Double.parseDouble(columns[2].trim());
+                double boxHeight = Double.parseDouble(columns[3].trim());
+                double boxWeight = Double.parseDouble(columns[4].trim());
+
+                if (componentSku.isEmpty() || componentSkus.contains(componentSku)) {
+                    continue;
+                }
+
+                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025")) componentSku = "DEC-20";
+
+                try {
+                    Component component;
+                    Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
+                    if (optionalComponent.isPresent()) {
+                        component = optionalComponent.get();
+                        Dimension dimension = Dimension.builder()
+                                .boxWeight(boxWeight)
+                                .boxHeight(boxHeight)
+                                .boxLength(boxLength)
+                                .boxWidth(boxWidth)
+                                .build();
+                        component.setDimension(dimension);
+                        componentRepository.save(component);
+                        componentSkus.add(componentSku);
+                        System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + dimension.toString());
                     }
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + componentSku + ": " + e.getMessage());

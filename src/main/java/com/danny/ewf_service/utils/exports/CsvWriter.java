@@ -15,9 +15,11 @@ public class CsvWriter {
 
         // Ensure the directory exists
         File directory = new File(exportDirectoryPath);
+
         if (!directory.exists()) {
             directory.mkdirs();
         }
+
         System.out.println("Start Exporting CSV file");
         try (CSVWriter writer = new CSVWriter(new FileWriter(csvFilePath))) {
             for (String[] row : rows) {
@@ -39,6 +41,7 @@ public class CsvWriter {
             boolean isFirstRow = true;
 
             while ((line = reader.readLine()) != null) {
+
                 if (isFirstRow) {
                     isFirstRow = false;
                     continue;
@@ -56,6 +59,7 @@ public class CsvWriter {
         }
         return skuSet;
     }
+
     public Map<String, String> skuTitleListFromCsv(String csvFilePath){
         Map<String, String> csvMap = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
