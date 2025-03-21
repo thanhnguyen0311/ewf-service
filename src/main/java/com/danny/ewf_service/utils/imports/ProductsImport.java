@@ -93,13 +93,13 @@ public class ProductsImport {
                     continue;
                 }
 
-                Optional<Product> optionalProduct = productRepository.findBySku(productSku);
+                Optional<Product> optionalProduct = productRepository.findBySku(productSku.toUpperCase());
                 Product product;
 
                 if (optionalProduct.isPresent()) {
                     product = optionalProduct.get();
                     ProductWholesales productWholesales = new ProductWholesales();
-                    productWholesales.setWayfair(true);
+                    productWholesales.setEwfdirect(true);
                     product.setWholesales(productWholesales);
                     productRepository.save(product);
                 }

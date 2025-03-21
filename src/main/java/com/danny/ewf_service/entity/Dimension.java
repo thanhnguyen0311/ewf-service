@@ -20,7 +20,7 @@ public class Dimension {
     private String sizeShape;
 
     @Column(name = "quantity_box")
-    private Long quantityBox;
+    private Long quantityBox = 1L;
 
     @Column(name = "box_weight")
     private Double boxWeight;

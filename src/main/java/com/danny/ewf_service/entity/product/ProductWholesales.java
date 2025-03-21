@@ -28,4 +28,7 @@ public class ProductWholesales {
     @Column(name = "overstock")
     private Boolean overstock = false;
 
+    @Column(name = "ewfdirect")
+    private Boolean ewfdirect = false;
+
 }
