@@ -1,5 +1,6 @@
-package com.danny.ewf_service.entity;
+package com.danny.ewf_service.entity.product;
 
+import com.danny.ewf_service.entity.Component;
 import jakarta.persistence.*;
 import lombok.*;
 

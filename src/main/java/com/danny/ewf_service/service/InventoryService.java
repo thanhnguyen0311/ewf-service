@@ -12,7 +12,7 @@ public interface InventoryService {
 
     List<ProductInventoryResponseDto> inventoryProductListByQuantityASC();
 
-    PagingResponse<ProductInventoryResponseDto> inventoryProductSearchBySku(int page, String sku);
+    List<ProductInventoryResponseDto> inventoryProductAll();
 
     Long getInventoryProductCountById(Long id);
 

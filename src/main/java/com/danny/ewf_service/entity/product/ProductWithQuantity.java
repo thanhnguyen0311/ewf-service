@@ -1,4 +1,4 @@
-package com.danny.ewf_service.entity;
+package com.danny.ewf_service.entity.product;
 
 
 import lombok.*;

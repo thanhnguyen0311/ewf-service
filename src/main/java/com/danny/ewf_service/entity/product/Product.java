@@ -1,6 +1,6 @@
-package com.danny.ewf_service.entity;
+package com.danny.ewf_service.entity.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.danny.ewf_service.entity.Price;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,9 +25,6 @@ public class Product {
     @Column(name = "sku")
     private String sku;
 
-    @Column(name="price")
-    private Long price;
-
     @Column(name = "category")
     private String category;
 
@@ -49,6 +46,15 @@ public class Product {
 
     @Column(name = "discontinued")
     private Boolean discontinued;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "wholesales_id", referencedColumnName = "id")
+    private ProductWholesales wholesales = new ProductWholesales();
+
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "price_id", referencedColumnName = "id")
+    private Price price;
 
     @Column(name = "title")
     private String title;

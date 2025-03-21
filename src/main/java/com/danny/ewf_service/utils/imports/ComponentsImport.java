@@ -2,14 +2,16 @@ package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Dimension;
-import com.danny.ewf_service.entity.Product;
-import com.danny.ewf_service.entity.ProductComponent;
+import com.danny.ewf_service.entity.Price;
+import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -117,7 +119,7 @@ public class ComponentsImport {
         }
     }
 
-    private boolean validateHeaderRow(String headerRow, String [] headersRequired) {
+    private boolean validateHeaderRow(String headerRow, String[] headersRequired) {
         String[] headers = headerRow.split(",");
 
         if (headers.length != headersRequired.length) {
@@ -126,7 +128,7 @@ public class ComponentsImport {
 
         for (int i = 0; i < headers.length; i++) {
             if (headers[i].isEmpty() || Objects.equals(headersRequired[i], "")) continue;
-            if (!Objects.equals(headers[i].trim(),headersRequired[i])) {
+            if (!Objects.equals(headers[i].trim(), headersRequired[i])) {
                 return false;
             }
         }
@@ -212,7 +214,7 @@ public class ComponentsImport {
     }
 
     @Transactional
-    public void importComponentsInventory(){
+    public void importComponentsInventory() {
         try (InputStream file = getClass().getResourceAsStream("/data/item_inventory.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
@@ -238,7 +240,8 @@ public class ComponentsImport {
                     continue;
                 }
 
-                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025")) componentSku = "DEC-20";
+                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025"))
+                    componentSku = "DEC-20";
                 if (componentSku.equals("Total Inventory")) return;
                 try {
                     Component component;
@@ -263,7 +266,7 @@ public class ComponentsImport {
         }
     }
 
-    public void checkSingleProduct(){
+    public void checkSingleProduct() {
         List<Component> componentList = componentRepository.findAll();
         Product product;
         for (Component component : componentList) {
@@ -289,7 +292,7 @@ public class ComponentsImport {
         }
     }
 
-    public void importReports(){
+    public void importReports() {
         try (InputStream file = getClass().getResourceAsStream("/data/report.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
@@ -310,7 +313,8 @@ public class ComponentsImport {
                     continue;
                 }
 
-                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025")) componentSku = "DEC-20";
+                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025"))
+                    componentSku = "DEC-20";
 
                 try {
                     Component component;
@@ -333,44 +337,100 @@ public class ComponentsImport {
     }
 
     @Transactional
-    public void importDimensions(){
-        try (InputStream file = getClass().getResourceAsStream("/data/report.csv");
+    public void importDimensions() {
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             Set<String> componentSkus = new HashSet<>();
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
-                String componentSku = columns[0].trim();  // Column 2: Product SKU
-                double boxLength = Double.parseDouble(columns[1].trim());
-                double boxWidth = Double.parseDouble(columns[2].trim());
-                double boxHeight = Double.parseDouble(columns[3].trim());
-                double boxWeight = Double.parseDouble(columns[4].trim());
+                String componentSku = columns[0].trim();
+                long quantityBox = Long.parseLong(columns[1].trim());
 
                 if (componentSku.isEmpty() || componentSkus.contains(componentSku)) {
                     continue;
                 }
 
-                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025")) componentSku = "DEC-20";
+                if (componentSku.equalsIgnoreCase("20-DEC") || componentSku.equals("46011") || componentSku.equals("12/20/2025"))
+                    componentSku = "DEC-20";
 
                 try {
                     Component component;
                     Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
                     if (optionalComponent.isPresent()) {
                         component = optionalComponent.get();
-                        Dimension dimension = Dimension.builder()
-                                .boxWeight(boxWeight)
-                                .boxHeight(boxHeight)
-                                .boxLength(boxLength)
-                                .boxWidth(boxWidth)
-                                .build();
+                        Dimension dimension = component.getDimension();
+                        if (dimension == null) {
+                            dimension = new Dimension();
+                        }
+
+                        dimension.setQuantityBox(quantityBox);
                         component.setDimension(dimension);
                         componentRepository.save(component);
                         componentSkus.add(componentSku);
-                        System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + dimension.toString());
+                        System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + dimension.getQuantityBox());
                     }
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + componentSku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
+
+    @Transactional
+    public void importPrices() {
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            Set<String> componentSkus = new HashSet<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+                String sku = columns[0].trim();
+                double QB1 = Double.parseDouble(columns[1].trim());
+                double QB2 = Double.parseDouble(columns[2].trim());
+                double QB3 = Double.parseDouble(columns[3].trim());
+                double QB4 = Double.parseDouble(columns[4].trim());
+                double QB5 = Double.parseDouble(columns[5].trim());
+                double QB6 = Double.parseDouble(columns[6].trim());
+                double QB7 = Double.parseDouble(columns[7].trim());
+
+                if (sku.isEmpty() || componentSkus.contains(sku)) {
+                    continue;
+                }
+
+                if (sku.equalsIgnoreCase("20-DEC") || sku.equals("46011") || sku.equals("12/20/2025")) sku = "DEC-20";
+
+                try {
+                    Product product;
+                    Component component;
+                    Optional<Component> optionalComponent = componentRepository.findBySku(sku);
+                    if (optionalComponent.isPresent()) {
+                        component = optionalComponent.get();
+                        if (component.getPrice() == null) {
+                            Price price = Price.builder().QB1(QB1).QB2(QB2).QB3(QB3).QB4(QB4).QB5(QB5).QB6(QB6).QB7(QB7).build();
+                            component.setPrice(price);
+                            componentRepository.save(component);
+                            System.out.println("Successfully Updated Component SKU : " + sku + " VALUES : " + price.toString());
+                        }
+                    }
+                    Optional<Product> optionalProduct = productRepository.findBySku(sku);
+                    if (optionalProduct.isPresent()) {
+                        product = optionalProduct.get();
+                        if (product.getPrice() == null) {
+                            Price price = Price.builder().QB1(QB1).QB2(QB2).QB3(QB3).QB4(QB4).QB5(QB5).QB6(QB6).QB7(QB7).build();
+                            product.setPrice(price);
+                            productRepository.save(product);
+                            System.out.println("Successfully Updated Product SKU : " + sku + " VALUES : " + price.toString());
+                        }
+                    }
+                    componentSkus.add(sku);
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
                 }
             }
         } catch (Exception e) {

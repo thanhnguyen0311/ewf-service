@@ -11,7 +11,6 @@ import lombok.*;
 public class ProductSearchResponseDto {
     private Long id;
     private String sku;
-    private Long price;
     private String image;
     private String finish;
 }

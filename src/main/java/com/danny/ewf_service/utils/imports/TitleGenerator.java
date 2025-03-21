@@ -1,13 +1,11 @@
 package com.danny.ewf_service.utils.imports;
 
-import com.danny.ewf_service.entity.LocalProduct;
+import com.danny.ewf_service.entity.product.LocalProduct;
 import com.danny.ewf_service.service.LocalService;
 import com.danny.ewf_service.utils.ImageCheck;
 import com.danny.ewf_service.utils.OpenAIClient;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
 

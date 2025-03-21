@@ -1,5 +1,6 @@
 package com.danny.ewf_service.entity;
 
+import com.danny.ewf_service.entity.product.ProductComponent;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,6 +49,10 @@ public class Component {
 
     @Column(name = "type")
     private String type;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "price_id", referencedColumnName = "id")
+    private Price price;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

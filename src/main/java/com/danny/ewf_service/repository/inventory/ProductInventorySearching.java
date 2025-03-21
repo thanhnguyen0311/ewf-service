@@ -1,6 +1,6 @@
 package com.danny.ewf_service.repository.inventory;
 
-import com.danny.ewf_service.entity.ProductComponent;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ProductInventorySearching extends JpaRepository<ProductComponent, Long> {
@@ -30,4 +29,23 @@ public interface ProductInventorySearching extends JpaRepository<ProductComponen
             p.id DESC""", nativeQuery = true)
     Page<Object[]> productInventorySearchBySku(Pageable pageable, @Param("sku") String sku);
 
+    @Query(value = """
+               SELECT
+                        p.id AS id,
+                        p.sku AS sku,
+                        p.images AS images,
+                        MIN(FLOOR(c.inventory / pc.quantity)) AS quantity,
+                        p.discontinued AS discontinued
+                    FROM
+                        product_components pc
+                    INNER JOIN
+                        components c ON pc.component_id = c.id
+                    INNER JOIN
+                        products p ON pc.product_id = p.id
+                    GROUP BY
+                        p.id, p.sku, p.images, p.discontinued
+                    ORDER BY
+                        p.id DESC
+            """, nativeQuery = true)
+    List<Object[]> productInventoryAll();
 }

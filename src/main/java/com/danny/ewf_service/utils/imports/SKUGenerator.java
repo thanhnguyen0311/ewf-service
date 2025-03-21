@@ -1,7 +1,7 @@
 package com.danny.ewf_service.utils.imports;
 
-import com.danny.ewf_service.entity.LocalProduct;
-import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.entity.product.LocalProduct;
+import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.repository.LocalRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import lombok.AllArgsConstructor;

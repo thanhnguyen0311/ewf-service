@@ -1,7 +1,7 @@
 package com.danny.ewf_service.converter;
 
 import com.danny.ewf_service.entity.ImageUrls;
-import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
@@ -33,7 +33,6 @@ public interface IProductMapper {
     @Named("productToSearchResponse")
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
-    @Mapping(target = "price", source = "product.price")
     @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
     @Mapping(target = "finish", source = "product.finish")
     ProductSearchResponseDto productToProductSearchResponseDto(Product product);
@@ -43,7 +42,6 @@ public interface IProductMapper {
     @Named("productWithDifferentSkuToSearchResponse")
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.localProduct.localSku") // Override the SKU
-    @Mapping(target = "price", source = "product.localProduct.price")
     @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
     @Mapping(target = "finish", source = "product.finish")
     ProductSearchResponseDto productWithDifferentSkuToProductSearchResponseDto(Product product);
@@ -98,8 +96,6 @@ public interface IProductMapper {
                     return imageUrls.getImg().get(0);
                 }
             }
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }

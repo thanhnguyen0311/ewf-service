@@ -17,4 +17,9 @@ public class ProductInventoryResponseDto {
     private Long inTransit;
     private Long ordered;
     private Long pendingOrders;
+    private Boolean discontinued;
+    private Boolean amazon;
+    private Boolean cymax;
+    private Boolean wayfair;
+    private Boolean overstock;
 }

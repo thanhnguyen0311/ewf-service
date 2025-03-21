@@ -1,7 +1,6 @@
 package com.danny.ewf_service.repository;
 
-import com.danny.ewf_service.entity.LocalProduct;
-import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.entity.product.LocalProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
