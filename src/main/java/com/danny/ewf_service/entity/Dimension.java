@@ -10,6 +10,7 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
+@ToString
 public class Dimension {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,5 +18,21 @@ public class Dimension {
 
     @Column(name = "size_shape")
     private String sizeShape;
+
+    @Column(name = "quantity_box")
+    private Long quantityBox = 1L;
+
+    @Column(name = "box_weight")
+    private Double boxWeight;
+
+    @Column(name = "box_height")
+    private Double boxHeight;
+
+    @Column(name = "box_length")
+    private Double boxLength;
+
+    @Column(name = "box_width")
+    private Double boxWidth;
+
 
 }

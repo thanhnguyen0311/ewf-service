@@ -1,15 +1,14 @@
 package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IProductMapper;
-import com.danny.ewf_service.entity.LocalProduct;
-import com.danny.ewf_service.entity.Product;
-import com.danny.ewf_service.entity.ProductComponent;
+import com.danny.ewf_service.entity.product.LocalProduct;
+import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
 import com.danny.ewf_service.repository.LocalRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
-import com.danny.ewf_service.repository.ReportRepository;
 import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.ProductService;

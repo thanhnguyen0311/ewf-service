@@ -32,14 +32,26 @@ public class InventoryController {
         }
     }
 
+    @GetMapping("/products")
+    public ResponseEntity<?> getProductsInventoryAll() {
+        try {
+            List<ComponentInventoryResponseDto> componentInventoryResponseDtos = inventoryService.findAllComponentsInventory();
+            return ResponseEntity.ok(componentInventoryResponseDtos);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Not found");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching product");
+        }
+    }
+
     @PostMapping("/products/search")
     public ResponseEntity<?> findProductInventory(@RequestBody ProductInventorySearchRequestDto productInventorySearchRequestDto) {
         try {
-            PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList =
-                    inventoryService.inventoryProductSearchBySku(
-                            productInventorySearchRequestDto.getPage()-1
-                            ,productInventorySearchRequestDto.getSku());
-            return ResponseEntity.ok(productInventoryResponseDtoList);
+//            PagingResponse<ProductInventoryResponseDto> productInventoryResponseDtoList =
+//                    inventoryService.inventoryProductSearchBySku(
+//                            productInventorySearchRequestDto.getPage()-1
+//                            ,productInventorySearchRequestDto.getSku());
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Not found");
         } catch (Exception e) {

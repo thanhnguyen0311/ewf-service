@@ -1,7 +1,6 @@
 package com.danny.ewf_service.repository;
 
-import com.danny.ewf_service.entity.Product;
-import org.jetbrains.annotations.NotNull;
+import com.danny.ewf_service.entity.product.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +28,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByIdIn(List<Long> ids);
 
     boolean existsBySku(String sku);
+
+    @Query("SELECT p FROM Product p JOIN FETCH p.localProduct JOIN FETCH p.price WHERE p.sku IN :skus")
+    List<Product> findAllBySkuInIgnoreCase(@Param("skus") List<String> skus);
 }

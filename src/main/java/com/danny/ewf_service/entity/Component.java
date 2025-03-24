@@ -1,5 +1,6 @@
 package com.danny.ewf_service.entity;
 
+import com.danny.ewf_service.entity.product.ProductComponent;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,10 +40,6 @@ public class Component {
     @Column(name = "images")
     private String images;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "dimensions_id", referencedColumnName = "id")
-    private Dimension dimensions;
-
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "report_id", referencedColumnName = "id")
     private Report report = new Report();
@@ -53,6 +50,10 @@ public class Component {
     @Column(name = "type")
     private String type;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "price_id", referencedColumnName = "id")
+    private Price price;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -61,6 +62,10 @@ public class Component {
 
     @Column(name = "discontinue")
     private Boolean discontinue;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "dimensions_id", referencedColumnName = "id")
+    private Dimension dimension;
 
     @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductComponent> productComponents = new ArrayList<>();

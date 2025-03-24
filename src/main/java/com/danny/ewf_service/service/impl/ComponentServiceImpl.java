@@ -2,8 +2,8 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IComponentMapper;
 import com.danny.ewf_service.entity.Component;
-import com.danny.ewf_service.entity.Product;
-import com.danny.ewf_service.entity.ProductComponent;
+import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.Report;
 import com.danny.ewf_service.payload.response.ComponentResponseDto;
 import com.danny.ewf_service.repository.ComponentRepository;

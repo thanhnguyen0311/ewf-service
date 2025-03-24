@@ -2,12 +2,11 @@ package com.danny.ewf_service.utils.exports;
 
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.ImageUrls;
-import com.danny.ewf_service.entity.Product;
-import com.danny.ewf_service.entity.ProductComponent;
+import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.ProductService;
-import com.danny.ewf_service.utils.ImageCheck;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -38,7 +37,7 @@ public class ImagesExport {
 
     public void updateImagesShopifyFromList(String filePath) throws JsonProcessingException {
         String[] header = {"Handle", "Title", "Image Src", "Image Position"};
-        String skuExportListPath = "src/main/resources/data/products_export.csv";
+        String skuExportListPath = "src/main/resources/data/report.csv";
         Map<String, String> skuTitleMapping = csvWriter.skuTitleListFromCsv(skuExportListPath);
         List<String[]> rows = new ArrayList<>();
         ImageUrls productImages;
@@ -90,14 +89,16 @@ public class ImagesExport {
     public void exportImagesShopifyMain(String filePath) throws JsonProcessingException {
         List<Product> products = productRepository.findAll();
         String[] header = {"Handle", "Title", "Image Src", "Image Position"};
-        String skuExportListPath = "src/main/resources/data/CUSTOMFIELD_EWFDIRECT.csv";
+        String skuExportListPath = "src/main/resources/data/report.csv";
         Set<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
         List<String[]> rows = new ArrayList<>();
         ImageUrls productImages;
         ImageUrls componentImages;
         rows.add(header);
+
         int imgPos;
         int count = 0;
+
         for (Product product : products) {
             if (product.getLocalProduct().getLocalTitle() == null || product.getLocalProduct().getLocalTitle().isEmpty()) continue;
             if (!skus.contains(product.getSku().toLowerCase())) continue;
@@ -106,7 +107,6 @@ public class ImagesExport {
 
             imgPos = addImagesToRows(product.getSku().toLowerCase(), product.getLocalProduct().getLocalTitle(), productImages, rows, imgPos);
 
-
             List<ProductComponent> components = product.getProductComponents();
             for (ProductComponent productComponent : components) {
                 if (Objects.equals(productComponent.getComponent().getType(), "Single")) {
@@ -114,6 +114,7 @@ public class ImagesExport {
                     imgPos = addImagesToRows(product.getSku().toLowerCase(), "", componentImages, rows, imgPos);
                 }
             }
+
             List<Product> mergedProducts = productService.findMergedProducts(product);
             if (mergedProducts != null) {
                 for (Product mergedProduct : mergedProducts) {

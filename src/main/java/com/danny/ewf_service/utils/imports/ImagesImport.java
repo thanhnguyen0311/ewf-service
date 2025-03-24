@@ -2,7 +2,7 @@ package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.ImageUrls;
-import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.utils.ImageCheck;

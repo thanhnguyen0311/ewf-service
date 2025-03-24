@@ -1,4 +1,4 @@
-package com.danny.ewf_service.entity;
+package com.danny.ewf_service.entity.product; // Changed package name to lowercase "product"
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,6 +25,6 @@ public class LocalProduct {
     private String localSku;
 
     @OneToOne(mappedBy = "localProduct")
-    private Product product;
+    private Product product; // Fully qualified name to resolve ambiguity
 
 }

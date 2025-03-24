@@ -1,7 +1,8 @@
 package com.danny.ewf_service.utils.imports;
 
-import com.danny.ewf_service.entity.LocalProduct;
-import com.danny.ewf_service.entity.Product;
+import com.danny.ewf_service.entity.product.LocalProduct;
+import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.entity.product.ProductWholesales;
 import com.danny.ewf_service.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,39 @@ public class ProductsImport {
             // Print summary
             System.out.println("\nImport Summary:");
             System.out.println("Total SKUs processed: " + (newSkus + existingSkus));
+
+        } catch (Exception e) {
+            System.err.println("Error importing SKUs: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void importProductWholesales(){
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+            String productSku;
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+                productSku = columns[0].trim();
+
+                if (productSku.isEmpty()) {
+                    continue;
+                }
+
+                Optional<Product> optionalProduct = productRepository.findBySku(productSku.toUpperCase());
+                Product product;
+
+                if (optionalProduct.isPresent()) {
+                    product = optionalProduct.get();
+                    ProductWholesales productWholesales = new ProductWholesales();
+                    productWholesales.setEwfdirect(true);
+                    product.setWholesales(productWholesales);
+                    productRepository.save(product);
+                }
+                System.out.println("Saved product sku " + productSku);
+            }
 
         } catch (Exception e) {
             System.err.println("Error importing SKUs: " + e.getMessage());
