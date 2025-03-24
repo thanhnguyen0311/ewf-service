@@ -47,6 +47,18 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
     List<Object[]> calculateAllProductInventoryByQuantityASC();
 
     @Query(value = """
+             SELECT p.sku, p.title, MIN(FLOOR(c.inventory / pc.quantity)) AS inventory
+                FROM product_components pc
+                JOIN components c ON pc.component_id = c.id
+                JOIN products p ON pc.product_id = p.id
+                JOIN product_wholesales w ON p.wholesales_id = w.id  
+                WHERE c.inventory IS NOT NULL
+                    AND w.ewfdirect = TRUE
+                GROUP BY p.id
+            """, nativeQuery = true)
+    List<Object[]> calculateListProductInventoryShopifyEWFDirectByQuantityASC();
+
+    @Query(value = """
             SELECT c.sku 
             FROM product_components pc 
             JOIN components c ON pc.component_id = c.id 

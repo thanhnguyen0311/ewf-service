@@ -3,6 +3,7 @@ package com.danny.ewf_service.utils.exports;
 import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class ShopifyExport {
     @Autowired
     private final ProductRepository productRepository;
 
+    @Autowired
+    private final ProductComponentRepository productComponentRepository;
+
     public void exportShopifyProductsWeight(String filePath) {
         String skuExportListPath = "src/main/resources/data/report.csv";
         Set<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
@@ -35,6 +39,7 @@ public class ShopifyExport {
                 .map(Product::getSku)
                 .collect(Collectors.toSet());
 
+
         List<String> missingSkus = uppercaseSkus.stream()
                 .filter(sku -> !foundSkus.contains(sku))
                 .toList();
@@ -43,7 +48,6 @@ public class ShopifyExport {
         String[] header = {"Handle", "Title", "Variant Grams", "Variant Price"};
         rows.add(header);
         products.forEach(product -> {
-            System.out.println("Processing " + product.getSku());
             if (product.getPrice() == null) return;
             double productWeight = 0;
             double productPrice = product.getPrice().getQB7();
@@ -95,6 +99,34 @@ public class ShopifyExport {
 //            rows.add(new String[]{missingSku});
 //        }
 
+        csvWriter.exportToCsv(rows, filePath);
+    }
+
+    public void exportShopifyProductsInventory(String filePath){
+        List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
+        List<String[]> rows = new ArrayList<>();
+        String[] header = {"Handle", "Title", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Option3 Name", "Option3 Value", "SKU", "HS Code", "COO", "175 Southbelt Industrial Drive"};
+        rows.add(header);
+        System.out.println("Found " + rawResult.size());
+        for (Object[] result : rawResult) {
+            if (result[0] != "" && result[1] != "" && result[2] != "") {
+                rows.add(new String[]{
+                        result[0].toString().toLowerCase(),
+                        result[1].toString(),
+                        "Title",
+                        "Default Title",
+                        "",
+                        "",
+                        "",
+                        "",
+                        result[0].toString(),
+                        "",
+                        "",
+                        result[2].toString(),
+
+                });
+            }
+        }
         csvWriter.exportToCsv(rows, filePath);
     }
 }
