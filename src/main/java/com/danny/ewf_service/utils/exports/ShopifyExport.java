@@ -129,4 +129,21 @@ public class ShopifyExport {
         }
         csvWriter.exportToCsv(rows, filePath);
     }
+
+    public void exportShopifyProductsTrackInventory(String filePath){
+        List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
+        List<String[]> rows = new ArrayList<>();
+        String[] header = {"Handle", "Title", "Variant Inventory Policy"};
+        rows.add(header);
+        for (Object[] result : rawResult) {
+            if (result[0] != "" && result[1] != "") {
+                rows.add(new String[]{
+                        result[0].toString().toLowerCase(),
+                        result[1].toString(),
+                        "deny"
+                });
+            }
+        }
+        csvWriter.exportToCsv(rows, filePath);
+    }
 }

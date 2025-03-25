@@ -21,7 +21,7 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping("/components")
-    public ResponseEntity<?> getProductsInventory() {
+    public ResponseEntity<?> getComponentsInventory() {
         try {
             List<ComponentInventoryResponseDto> componentInventoryResponseDtos = inventoryService.findAllComponentsInventory();
             return ResponseEntity.ok(componentInventoryResponseDtos);

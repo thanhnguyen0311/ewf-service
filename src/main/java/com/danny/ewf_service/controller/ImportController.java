@@ -36,7 +36,7 @@ public class ImportController {
 //            imagesExport.updateImagesShopifyFromList("houston.csv");
 //            componentsImport.importPrices();
 //            productsImport.importProductWholesales();
-//            shopifyExport.exportShopifyProductsInventory(fileName);
+            shopifyExport.exportShopifyProductsTrackInventory(fileName);
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
