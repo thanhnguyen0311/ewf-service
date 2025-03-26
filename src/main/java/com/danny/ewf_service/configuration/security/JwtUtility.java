@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -16,9 +17,11 @@ import java.util.function.Function;
 @Component
 public class JwtUtility {
 
-    private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final SecretKey SECRET_KEY;
 
-
+    public JwtUtility(@Value("${jwt.secret}") String base64Secret) {
+        this.SECRET_KEY = Keys.hmacShaKeyFor(base64Secret.getBytes());
+    }
 
     // Extract username from JWT token
     public String extractUsername(String token) {

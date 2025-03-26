@@ -28,8 +28,6 @@ public interface IProductMapper {
     ProductResponseDto productToProductResponseDto(Product product);
     List<ProductResponseDto> productListToProductResponseDtoList(List<Product> products);
 
-
-
     @Named("productToSearchResponse")
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
@@ -49,9 +47,6 @@ public interface IProductMapper {
     @IterableMapping(qualifiedByName = "productWithDifferentSkuToSearchResponse")
     List<ProductSearchResponseDto> productWithDifferentSkuToProductSearchResponseDtoList(List<Product> products);
 
-
-
-    @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
     ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
@@ -99,7 +94,6 @@ public interface IProductMapper {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return "";
     }
 

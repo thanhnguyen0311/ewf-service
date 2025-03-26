@@ -23,7 +23,6 @@ public class CustomerController {
     @PostMapping("/search")
     public ResponseEntity<List<CustomerSearchDto>> findCustomerByPhone(@RequestBody PhoneNumberRequestDto phoneNumber) {
         try{
-            System.out.println(phoneNumber.getPhoneNumber());
             List<CustomerSearchDto> customers = customerService.findCustomersByPartialPhone(phoneNumber.getPhoneNumber());
             return ResponseEntity.ok(customers);
         } catch (RuntimeException e) {

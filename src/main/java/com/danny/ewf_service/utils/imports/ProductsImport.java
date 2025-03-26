@@ -82,12 +82,16 @@ public class ProductsImport {
     public void importProductWholesales(){
         try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
-
+            int notFound = 0;
             String line;
             String productSku;
+            String upc;
+            String asin;
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
                 productSku = columns[0].trim();
+                upc = columns[1].trim();
+                asin = columns[2].trim();
 
                 if (productSku.isEmpty()) {
                     continue;
@@ -98,13 +102,23 @@ public class ProductsImport {
 
                 if (optionalProduct.isPresent()) {
                     product = optionalProduct.get();
-                    ProductWholesales productWholesales = new ProductWholesales();
-                    productWholesales.setEwfdirect(true);
+                    product.setUpc(upc);
+                    product.setAsin(asin);
+                    ProductWholesales productWholesales = product.getWholesales();
+                    if (productWholesales == null) {
+                        productWholesales = new ProductWholesales();
+                    }
+                    productWholesales.setAmazon(true);
                     product.setWholesales(productWholesales);
                     productRepository.save(product);
+                } else {
+                    System.out.println("Product not found: " + productSku);
+                    notFound++;
                 }
-                System.out.println("Saved product sku " + productSku);
+                System.out.println("Saved product " + productSku);
             }
+
+            System.out.println("Not found " + notFound);
 
         } catch (Exception e) {
             System.err.println("Error importing SKUs: " + e.getMessage());

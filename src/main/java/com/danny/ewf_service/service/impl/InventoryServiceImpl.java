@@ -12,19 +12,18 @@ import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ConfigurationRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
-import com.danny.ewf_service.repository.inventory.ProductInventorySearching;
 import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
+import com.danny.ewf_service.service.auth.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import com.danny.ewf_service.payload.response.PagingResponse;
 
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,25 +34,19 @@ public class InventoryServiceImpl implements InventoryService {
     private final ProductComponentRepository productComponentRepository;
 
     @Autowired
-    private final ProductRepository productRepository;
-
-    @Autowired
-    private final IProductMapper productMapper;
-
-    @Autowired
     private final IComponentMapper componentMapper;
 
     @Autowired
     private final ConfigurationRepository configurationRepository;
 
     @Autowired
+    private final CustomUserDetailsService userDetailsService;
+
+    @Autowired
     private final ComponentRepository componentRepository;
 
     @Autowired
     private final ComponentService componentService;
-
-    @Autowired
-    private final ProductInventorySearching productInventorySearching;
 
     @Override
     public List<ProductInventoryResponseDto> inventoryProductListByQuantityASC() {
@@ -78,8 +71,19 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public List<ProductInventoryResponseDto> inventoryProductAll() {
-        List<Object[]> productIds = productInventorySearching.productInventoryAll();
-        return List.of();
+        List<Object[]> rawResults = productComponentRepository.productInventoryAll();
+
+        return rawResults.parallelStream() // Use parallel processing
+                .map(row -> new ProductInventoryResponseDto(
+                        ((Number) row[0]).longValue(),
+                        (String) row[1],
+                        ((Number) row[2]).longValue(),
+                        (Boolean) row[3],
+                        (Boolean) row[4],
+                        (Boolean) row[5],
+                        (Boolean) row[6],
+                        (Boolean) row[7],
+                        (Boolean) row[8])).toList();
     }
 
     @Override

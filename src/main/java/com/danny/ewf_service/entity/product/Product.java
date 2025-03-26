@@ -62,4 +62,11 @@ public class Product {
     @Column(name = "images")
     private String images;
 
+
+    @Column(name = "upc")
+    private String upc;
+
+    @Column(name = "asin")
+    private String asin;
+
 }

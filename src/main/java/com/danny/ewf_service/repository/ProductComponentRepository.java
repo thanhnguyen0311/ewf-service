@@ -1,6 +1,7 @@
 package com.danny.ewf_service.repository;
 
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.service.impl.ProductServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -100,5 +101,51 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
         LIMIT 1 
     """, nativeQuery = true)
     Optional<ProductServiceImpl.ProductProjection> findProductByExactComponents(@Param("ids") List<Long> ids, @Param("skuCount") int skuCount);
+
+
+    @Query(value = """
+         SELECT
+            p.id AS product_id,
+            MIN(FLOOR(c.inventory / pc.quantity)) AS inventory
+            FROM
+            product_components pc
+            JOIN components c ON pc.component_id = c.id
+            JOIN products p ON pc.product_id = p.id
+            WHERE
+            c.inventory IS NOT NULL AND p.sku LIKE  CONCAT('%', :sku, '%')
+            GROUP BY
+            p.id
+            ORDER BY
+            p.id DESC""", nativeQuery = true)
+    Page<Object[]> productInventorySearchBySku(Pageable pageable, @Param("sku") String sku);
+
+
+    @Query(value = """
+               SELECT
+                        p.id AS id,
+                        p.sku AS sku,
+                        MIN(FLOOR(c.inventory / pc.quantity)) AS quantity,
+                        p.discontinued AS discontinued,
+                        pw.ewfdirect AS ewfdirect,
+                        pw.amazon AS amazon,
+                        pw.cymax as cymax,
+                        pw.overstock as overstock,
+                        pw.wayfair as wayfair
+                    FROM
+                        product_components pc
+                    INNER JOIN
+                        components c ON pc.component_id = c.id
+                    INNER JOIN
+                        products p ON pc.product_id = p.id
+                    INNER JOIN
+                        product_wholesales pw ON p.wholesales_id = pw.id
+                    WHERE p.is_deleted = False
+                    GROUP BY
+                        p.id, p.sku, p.discontinued
+                    ORDER BY
+                        p.id DESC
+            """, nativeQuery = true)
+    List<Object[]> productInventoryAll();
+
 }
 
