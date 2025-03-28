@@ -1,9 +1,11 @@
 package com.danny.ewf_service.utils.imports;
 
-import com.danny.ewf_service.entity.product.LocalProduct;
 import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.opencsv.CSVReader;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,23 +27,35 @@ public class ProductsImport {
 
     public void importProductDetails() {
         try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file));
+             CSVReader csvReader = new CSVReader(reader)) {
 
-            String line;
             String productSku;
-            String shipping;
-            String discontinued;
+            String description;
+            String htmlDescription;
+            String mainCategory;
+            String subCategory;
+            String finish;
+            String sizeShape;
+            String pieces;
+            String collection;
+            String productType;
+            String[] columns;
+
             int newSkus = 0;
             int existingSkus = 0;
-            while ((line = reader.readLine()) != null) {
-                String[] columns = line.split(",");
-                productSku = columns[0].trim();
-                shipping = columns[1].trim();
-                if (columns.length >= 3){
-                    discontinued = columns[2].trim();
-                } else {
-                    discontinued = "";
-                }
+
+            while ((columns = csvReader.readNext()) != null) {
+                productSku = getValueByIndex(columns, 0);
+                description = getValueByIndex(columns, 1);
+                htmlDescription = getValueByIndex(columns, 2);
+                mainCategory = getValueByIndex(columns, 3);
+                subCategory = getValueByIndex(columns, 4);
+                finish = getValueByIndex(columns, 5);
+                sizeShape = getValueByIndex(columns, 6);
+                pieces = getValueByIndex(columns, 7);
+                collection = getValueByIndex(columns, 8);
+                productType = getValueByIndex(columns, 9);
 
 
                 if (productSku.isEmpty()) {
@@ -50,28 +64,50 @@ public class ProductsImport {
 
                 Optional<Product> optionalProduct = productRepository.findBySku(productSku);
                 Product product;
+
                 if (optionalProduct.isPresent()) {
                     product = optionalProduct.get();
                     existingSkus++;
                 } else {
                     product = new Product();
                     product.setSku(productSku);
-                    LocalProduct localProduct = new LocalProduct();
-                    localProduct.setLocalSku(skuGenerator.generateNewSKU(productSku));
-                    product.setLocalProduct(localProduct);
-                    System.out.println("Inserted new SKU: " + productSku + ", Local SKU: " + localProduct.getLocalSku() );
+                    product.setLocalSku(skuGenerator.generateNewSKU(productSku));
+                    System.out.println("Inserted new SKU: " + productSku);
                     newSkus++;
                 }
-                if (!shipping.isEmpty())  product.setShippingMethod(shipping);
-                if (discontinued.equals("Discontinued")) {
-                    product.setDiscontinued(true);
-                }
+
+                ProductDetail productDetail = product.getProductDetail();
+                System.out.println(productDetail);
+                if (productDetail == null) productDetail = new ProductDetail();
+
+                productDetail.setDescription(description);
+
+                productDetail.setHtmlDescription(htmlDescription);
+
+                productDetail.setMainCategory(mainCategory);
+
+                productDetail.setSubCategory(subCategory);
+
+                productDetail.setFinish(finish);
+
+                productDetail.setSizeShape(sizeShape);
+
+                productDetail.setPieces(pieces);
+
+                productDetail.setCollection(collection);
+
+                productDetail.setProductType(productType);
+
+                product.setProductDetail(productDetail);
+
                 productRepository.save(product);
-                System.out.println("Saved product sku " + product.getSku() + " Ship " + product.getShippingMethod() + " " + discontinued );
+
+                System.out.println("Saved product sku " + product.getSku());
             }
             // Print summary
             System.out.println("\nImport Summary:");
             System.out.println("Total SKUs processed: " + (newSkus + existingSkus));
+            System.out.println("Total SKUs new: " + (newSkus));
 
         } catch (Exception e) {
             System.err.println("Error importing SKUs: " + e.getMessage());
@@ -79,19 +115,20 @@ public class ProductsImport {
         }
     }
 
-    public void importProductWholesales(){
+    private String getValueByIndex(String[] array, int index) {
+        return index < array.length ? array[index].trim() : "";
+    }
+
+
+    public void importProductWholesales() {
         try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
             int notFound = 0;
             String line;
             String productSku;
-            String upc;
-            String asin;
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
-                productSku = columns[0].trim();
-                upc = columns[1].trim();
-                asin = columns[2].trim();
+                productSku = columns[0].trim().toUpperCase();
 
                 if (productSku.isEmpty()) {
                     continue;
@@ -102,13 +139,11 @@ public class ProductsImport {
 
                 if (optionalProduct.isPresent()) {
                     product = optionalProduct.get();
-                    product.setUpc(upc);
-                    product.setAsin(asin);
                     ProductWholesales productWholesales = product.getWholesales();
                     if (productWholesales == null) {
                         productWholesales = new ProductWholesales();
                     }
-                    productWholesales.setAmazon(true);
+                    productWholesales.setEwfdirect(true);
                     product.setWholesales(productWholesales);
                     productRepository.save(product);
                 } else {

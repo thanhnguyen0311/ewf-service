@@ -37,8 +37,6 @@ public class Report {
     @Column(name="missing_report")
     private Long missingReport = 0L;
 
-
-
     @Column(name="overstock_report")
     private Long overstockReport = 0L;
 

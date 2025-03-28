@@ -1,12 +1,11 @@
 package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IProductMapper;
-import com.danny.ewf_service.entity.product.LocalProduct;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
-import com.danny.ewf_service.repository.LocalRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.ComponentService;
@@ -30,7 +29,6 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private final SKUGenerator skuGenerator;
 
-    private final LocalRepository localRepository;
 
     private final IProductMapper productMapper;
 
@@ -85,9 +83,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponseDto> findAll() {
+    public List<ProductDetailResponseDto> findAll() {
         List<Product> products = productRepository.findAllProducts();
-        return productMapper.productListToProductResponseDtoList(products);
+        return productMapper.productListToProductDetailResponseDtoList(products);
     }
 
     @Override
@@ -103,13 +101,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void saveProduct(Product product) {
-        if (product.getLocalProduct() == null) {
-            LocalProduct localProduct = new LocalProduct();
-            localProduct.setLocalSku(skuGenerator.generateNewSKU(product.getSku()));
-            localRepository.save(localProduct);
-            System.out.println("\u001B[32m" + "Successfully created Local SKU : " + localProduct.getLocalSku() + "\u001B[0m");
-            product.setLocalProduct(localProduct);
-        }
         productRepository.save(product);
     }
 

@@ -125,12 +125,15 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
                         p.id AS id,
                         p.sku AS sku,
                         MIN(FLOOR(c.inventory / pc.quantity)) AS quantity,
+                        p.asin as asin,
+                        p.upc as upc,
                         p.discontinued AS discontinued,
                         pw.ewfdirect AS ewfdirect,
                         pw.amazon AS amazon,
                         pw.cymax as cymax,
                         pw.overstock as overstock,
-                        pw.wayfair as wayfair
+                        pw.wayfair as wayfair,
+                        p.local_sku as local_sku
                     FROM
                         product_components pc
                     INNER JOIN

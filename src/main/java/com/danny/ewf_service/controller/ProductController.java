@@ -1,5 +1,6 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
 import com.danny.ewf_service.service.ProductService;
@@ -31,9 +32,9 @@ public class ProductController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ProductResponseDto>> getProducts() {
+    public ResponseEntity<?> getProducts() {
         try {
-            List<ProductResponseDto> products = productService.findAll();
+            List<ProductDetailResponseDto> products = productService.findAll();
             if (products.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }

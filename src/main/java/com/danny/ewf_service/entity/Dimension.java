@@ -34,5 +34,12 @@ public class Dimension {
     @Column(name = "box_width")
     private Double boxWidth;
 
+    @Column(name = "width")
+    private Double width;
 
+    @Column(name = "height")
+    private Double height;
+
+    @Column(name = "length")
+    private Double length;
 }

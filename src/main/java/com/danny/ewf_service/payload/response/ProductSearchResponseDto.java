@@ -12,5 +12,4 @@ public class ProductSearchResponseDto {
     private Long id;
     private String sku;
     private String image;
-    private String finish;
 }
