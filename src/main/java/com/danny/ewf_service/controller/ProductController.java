@@ -4,6 +4,7 @@ import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
 import com.danny.ewf_service.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @RequestMapping("/api/product")
 public class ProductController {
 
+    @Autowired
     private final ProductService productService;
 
     public ProductController(ProductService productService) {
@@ -34,7 +36,7 @@ public class ProductController {
     @GetMapping("/all")
     public ResponseEntity<?> getProducts() {
         try {
-            List<ProductDetailResponseDto> products = productService.findAll();
+            List<ProductDetailResponseDto> products = productService.findAllProductsToDtos();
             if (products.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }

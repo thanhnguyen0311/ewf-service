@@ -3,11 +3,7 @@ package com.danny.ewf_service.converter;
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
-import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
-import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
-import com.danny.ewf_service.payload.response.ProductResponseDto;
-import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.danny.ewf_service.payload.response.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mapstruct.IterableMapping;
@@ -17,18 +13,18 @@ import org.mapstruct.Named;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Mapper(componentModel = "spring")
 public interface IProductMapper {
     ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // For JSON parsing
 
-    @Mapping(target = "id", source="product.id")
-    @Mapping(target = "sku", source="product.sku")
-    @Mapping(target = "localSku", source="product.localSku")
-    @Mapping(target = "images", source="product.images", qualifiedByName = "extractImages")
+    @Mapping(target = "id", source = "product.id")
+    @Mapping(target = "sku", source = "product.sku")
+    @Mapping(target = "localSku", source = "product.localSku")
+    @Mapping(target = "images", source = "product.images", qualifiedByName = "extractImages")
     @Mapping(target = "finish", source = "product.productDetail.finish")
     ProductResponseDto productToProductResponseDto(Product product);
+
     List<ProductResponseDto> productListToProductResponseDtoList(List<Product> products);
 
     @Named("productToSearchResponse")
@@ -36,6 +32,7 @@ public interface IProductMapper {
     @Mapping(target = "sku", source = "product.sku")
     @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
     ProductSearchResponseDto productToProductSearchResponseDto(Product product);
+
     @IterableMapping(qualifiedByName = "productToSearchResponse")
     List<ProductSearchResponseDto> productToProductSearchResponseDtoList(List<Product> products);
 
@@ -51,22 +48,35 @@ public interface IProductMapper {
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
     ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
+
     List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
 
 
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
     @Mapping(target = "localSku", source = "product.localSku")
-    @Mapping(target = "image", source = "product.images", qualifiedByName = "extractFirstImage")
+    @Mapping(target = "image", source = "images", qualifiedByName = "extractFirstImage")
     @Mapping(target = "upc", source = "product.upc")
+    @Mapping(target = "order", source = "product.order")
+    @Mapping(target = "category", source = "product.category")
     @Mapping(target = "asin", source = "product.asin")
     @Mapping(target = "title", source = "product.title")
     @Mapping(target = "localTitle", source = "product.localTitle")
-    @Mapping(target = "description", source = "product.productDetail.description")
     @Mapping(target = "shippingMethod", source = "product.shippingMethod")
-    @Mapping(target = "pieces", source = "product.productDetail.pieces")
+    @Mapping(target = "type", source = "product.type")
     @Mapping(target = "discontinued", source = "product.discontinued")
-    @Mapping(target = "components", source = "product.productComponents", qualifiedByName = "listComponents")
+    @Mapping(target = "components", source = "product.components", qualifiedByName = "listComponents")
+    @Mapping(target = "amazon", source = "product.wholesales.amazon")
+    @Mapping(target = "cymax", source = "product.wholesales.cymax")
+    @Mapping(target = "wayfair", source = "product.wholesales.wayfair")
+    @Mapping(target = "ewfdirect", source = "product.wholesales.ewfdirect")
+    @Mapping(target = "overstock", source = "product.wholesales.overstock")
+    @Mapping(target = "description", source = "product.productDetail.description")
+    @Mapping(target = "htmlDescription", source = "product.productDetail.htmlDescription")
+    @Mapping(target = "mainCategory", source = "product.productDetail.mainCategory")
+    @Mapping(target = "subCategory", source = "product.productDetail.subCategory")
+    @Mapping(target = "collection", source = "product.productDetail.collection")
+    @Mapping(target = "pieces", source = "product.productDetail.pieces")
     ProductDetailResponseDto productToProductDetailResponseDto(Product product);
     List<ProductDetailResponseDto> productListToProductDetailResponseDtoList(List<Product> products);
 
@@ -114,10 +124,16 @@ public interface IProductMapper {
     }
 
     @Named("listComponents")
-    default List<Map<String,Long>> listComponents(List<ProductComponent> components) {
-        List<Map<String, Long>> componentList = new ArrayList<>();
-        for (ProductComponent component : components) {
-            componentList.add(Map.of("id", component.getId(), component.getComponent().getSku(), component.getQuantity()));
+    default List<ComponentProductDetailResponseDto> listComponents(List<ProductComponent> components) {
+        List<ComponentProductDetailResponseDto> componentList = new ArrayList<>();
+        for (ProductComponent productComponent : components) {
+            componentList.add(
+                    new ComponentProductDetailResponseDto(
+                            productComponent.getId(),
+                            productComponent.getComponent().getId(),
+                            productComponent.getComponent().getSku(),
+                            productComponent.getQuantity()
+                    ));
         }
         return componentList;
     }

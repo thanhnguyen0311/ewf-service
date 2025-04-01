@@ -100,7 +100,7 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
              WHERE pc2.product_id = p.id) = :skuCount
         LIMIT 1 
     """, nativeQuery = true)
-    Optional<ProductServiceImpl.ProductProjection> findProductByExactComponents(@Param("ids") List<Long> ids, @Param("skuCount") int skuCount);
+    Optional<ProductServiceImpl.ProductMergedProjection> findProductByExactComponents(@Param("ids") List<Long> ids, @Param("skuCount") int skuCount);
 
 
     @Query(value = """

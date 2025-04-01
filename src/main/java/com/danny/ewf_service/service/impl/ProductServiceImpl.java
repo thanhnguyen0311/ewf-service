@@ -2,12 +2,14 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.product.Product;
+import org.springframework.beans.factory.annotation.Qualifier;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.CacheService;
 import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.ProductService;
@@ -15,7 +17,10 @@ import com.danny.ewf_service.utils.imports.SKUGenerator;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,21 +34,24 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private final SKUGenerator skuGenerator;
 
-
     private final IProductMapper productMapper;
 
+    @Autowired
     private final ProductRepository productRepository;
 
     @Autowired
     private final ComponentService componentService;
 
+    @Autowired
     private final ProductComponentRepository productComponentRepository;
 
+    @Autowired
+    private final CacheService cacheService;
 
     @Autowired
     private InventoryService inventoryService;
 
-    public interface ProductProjection {
+    public interface ProductMergedProjection {
         Long getId();
         String getSku();
     }
@@ -83,9 +91,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDetailResponseDto> findAll() {
-        List<Product> products = productRepository.findAllProducts();
+    public List<ProductDetailResponseDto> findAllProductsToDtos() {
+//        List<ProductProjection> products = productRepository.findAllProductDetails();
+//        return productMapper.productProjectionToProductDetailResponseDtoList(products);
+        List<Product> products = cacheService.getAllProducts();
         return productMapper.productListToProductDetailResponseDtoList(products);
+    }
+
+    @Override
+    @Cacheable(value = "productsCache", key = "#productId")
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found: " + productId));
     }
 
     @Override
@@ -97,17 +113,21 @@ public class ProductServiceImpl implements ProductService {
         return productSearchResponseDtoList;
     }
 
-
     @Override
     @Transactional
-    public void saveProduct(Product product) {
-        productRepository.save(product);
+    @CacheEvict(value = "productsCache", key = "#product.id")
+    public Product saveProduct(Product product) {
+        Product updatedProduct = productRepository.save(product);
+
+        cacheService.reloadProductInCache(updatedProduct);
+
+        return updatedProduct;
     }
 
     @Override
     public List<Product> findMergedProducts(Product product) {
 
-        List<ProductComponent> groupComponents = product.getProductComponents().stream()
+        List<ProductComponent> groupComponents = product.getComponents().stream()
                 .filter(pc -> "Group".equalsIgnoreCase(pc.getComponent().getType()))
                 .toList();
         if (groupComponents.size() < 2) {
@@ -120,15 +140,14 @@ public class ProductServiceImpl implements ProductService {
 
             // Check if a product exists for each combination
             for (List<ProductComponent> combination : combinations) {
-                // Extract SKUs of components in the combination
                 List<Long> componentIds = combination.stream()
                         .map(pc -> pc.getComponent().getId())
                         .collect(Collectors.toList());
 
-                Optional<ProductProjection> result = productComponentRepository.findProductByExactComponents(componentIds, componentIds.size());
+                Optional<ProductMergedProjection> result = productComponentRepository.findProductByExactComponents(componentIds, componentIds.size());
 
                 if (result.isPresent()) {
-                    ProductProjection productProjection = result.get();
+                    ProductMergedProjection productProjection = result.get();
 
                     if (productProjection.getSku().equals(product.getSku())) continue;
 

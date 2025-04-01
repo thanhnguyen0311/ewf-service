@@ -51,7 +51,7 @@ public class ShopifyExport {
             double productWeight = 0;
             double productPrice = product.getPrice().getQB7();
             double shippingCost;
-            List<ProductComponent> components = product.getProductComponents();
+            List<ProductComponent> components = product.getComponents();
 
             for (ProductComponent productComponent : components) {
 

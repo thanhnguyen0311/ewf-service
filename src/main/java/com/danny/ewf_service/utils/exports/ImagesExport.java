@@ -53,7 +53,7 @@ public class ImagesExport {
                 productImages = mapper.readValue(product.getImages(), ImageUrls.class);
                 imgPos = addImagesToRows(entry.getKey(), entry.getValue(), productImages, rows, imgPos);
 
-                List<ProductComponent> components = product.getProductComponents();
+                List<ProductComponent> components = product.getComponents();
 
                 for (ProductComponent productComponent : components) {
                     if (Objects.equals(productComponent.getComponent().getType(), "Single")) {
@@ -107,7 +107,7 @@ public class ImagesExport {
 
             imgPos = addImagesToRows(product.getSku().toLowerCase(), product.getLocalTitle(), productImages, rows, imgPos);
 
-            List<ProductComponent> components = product.getProductComponents();
+            List<ProductComponent> components = product.getComponents();
             for (ProductComponent productComponent : components) {
                 if (Objects.equals(productComponent.getComponent().getType(), "Single")) {
                     componentImages = mapper.readValue(productComponent.getComponent().getImages(), ImageUrls.class);

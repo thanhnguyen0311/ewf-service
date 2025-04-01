@@ -11,11 +11,13 @@ public interface ProductService {
 
     ProductResponseDto findBySku(String sku);
 
-    List<ProductDetailResponseDto> findAll();
+    List<ProductDetailResponseDto> findAllProductsToDtos();
+
+    Product getProductById(Long id);
 
     List<ProductSearchResponseDto> getAllProductsSearch();
 
-    void saveProduct(Product product);
+    Product saveProduct(Product product);
 
     List<Product> findMergedProducts(Product product);
 }

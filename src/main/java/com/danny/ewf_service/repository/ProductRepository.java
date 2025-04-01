@@ -15,7 +15,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.sku = :sku")
     Optional<Product> findProductBySku(@Param("sku") String sku);
 
-    @Query("SELECT p FROM Product p JOIN FETCH p.price JOIN FETCH p.productDetail JOIN FETCH p.wholesales JOIN FETCH p.productComponents")
+    @Query("SELECT p FROM Product p " +
+           "LEFT JOIN FETCH p.components " +
+           "LEFT JOIN FETCH p.wholesales " +
+           "LEFT JOIN FETCH p.price " +
+           "LEFT JOIN FETCH p.productDetail")
     List<Product> findAllProducts();
 
     Optional<Product> findBySkuIgnoreCase(String sku);
@@ -30,4 +34,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p JOIN FETCH p.price WHERE p.sku IN :skus")
     List<Product> findAllBySkuInIgnoreCase(@Param("skus") List<String> skus);
+
+
 }

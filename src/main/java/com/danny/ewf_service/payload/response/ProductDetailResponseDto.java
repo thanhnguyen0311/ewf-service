@@ -16,15 +16,30 @@ public class ProductDetailResponseDto {
     private Long id;
     private String sku;
     private String localSku;
-    private String image;
     private String upc;
     private String asin;
     private String title;
+    private String image;
     private String localTitle;
     private String description;
+    private String htmlDescription;
     private String type;
+    private String collection;
     private String shippingMethod;
-    private Boolean discontinued;
+    private Boolean discontinued = false;
     private String pieces;
-    private List<Map<String, Long>> components;
+    private String order;
+    private String category;
+    private String mainCategory;
+    private String subCategory;
+    private List<ComponentProductDetailResponseDto> components;
+    private Boolean amazon = false;
+    private Boolean cymax = false;
+    private Boolean overstock = false;
+    private Boolean wayfair = false;
+    private Boolean ewfdirect = false;
+    private Boolean houstondirect = false;
+    private Boolean ewfmain = false;
+
 }
+

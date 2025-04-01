@@ -25,14 +25,23 @@ public class Product {
     @Column(name = "sku")
     private String sku;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductComponent> productComponents = new ArrayList<>();
+    @Column(name = "type")
+    private String type;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ProductComponent> components = new ArrayList<>();
 
     @Column(name = "shipping")
     private String shippingMethod;
 
     @Column(name = "local_title")
     private String localTitle;
+
+    @Column(name = "cat")
+    private String category;
+
+    @Column(name = "order")
+    private String order;
 
     @Column(name = "local_sku")
     private String localSku;
