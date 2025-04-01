@@ -12,14 +12,13 @@ public class ProductInventoryResponseDto {
     private Long id;
     private String sku;
     private Long quantity;
-    private String image;
-    private Long inProduction;
-    private Long inTransit;
-    private Long ordered;
-    private Long pendingOrders;
+    private String asin;
+    private String upc;
     private Boolean discontinued;
+    private Boolean ewfdirect;
     private Boolean amazon;
     private Boolean cymax;
-    private Boolean wayfair;
     private Boolean overstock;
+    private Boolean wayfair;
+    private String localSku;
 }

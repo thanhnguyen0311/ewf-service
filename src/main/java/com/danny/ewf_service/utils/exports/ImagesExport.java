@@ -53,7 +53,7 @@ public class ImagesExport {
                 productImages = mapper.readValue(product.getImages(), ImageUrls.class);
                 imgPos = addImagesToRows(entry.getKey(), entry.getValue(), productImages, rows, imgPos);
 
-                List<ProductComponent> components = product.getProductComponents();
+                List<ProductComponent> components = product.getComponents();
 
                 for (ProductComponent productComponent : components) {
                     if (Objects.equals(productComponent.getComponent().getType(), "Single")) {
@@ -100,14 +100,14 @@ public class ImagesExport {
         int count = 0;
 
         for (Product product : products) {
-            if (product.getLocalProduct().getLocalTitle() == null || product.getLocalProduct().getLocalTitle().isEmpty()) continue;
+            if (product.getLocalTitle() == null || product.getLocalTitle().isEmpty()) continue;
             if (!skus.contains(product.getSku().toLowerCase())) continue;
             imgPos = 1;
             productImages = mapper.readValue(product.getImages(), ImageUrls.class);
 
-            imgPos = addImagesToRows(product.getSku().toLowerCase(), product.getLocalProduct().getLocalTitle(), productImages, rows, imgPos);
+            imgPos = addImagesToRows(product.getSku().toLowerCase(), product.getLocalTitle(), productImages, rows, imgPos);
 
-            List<ProductComponent> components = product.getProductComponents();
+            List<ProductComponent> components = product.getComponents();
             for (ProductComponent productComponent : components) {
                 if (Objects.equals(productComponent.getComponent().getType(), "Single")) {
                     componentImages = mapper.readValue(productComponent.getComponent().getImages(), ImageUrls.class);

@@ -33,7 +33,7 @@ public class ComponentServiceImpl implements ComponentService {
     @Override
     public List<ComponentResponseDto> findComponents(Product product) {
         List<ComponentResponseDto> componentResponseDtos = new ArrayList<>();
-        List<ProductComponent> productComponents = product.getProductComponents();
+        List<ProductComponent> productComponents = product.getComponents();
         if (productComponents != null) {
             for (ProductComponent productComponent : productComponents) {
                 if (Objects.equals(productComponent.getComponent().getSku(), product.getSku())) continue;

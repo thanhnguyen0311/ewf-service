@@ -343,10 +343,18 @@ public class ComponentsImport {
 
             Set<String> componentSkus = new HashSet<>();
             String line;
+
             while ((line = reader.readLine()) != null) {
+
                 String[] columns = line.split(",");
+                if (columns.length < 4) {
+                    continue;
+                }
+
                 String componentSku = columns[0].trim();
-                long quantityBox = Long.parseLong(columns[1].trim());
+                double length = Double.parseDouble(columns[1].trim());
+                double width = Double.parseDouble(columns[2].trim());
+                double height = Double.parseDouble(columns[3].trim());
 
                 if (componentSku.isEmpty() || componentSkus.contains(componentSku)) {
                     continue;
@@ -360,17 +368,29 @@ public class ComponentsImport {
                     Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
                     if (optionalComponent.isPresent()) {
                         component = optionalComponent.get();
-                        Dimension dimension = component.getDimension();
-                        if (dimension == null) {
-                            dimension = new Dimension();
-                        }
 
-                        dimension.setQuantityBox(quantityBox);
-                        component.setDimension(dimension);
-                        componentRepository.save(component);
-                        componentSkus.add(componentSku);
-                        System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + dimension.getQuantityBox());
+
+                    } else {
+                        component = new Component();
+                        component.setSku(componentSku);
                     }
+
+                    Dimension dimension = component.getDimension();
+
+                    if (dimension == null) {
+                        dimension = new Dimension();
+                    }
+
+                    dimension.setHeight(height);
+                    dimension.setWidth(width);
+                    dimension.setLength(length);
+
+                    component.setDimension(dimension);
+                    componentRepository.save(component);
+                    componentSkus.add(componentSku);
+                    System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + dimension.getQuantityBox());
+
+
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + componentSku + ": " + e.getMessage());
                 }

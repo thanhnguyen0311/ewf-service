@@ -2,14 +2,15 @@ package com.danny.ewf_service.payload.response;
 
 import lombok.*;
 
+@Data
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
-@Setter
 @Getter
-@ToString
-public class ProductSearchResponseDto {
+@Setter
+@NoArgsConstructor
+public class ComponentProductDetailResponseDto{
     private Long id;
+    private Long componentId;
     private String sku;
-    private String image;
+    private Long quantity;
 }

@@ -39,7 +39,6 @@ public class ShopifyExport {
                 .map(Product::getSku)
                 .collect(Collectors.toSet());
 
-
         List<String> missingSkus = uppercaseSkus.stream()
                 .filter(sku -> !foundSkus.contains(sku))
                 .toList();
@@ -52,36 +51,46 @@ public class ShopifyExport {
             double productWeight = 0;
             double productPrice = product.getPrice().getQB7();
             double shippingCost;
-            List<ProductComponent> components = product.getProductComponents();
+            List<ProductComponent> components = product.getComponents();
+
             for (ProductComponent productComponent : components) {
+
                 Dimension dimension = productComponent.getComponent().getDimension();
                 long quantityBox;
+
                 if (dimension != null) {
+
                     quantityBox = productComponent.getComponent().getDimension().getQuantityBox();
+
                     double componentWeight = (dimension.getBoxLength() * dimension.getBoxWidth() * dimension.getBoxHeight()) / 139;
+
                     if (componentWeight < dimension.getBoxWeight()) {
                         componentWeight = dimension.getBoxWeight();
                     }
+
                     if (componentWeight <= 30) {
-                        shippingCost = 25;
+                        shippingCost = 20;
                     } else if (componentWeight <= 40) {
-                        shippingCost = 30;
+                        shippingCost = 25;
                     } else if (componentWeight <= 50) {
-                        shippingCost = 40;
+                        shippingCost = 35;
                     } else if (componentWeight <= 60) {
-                        shippingCost = 50;
+                        shippingCost = 45;
                     } else if (componentWeight <= 70) {
-                        shippingCost = 60;
+                        shippingCost = 65;
                     } else if (componentWeight <= 80) {
                         shippingCost = 70;
+                    } else if (componentWeight <= 100) {
+                        shippingCost = 85;
                     } else {
-                        shippingCost = 80;
+                        shippingCost = 100;
                     }
+
                     productPrice = productPrice + shippingCost*((double) productComponent.getQuantity()/quantityBox);
                     productWeight = productWeight + componentWeight * ((double) productComponent.getQuantity()/quantityBox);
                 }
                 if (productWeight == 0.0) {
-                    productPrice = productPrice * 1.3;
+                    productPrice = productPrice * 1.25;
                 }
             }
 
@@ -124,6 +133,23 @@ public class ShopifyExport {
                         "",
                         result[2].toString(),
 
+                });
+            }
+        }
+        csvWriter.exportToCsv(rows, filePath);
+    }
+
+    public void exportShopifyProductsTrackInventory(String filePath){
+        List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
+        List<String[]> rows = new ArrayList<>();
+        String[] header = {"Handle", "Title", "Variant Inventory Policy"};
+        rows.add(header);
+        for (Object[] result : rawResult) {
+            if (result[0] != "" && result[1] != "") {
+                rows.add(new String[]{
+                        result[0].toString().toLowerCase(),
+                        result[1].toString(),
+                        "deny"
                 });
             }
         }

@@ -6,7 +6,6 @@ import com.danny.ewf_service.utils.exports.ShopifyExport;
 import com.danny.ewf_service.utils.imports.ComponentsImport;
 import com.danny.ewf_service.utils.imports.ImagesImport;
 import com.danny.ewf_service.utils.imports.ProductsImport;
-import com.danny.ewf_service.utils.imports.SKUGenerator;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +33,9 @@ public class ImportController {
 //            componentsImport.checkSingleProduct();
 //            imagesImport.updateComponentImages();
 //            imagesExport.updateImagesShopifyFromList("houston.csv");
-//            componentsImport.importPrices();
-//            productsImport.importProductWholesales();
-//            shopifyExport.exportShopifyProductsInventory(fileName);
+            componentsImport.importDimensions();
+//            productsImport.importProductDetails();
+//            shopifyExport.exportShopifyProductsWeight(fileName);
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

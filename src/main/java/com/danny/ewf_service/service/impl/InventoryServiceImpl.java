@@ -1,7 +1,6 @@
 package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IComponentMapper;
-import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductWithQuantity;
@@ -11,21 +10,16 @@ import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ConfigurationRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
-import com.danny.ewf_service.repository.ProductRepository;
-import com.danny.ewf_service.repository.inventory.ProductInventorySearching;
 import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
+import com.danny.ewf_service.service.auth.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import com.danny.ewf_service.payload.response.PagingResponse;
 
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -35,25 +29,19 @@ public class InventoryServiceImpl implements InventoryService {
     private final ProductComponentRepository productComponentRepository;
 
     @Autowired
-    private final ProductRepository productRepository;
-
-    @Autowired
-    private final IProductMapper productMapper;
-
-    @Autowired
     private final IComponentMapper componentMapper;
 
     @Autowired
     private final ConfigurationRepository configurationRepository;
 
     @Autowired
+    private final CustomUserDetailsService userDetailsService;
+
+    @Autowired
     private final ComponentRepository componentRepository;
 
     @Autowired
     private final ComponentService componentService;
-
-    @Autowired
-    private final ProductInventorySearching productInventorySearching;
 
     @Override
     public List<ProductInventoryResponseDto> inventoryProductListByQuantityASC() {
@@ -64,7 +52,6 @@ public class InventoryServiceImpl implements InventoryService {
                         ((Number) result[1]).longValue() // The calculated inventory (quantity)
                 ))
                 .toList();
-
 
         return new ArrayList<>();
     }
@@ -78,8 +65,22 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public List<ProductInventoryResponseDto> inventoryProductAll() {
-        List<Object[]> productIds = productInventorySearching.productInventoryAll();
-        return List.of();
+        List<Object[]> rawResults = productComponentRepository.productInventoryAll();
+
+        return rawResults.parallelStream() // Use parallel processing
+                .map(row -> new ProductInventoryResponseDto(
+                        ((Number) row[0]).longValue(),  // id
+                        (String) row[1],                // sku
+                        ((Number) row[2]).longValue(),  // quantity
+                        (String) row[3],                // asin
+                        (String) row[4],                // upc
+                        (Boolean) row[5],               // discontinued
+                        (Boolean) row[6],               // ewfdirect
+                        (Boolean) row[7],               // amazon
+                        (Boolean) row[8],               // cymax
+                        (Boolean) row[9],               // overstock
+                        (Boolean) row[10],              // wayfair
+                        (String) row[11])).toList();    // localSku
     }
 
     @Override
@@ -120,7 +121,7 @@ public class InventoryServiceImpl implements InventoryService {
         return componentInventoryResponseDto;
     }
 
-    private Long parseObjectToLong(Object object){
+    private Long parseObjectToLong(Object object) {
         return Long.parseLong(String.valueOf(object));
     }
 
@@ -157,9 +158,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     private String calculateToBeShipped(ComponentInventoryResponseDto componentInventoryResponseDto, double toBeShippedRate) {
         double calculatedValue = toBeShippedRate * componentInventoryResponseDto.getReport120Days()
-                - (componentInventoryResponseDto.getInStock()
-                + componentInventoryResponseDto.getToShip()
-                + componentInventoryResponseDto.getInTransit());
+                                 - (componentInventoryResponseDto.getInStock()
+                                    + componentInventoryResponseDto.getToShip()
+                                    + componentInventoryResponseDto.getInTransit());
         double additionalNeeded = Math.min(calculatedValue, componentInventoryResponseDto.getInProduction() + componentInventoryResponseDto.getStockVN());
         long result = Math.round(additionalNeeded);
         if (additionalNeeded < 0) {

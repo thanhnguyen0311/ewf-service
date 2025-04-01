@@ -21,7 +21,7 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping("/components")
-    public ResponseEntity<?> getProductsInventory() {
+    public ResponseEntity<?> getComponentsInventory() {
         try {
             List<ComponentInventoryResponseDto> componentInventoryResponseDtos = inventoryService.findAllComponentsInventory();
             return ResponseEntity.ok(componentInventoryResponseDtos);
@@ -35,8 +35,8 @@ public class InventoryController {
     @GetMapping("/products")
     public ResponseEntity<?> getProductsInventoryAll() {
         try {
-            List<ComponentInventoryResponseDto> componentInventoryResponseDtos = inventoryService.findAllComponentsInventory();
-            return ResponseEntity.ok(componentInventoryResponseDtos);
+            List<ProductInventoryResponseDto> productInventoryResponseDtos = inventoryService.inventoryProductAll();
+            return ResponseEntity.ok(productInventoryResponseDtos);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Not found");
         } catch (Exception e) {

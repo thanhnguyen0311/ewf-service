@@ -14,11 +14,9 @@ public interface ComponentRepository extends JpaRepository<Component, Long> {
 
     Optional<Component> findBySku(String sku);
 
-    @Query("SELECT c FROM Component c JOIN FETCH c.report")
+    @Query("SELECT c FROM Component c JOIN FETCH c.report JOIN FETCH c.price JOIN FETCH c.dimension")
     List<Component> findAllComponents();
 
     @Query("SELECT c FROM Component c JOIN FETCH c.report WHERE c.id = :id")
     Component findComponentById(@Param("id") Long id);
-
-
 }
