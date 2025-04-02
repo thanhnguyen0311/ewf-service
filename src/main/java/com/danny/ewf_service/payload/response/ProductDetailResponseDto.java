@@ -19,7 +19,6 @@ public class ProductDetailResponseDto {
     private String upc;
     private String asin;
     private String title;
-    private String image;
     private String localTitle;
     private String description;
     private String htmlDescription;

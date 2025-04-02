@@ -31,15 +31,29 @@ public class ProductsImport {
              CSVReader csvReader = new CSVReader(reader)) {
 
             String productSku;
-            String description;
-            String htmlDescription;
-            String mainCategory;
-            String subCategory;
-            String finish;
-            String sizeShape;
-            String pieces;
-            String collection;
-            String productType;
+            String cat;
+            String cat2;
+            String item1sku;
+            String item2sku;
+            String item3sku;
+            String item3box;
+            String item3pcs;
+
+            String item4sku;
+            String item4box;
+            String item4pcs;
+
+            String item5sku;
+            String item5box;
+            String item5pcs;
+
+            String item6sku;
+            String item6box;
+            String item6pcs;
+
+            String item7sku;
+            String item7box;
+            String item7pcs;
             String[] columns;
 
             int newSkus = 0;
@@ -47,16 +61,25 @@ public class ProductsImport {
 
             while ((columns = csvReader.readNext()) != null) {
                 productSku = getValueByIndex(columns, 0);
-                description = getValueByIndex(columns, 1);
-                htmlDescription = getValueByIndex(columns, 2);
-                mainCategory = getValueByIndex(columns, 3);
-                subCategory = getValueByIndex(columns, 4);
-                finish = getValueByIndex(columns, 5);
-                sizeShape = getValueByIndex(columns, 6);
-                pieces = getValueByIndex(columns, 7);
-                collection = getValueByIndex(columns, 8);
-                productType = getValueByIndex(columns, 9);
-
+                cat = getValueByIndex(columns, 1);
+                cat2 = getValueByIndex(columns, 2);
+                item1sku = getValueByIndex(columns, 3);
+                item2sku = getValueByIndex(columns, 4);
+                item3sku = getValueByIndex(columns, 5);
+                item3box = getValueByIndex(columns, 6);
+                item3pcs = getValueByIndex(columns, 7);
+                item4sku = getValueByIndex(columns, 8);
+                item4box = getValueByIndex(columns, 9);
+                item4pcs = getValueByIndex(columns, 10);
+                item5sku = getValueByIndex(columns, 11);
+                item5box = getValueByIndex(columns, 12);
+                item5pcs = getValueByIndex(columns, 13);
+                item6sku = getValueByIndex(columns, 14);
+                item6box = getValueByIndex(columns, 15);
+                item6pcs = getValueByIndex(columns, 16);
+                item7sku = getValueByIndex(columns, 17);
+                item7box = getValueByIndex(columns, 18);
+                item7pcs = getValueByIndex(columns, 19);
 
                 if (productSku.isEmpty()) {
                     continue;
