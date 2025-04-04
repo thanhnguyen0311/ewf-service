@@ -26,16 +26,16 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String fileName = "ewfdirect.csv";
+            String fileName = "ewfdirect_price.csv";
 //            imagesExport.exportImagesShopifyMain(fileName);
 //            imagesImport.updateProductImages();
 //            imagesExport.exportImagesShopifyMain("ewfmain.csv");
 //            componentsImport.checkSingleProduct();
 //            imagesImport.updateComponentImages();
 //            imagesExport.updateImagesShopifyFromList("houston.csv");
-            componentsImport.importDimensions();
-//            productsImport.importProductDetails();
-//            shopifyExport.exportShopifyProductsWeight(fileName);
+//            componentsImport.importDimensions();
+//            productsImport.importProductWholesales();
+            shopifyExport.exportShopifyProductsWeight(fileName);
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

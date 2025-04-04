@@ -4,7 +4,6 @@ import com.danny.ewf_service.entity.Price;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -29,7 +28,7 @@ public class Product {
     private String type;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<ProductComponent> components = new ArrayList<>();
+    private List<ProductComponent> components;
 
     @Column(name = "shipping")
     private String shippingMethod;
@@ -40,7 +39,10 @@ public class Product {
     @Column(name = "cat")
     private String category;
 
-    @Column(name = "order")
+    @Column(name = "cat2")
+    private String category2;
+
+    @Column(name = "`order`")
     private String order;
 
     @Column(name = "local_sku")
@@ -51,7 +53,7 @@ public class Product {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "wholesales_id", referencedColumnName = "id")
-    private ProductWholesales wholesales = new ProductWholesales();
+    private ProductWholesales wholesales;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "price_id", referencedColumnName = "id")

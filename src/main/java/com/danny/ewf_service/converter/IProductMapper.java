@@ -24,7 +24,6 @@ public interface IProductMapper {
     @Mapping(target = "images", source = "product.images", qualifiedByName = "extractImages")
     @Mapping(target = "finish", source = "product.productDetail.finish")
     ProductResponseDto productToProductResponseDto(Product product);
-
     List<ProductResponseDto> productListToProductResponseDtoList(List<Product> products);
 
     @Named("productToSearchResponse")
@@ -55,7 +54,6 @@ public interface IProductMapper {
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
     @Mapping(target = "localSku", source = "product.localSku")
-    @Mapping(target = "image", source = "images", qualifiedByName = "extractFirstImage")
     @Mapping(target = "upc", source = "product.upc")
     @Mapping(target = "order", source = "product.order")
     @Mapping(target = "category", source = "product.category")

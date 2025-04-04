@@ -8,6 +8,7 @@ import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping("/components")
+    @PreAuthorize("hasAuthority('VIEW_INVENTORY')")
     public ResponseEntity<?> getComponentsInventory() {
         try {
             List<ComponentInventoryResponseDto> componentInventoryResponseDtos = inventoryService.findAllComponentsInventory();

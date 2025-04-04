@@ -72,4 +72,7 @@ public class Component {
 
     @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContainerComponent> containerComponents = new ArrayList<>();
+
+    @Column(name = "pos")
+    private Long pos;
 }
