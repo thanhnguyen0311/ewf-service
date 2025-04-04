@@ -35,11 +35,11 @@ public class Role {
     @ToString.Exclude
     private Set<User> users;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "role_permission",
             joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permissionId")
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions;
 

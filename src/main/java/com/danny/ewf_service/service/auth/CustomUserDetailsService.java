@@ -1,11 +1,12 @@
 package com.danny.ewf_service.service.auth;
 
+import com.danny.ewf_service.entity.auth.Permission;
 import com.danny.ewf_service.entity.auth.User;
 import com.danny.ewf_service.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -27,6 +30,18 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getSlug().toUpperCase()));
+
+        if (user.getRole().getPermissions() != null) {
+            for (Permission permission : user.getRole().getPermissions()) {
+                authorities.add(new SimpleGrantedAuthority(permission.getSlug()));
+            }
+        }
+        System.out.println(authorities);
+
+
         return new CustomUserDetails(
                 username,
                 user.getPasswordHash(),
@@ -34,11 +49,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 true,
                 true,
                 true,
-                List.of(new SimpleGrantedAuthority(String.valueOf(user.getRole().getSlug()))), // Authorities can be added later if needed
+                authorities, // Authorities can be added later if needed
                 user.getId(),
                 user.getFirstName(),
-                user.getLastName(),
-                String.valueOf(user.getRole().getSlug())
+                user.getLastName()
         );
     }
 

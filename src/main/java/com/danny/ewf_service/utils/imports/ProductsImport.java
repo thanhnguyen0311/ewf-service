@@ -1,8 +1,11 @@
 package com.danny.ewf_service.utils.imports;
 
+import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.product.Product;
-import com.danny.ewf_service.entity.product.ProductDetail;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.product.ProductWholesales;
+import com.danny.ewf_service.repository.ComponentRepository;
+import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.opencsv.CSVReader;
 import jakarta.transaction.Transactional;
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -23,8 +28,15 @@ public class ProductsImport {
     @Autowired
     private final ProductRepository productRepository;
 
+    @Autowired
+    private final ProductComponentRepository productComponentRepository;
+
+    @Autowired
+    private final ComponentRepository componentRepository;
+
     private final SKUGenerator skuGenerator;
 
+    @Transactional
     public void importProductDetails() {
         try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file));
@@ -35,25 +47,6 @@ public class ProductsImport {
             String cat2;
             String item1sku;
             String item2sku;
-            String item3sku;
-            String item3box;
-            String item3pcs;
-
-            String item4sku;
-            String item4box;
-            String item4pcs;
-
-            String item5sku;
-            String item5box;
-            String item5pcs;
-
-            String item6sku;
-            String item6box;
-            String item6pcs;
-
-            String item7sku;
-            String item7box;
-            String item7pcs;
             String[] columns;
 
             int newSkus = 0;
@@ -63,23 +56,6 @@ public class ProductsImport {
                 productSku = getValueByIndex(columns, 0);
                 cat = getValueByIndex(columns, 1);
                 cat2 = getValueByIndex(columns, 2);
-                item1sku = getValueByIndex(columns, 3);
-                item2sku = getValueByIndex(columns, 4);
-                item3sku = getValueByIndex(columns, 5);
-                item3box = getValueByIndex(columns, 6);
-                item3pcs = getValueByIndex(columns, 7);
-                item4sku = getValueByIndex(columns, 8);
-                item4box = getValueByIndex(columns, 9);
-                item4pcs = getValueByIndex(columns, 10);
-                item5sku = getValueByIndex(columns, 11);
-                item5box = getValueByIndex(columns, 12);
-                item5pcs = getValueByIndex(columns, 13);
-                item6sku = getValueByIndex(columns, 14);
-                item6box = getValueByIndex(columns, 15);
-                item6pcs = getValueByIndex(columns, 16);
-                item7sku = getValueByIndex(columns, 17);
-                item7box = getValueByIndex(columns, 18);
-                item7pcs = getValueByIndex(columns, 19);
 
                 if (productSku.isEmpty()) {
                     continue;
@@ -88,6 +64,8 @@ public class ProductsImport {
                 Optional<Product> optionalProduct = productRepository.findBySku(productSku);
                 Product product;
 
+                long pos = 1;
+
                 if (optionalProduct.isPresent()) {
                     product = optionalProduct.get();
                     existingSkus++;
@@ -95,43 +73,93 @@ public class ProductsImport {
                     product = new Product();
                     product.setSku(productSku);
                     product.setLocalSku(skuGenerator.generateNewSKU(productSku));
+                    productRepository.save(product);
                     System.out.println("Inserted new SKU: " + productSku);
                     newSkus++;
                 }
 
-                ProductDetail productDetail = product.getProductDetail();
-                System.out.println(productDetail);
-                if (productDetail == null) productDetail = new ProductDetail();
+                if (!cat.isEmpty()) {
+                    product.setCategory(cat);
+                }
 
-                productDetail.setDescription(description);
+                if (!cat2.isEmpty()) {
+                    product.setCategory2(cat2);
+                }
 
-                productDetail.setHtmlDescription(htmlDescription);
+                List<ProductComponent> productComponentList = product.getComponents();
+                if (productComponentList == null) {
+                    productComponentList = new ArrayList<>();
+                }
+                if (!productComponentList.isEmpty()) {
+                    continue;
+                }
 
-                productDetail.setMainCategory(mainCategory);
+                item1sku = getValueByIndex(columns, 3);
+                item2sku = getValueByIndex(columns, 4);
 
-                productDetail.setSubCategory(subCategory);
+                if (!item1sku.isEmpty()) {
+                    Optional<Component> optionalComponent = componentRepository.findBySku(item1sku);
+                    if (optionalComponent.isPresent()) {
+                        Component component = optionalComponent.get();
+                        ProductComponent productComponent = new ProductComponent();
+                        productComponent.setProduct(product);
+                        productComponent.setComponent(component);
+                        productComponent.setQuantity(1L);
 
-                productDetail.setFinish(finish);
+                        component.setPos(pos);
+                        componentRepository.save(component);
 
-                productDetail.setSizeShape(sizeShape);
+                        productComponentRepository.save(productComponent);
+                        System.out.println("Inserted component " + component.getSku() + " for product " + product.getSku() + " quantity " + productComponent.getQuantity());
+                    }
+                }
+                pos = 2 ;
 
-                productDetail.setPieces(pieces);
+                if (!item2sku.isEmpty()) {
+                    Optional<Component> optionalComponent = componentRepository.findBySku(item2sku);
+                    if (optionalComponent.isPresent()) {
+                        Component component = optionalComponent.get();
+                        ProductComponent productComponent = new ProductComponent();
+                        productComponent.setProduct(product);
+                        productComponent.setComponent(component);
+                        productComponent.setQuantity(1L);
+                        productComponentRepository.save(productComponent);
 
-                productDetail.setCollection(collection);
+                        component.setPos(pos);
+                        componentRepository.save(component);
 
-                productDetail.setProductType(productType);
+                        System.out.println("Inserted component " + component.getSku() + " for product " + product.getSku() + " quantity " + productComponent.getQuantity());
+                    }
+                }
 
-                product.setProductDetail(productDetail);
+                for (int i = 5; i <= 17; i = i + 3) {
+                    pos++;
+                    if (!getValueByIndex(columns, i).isEmpty()) {
+                        Optional<Component> optionalComponent = componentRepository.findBySku(getValueByIndex(columns, i));
+                        if (optionalComponent.isPresent()) {
+                            Component component = optionalComponent.get();
+                            ProductComponent productComponent = new ProductComponent();
+                            productComponent.setProduct(product);
+                            productComponent.setComponent(component);
+                            long quantity = Long.parseLong(getValueByIndex(columns, i + 2));
+                            if (quantity == 0) {
+                                quantity = Long.parseLong(getValueByIndex(columns, i + 1)) * component.getDimension().getQuantityBox();
+                            }
+                            productComponent.setQuantity(quantity);
+                            productComponentRepository.save(productComponent);
 
-                productRepository.save(product);
 
-                System.out.println("Saved product sku " + product.getSku());
+                            component.setPos(pos);
+                            componentRepository.save(component);
+
+                            System.out.println("Inserted component " + component.getSku() + " for product " + product.getSku() + " quantity " + productComponent.getQuantity());
+                        }
+                    }
+                }
             }
-            // Print summary
             System.out.println("\nImport Summary:");
             System.out.println("Total SKUs processed: " + (newSkus + existingSkus));
             System.out.println("Total SKUs new: " + (newSkus));
-
         } catch (Exception e) {
             System.err.println("Error importing SKUs: " + e.getMessage());
             e.printStackTrace();
@@ -166,7 +194,7 @@ public class ProductsImport {
                     if (productWholesales == null) {
                         productWholesales = new ProductWholesales();
                     }
-                    productWholesales.setEwfdirect(true);
+                    productWholesales.setEwfmain(true);
                     product.setWholesales(productWholesales);
                     productRepository.save(product);
                 } else {
@@ -182,5 +210,9 @@ public class ProductsImport {
             System.err.println("Error importing SKUs: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void importProductShopify() {
+
     }
 }

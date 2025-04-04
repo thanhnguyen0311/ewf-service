@@ -31,7 +31,7 @@ public class Permission {
     @Column(nullable = false)
     private Boolean active = true;
 
-    @ManyToMany(mappedBy = "permissions")
+    @ManyToMany(mappedBy = "permissions", fetch = FetchType.EAGER)
     private Set<Role> roles;
 
 }
