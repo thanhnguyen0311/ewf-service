@@ -1,5 +1,7 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
+import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
@@ -25,6 +27,18 @@ public class ProductController {
     public ResponseEntity<?> getProductBySku(@PathVariable String sku) {
         try {
             ProductResponseDto product = productService.findBySku(sku);
+            return ResponseEntity.ok().body(product);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching product");
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProductDetailById(@PathVariable Long id, @RequestBody ProductDetailRequestDto productDetailRequestDto) {
+        try {
+            ProductDetailResponseDto product = productService.updateProductDetailById(id ,productDetailRequestDto);
             return ResponseEntity.ok().body(product);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

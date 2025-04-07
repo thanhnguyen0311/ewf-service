@@ -2,6 +2,9 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.entity.product.ProductDetail;
+import com.danny.ewf_service.entity.product.ProductWholesales;
+import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
 import org.springframework.beans.factory.annotation.Qualifier;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
@@ -92,17 +95,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDetailResponseDto> findAllProductsToDtos() {
-//        List<ProductProjection> products = productRepository.findAllProductDetails();
-//        return productMapper.productProjectionToProductDetailResponseDtoList(products);
         List<Product> products = cacheService.getAllProducts();
         return productMapper.productListToProductDetailResponseDtoList(products);
     }
 
-    @Override
-    @Cacheable(value = "productsCache", key = "#productId")
-    public Product getProductById(Long productId) {
-        return productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found: " + productId));
-    }
 
     @Override
     public List<ProductSearchResponseDto> getAllProductsSearch() {
@@ -113,15 +109,13 @@ public class ProductServiceImpl implements ProductService {
         return productSearchResponseDtoList;
     }
 
+
     @Override
-    @Transactional
-    @CacheEvict(value = "productsCache", key = "#product.id")
-    public Product saveProduct(Product product) {
-        Product updatedProduct = productRepository.save(product);
-
-        cacheService.reloadProductInCache(updatedProduct);
-
-        return updatedProduct;
+    public ProductDetailResponseDto updateProductDetailById(Long id, ProductDetailRequestDto productDetailRequestDto) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found: " + id));
+        updateProductFromDto(product, productDetailRequestDto);
+        product = cacheService.saveProduct(product);
+        return productMapper.productToProductDetailResponseDto(product);
     }
 
     @Override
@@ -159,6 +153,7 @@ public class ProductServiceImpl implements ProductService {
         return mergedProducts;
     }
 
+
     private List<List<ProductComponent>> generateCombinations(List<ProductComponent> components, int size) {
         List<List<ProductComponent>> combinations = new ArrayList<>();
         generateCombinationsRecursive(components, size, 0, new ArrayList<>(), combinations);
@@ -186,6 +181,45 @@ public class ProductServiceImpl implements ProductService {
             generateCombinationsRecursive(components, size, i + 1, currentCombination, combinations);
             currentCombination.remove(currentCombination.size() - 1); // Backtrack
         }
+    }
+
+    private void updateProductFromDto(Product product, ProductDetailRequestDto dto) {
+        if (dto.getTitle() != null) product.setTitle(dto.getTitle());
+        if (dto.getLocalTitle() != null) product.setLocalTitle(dto.getLocalTitle());
+        if (dto.getUpc() != null) product.setUpc(dto.getUpc());
+        if (dto.getAsin() != null) product.setAsin(dto.getAsin());
+        if (dto.getType() != null) product.setType(dto.getType());
+        if (dto.getOrder() != null) product.setOrder(dto.getOrder());
+        if (dto.getCategory() != null) product.setCategory(dto.getCategory());
+        if (dto.getShippingMethod() != null) product.setShippingMethod(dto.getShippingMethod());
+        if (dto.getDiscontinued() != null) product.setDiscontinued(dto.getDiscontinued());
+
+        // Initialize productDetail if null
+        if (product.getProductDetail() == null) {
+            product.setProductDetail(new ProductDetail());
+        }
+
+        // Update productDetail fields
+        if (dto.getDescription() != null) product.getProductDetail().setDescription(dto.getDescription());
+        if (dto.getHtmlDescription() != null) product.getProductDetail().setHtmlDescription(dto.getHtmlDescription());
+        if (dto.getMainCategory() != null) product.getProductDetail().setMainCategory(dto.getMainCategory());
+        if (dto.getCollection() != null) product.getProductDetail().setCollection(dto.getCollection());
+        if (dto.getSubCategory() != null) product.getProductDetail().setSubCategory(dto.getSubCategory());
+        if (dto.getPieces() != null) product.getProductDetail().setPieces(dto.getPieces());
+
+        // Initialize wholesales if null
+        if (product.getWholesales() == null) {
+            product.setWholesales(new ProductWholesales());
+        }
+
+        // Update wholesales fields
+        if (dto.getAmazon() != null) product.getWholesales().setAmazon(dto.getAmazon());
+        if (dto.getCymax() != null) product.getWholesales().setCymax(dto.getCymax());
+        if (dto.getOverstock() != null) product.getWholesales().setOverstock(dto.getOverstock());
+        if (dto.getWayfair() != null) product.getWholesales().setWayfair(dto.getWayfair());
+        if (dto.getEwfdirect() != null) product.getWholesales().setEwfdirect(dto.getEwfdirect());
+        if (dto.getHoustondirect() != null) product.getWholesales().setHoustonDirect(dto.getHoustondirect());
+        if (dto.getEwfmain() != null) product.getWholesales().setEwfmain(dto.getEwfmain());
     }
 }
 

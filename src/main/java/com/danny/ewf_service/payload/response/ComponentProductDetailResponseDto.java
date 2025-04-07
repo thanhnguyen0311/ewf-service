@@ -13,4 +13,5 @@ public class ComponentProductDetailResponseDto{
     private Long componentId;
     private String sku;
     private Long quantity;
+    private Long pos;
 }

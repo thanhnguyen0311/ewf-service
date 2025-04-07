@@ -1,6 +1,7 @@
 package com.danny.ewf_service.service;
 
 import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.ProductResponseDto;
 import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
@@ -13,11 +14,9 @@ public interface ProductService {
 
     List<ProductDetailResponseDto> findAllProductsToDtos();
 
-    Product getProductById(Long id);
-
     List<ProductSearchResponseDto> getAllProductsSearch();
 
-    Product saveProduct(Product product);
-
     List<Product> findMergedProducts(Product product);
+
+    ProductDetailResponseDto updateProductDetailById(Long id, ProductDetailRequestDto productDetailRequestDto);
 }

@@ -1,6 +1,7 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.product.ProductWholesales;
@@ -16,9 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -209,6 +208,61 @@ public class ProductsImport {
         } catch (Exception e) {
             System.err.println("Error importing SKUs: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    @Transactional
+    public void importDimensions() {
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] columns = line.split(",");
+                if (columns.length < 4) {
+                    continue;
+                }
+
+                String sku = columns[0].trim();
+                String length = columns[1].trim();
+                String width = columns[2].trim();
+                String height = columns[3].trim();
+                String weight = columns[4].trim();
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
+                try {
+                    Product product;
+                    Optional<Product> optionalProduct = productRepository.findBySku(sku);
+                    if (optionalProduct.isPresent()) {
+                        product = optionalProduct.get();
+                    } else {
+                        System.err.println("Error processing row for component " + sku);
+                        continue;
+                    }
+                    Dimension dimension = product.getDimension();
+                    if (dimension == null) {
+                        dimension = new Dimension();
+                    }
+                    dimension.setBoxLength(Double.valueOf(length));
+                    dimension.setBoxWidth(Double.valueOf(width));
+                    dimension.setBoxHeight(Double.valueOf(height));
+                    dimension.setBoxWeight(Double.valueOf(weight));
+                    product.setDimension(dimension);
+                    productRepository.save(product);
+                    System.out.println("Successfully Updated Component SKU : " + sku + " VALUES : " + dimension);
+
+
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
         }
     }
 

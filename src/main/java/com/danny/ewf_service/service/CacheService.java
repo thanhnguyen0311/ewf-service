@@ -9,6 +9,11 @@ public interface CacheService {
 
     List<Product> getAllProducts();
 
-    void reloadProductInCache(Product product);
+//    void reloadProductInCache(Product product);
+
+    Product getProductById(Long id);
+
+    Product saveProduct(Product product);
+
 }
 
