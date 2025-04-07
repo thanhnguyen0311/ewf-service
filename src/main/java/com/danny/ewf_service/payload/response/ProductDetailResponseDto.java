@@ -37,7 +37,7 @@ public class ProductDetailResponseDto {
     private Boolean overstock = false;
     private Boolean wayfair = false;
     private Boolean ewfdirect = false;
-    private Boolean houstondirect = false;
+    private Boolean houstonDirect = false;
     private Boolean ewfmain = false;
 
 }

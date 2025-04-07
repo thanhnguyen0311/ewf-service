@@ -33,4 +33,7 @@ public class ProductWholesales {
 
     @Column(name = "ewfmain")
     private Boolean ewfmain = false;
+
+    @Column(name = "houstondirect")
+    private Boolean houstonDirect = false;
 }

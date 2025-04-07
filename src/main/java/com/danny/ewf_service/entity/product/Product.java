@@ -1,5 +1,6 @@
 package com.danny.ewf_service.entity.product;
 
+import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Price;
 import jakarta.persistence.*;
 import lombok.*;
@@ -58,6 +59,10 @@ public class Product {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "price_id", referencedColumnName = "id")
     private Price price;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "dimension_id", referencedColumnName = "id")
+    private Dimension dimension;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "detail_id", referencedColumnName = "id")

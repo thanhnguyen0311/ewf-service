@@ -8,6 +8,7 @@ import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.CacheService;
 import com.danny.ewf_service.service.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,9 @@ public class ComponentsImport {
 
     @Autowired
     private final ComponentRepository componentRepository;
+
+    @Autowired
+    private CacheService cacheService;
 
 
     @Transactional
@@ -180,7 +184,7 @@ public class ComponentsImport {
                     } else {
                         product = new Product();
                         product.setSku(productSku);
-                        productService.saveProduct(product);
+                        cacheService.saveProduct(product);
                         System.out.println("\u001B[32m" + "Successfully created Product SKU : " + productSku + "\u001B[0m");
                     }
 
@@ -347,14 +351,11 @@ public class ComponentsImport {
             while ((line = reader.readLine()) != null) {
 
                 String[] columns = line.split(",");
-                if (columns.length < 4) {
+                if (columns.length < 1) {
                     continue;
                 }
 
                 String componentSku = columns[0].trim();
-                double length = Double.parseDouble(columns[1].trim());
-                double width = Double.parseDouble(columns[2].trim());
-                double height = Double.parseDouble(columns[3].trim());
 
                 if (componentSku.isEmpty() || componentSkus.contains(componentSku)) {
                     continue;
@@ -369,26 +370,14 @@ public class ComponentsImport {
                     if (optionalComponent.isPresent()) {
                         component = optionalComponent.get();
 
-
                     } else {
                         component = new Component();
                         component.setSku(componentSku);
                     }
-
-                    Dimension dimension = component.getDimension();
-
-                    if (dimension == null) {
-                        dimension = new Dimension();
-                    }
-
-                    dimension.setHeight(height);
-                    dimension.setWidth(width);
-                    dimension.setLength(length);
-
-                    component.setDimension(dimension);
+                    component.setPos(5L);
                     componentRepository.save(component);
                     componentSkus.add(componentSku);
-                    System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + dimension.getQuantityBox());
+                    System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + component.getPos());
 
 
                 } catch (RuntimeException e) {

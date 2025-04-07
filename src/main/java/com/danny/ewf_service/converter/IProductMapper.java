@@ -3,6 +3,7 @@ package com.danny.ewf_service.converter;
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,6 +69,8 @@ public interface IProductMapper {
     @Mapping(target = "cymax", source = "product.wholesales.cymax")
     @Mapping(target = "wayfair", source = "product.wholesales.wayfair")
     @Mapping(target = "ewfdirect", source = "product.wholesales.ewfdirect")
+    @Mapping(target = "ewfmain", source = "product.wholesales.ewfmain")
+    @Mapping(target = "houstonDirect", source = "product.wholesales.houstonDirect")
     @Mapping(target = "overstock", source = "product.wholesales.overstock")
     @Mapping(target = "description", source = "product.productDetail.description")
     @Mapping(target = "htmlDescription", source = "product.productDetail.htmlDescription")
@@ -77,6 +80,11 @@ public interface IProductMapper {
     @Mapping(target = "pieces", source = "product.productDetail.pieces")
     ProductDetailResponseDto productToProductDetailResponseDto(Product product);
     List<ProductDetailResponseDto> productListToProductDetailResponseDtoList(List<Product> products);
+
+
+
+    Product productDetailRequestToProduct(ProductDetailRequestDto productDetailRequestDto);
+
 
 
     @Named("extractImages")
@@ -130,11 +138,14 @@ public interface IProductMapper {
                             productComponent.getId(),
                             productComponent.getComponent().getId(),
                             productComponent.getComponent().getSku(),
-                            productComponent.getQuantity()
+                            productComponent.getQuantity(),
+                            productComponent.getComponent().getPos()
                     ));
         }
         return componentList;
     }
+
+
 
 }
 
