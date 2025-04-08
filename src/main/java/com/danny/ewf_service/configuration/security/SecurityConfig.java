@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +20,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @AllArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -35,7 +37,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http    .cors(withDefaults()) // Enable CORS
+        http.cors(withDefaults()) // Enable CORS
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(authorize -> authorize
@@ -50,13 +52,4 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
-//    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-//        AuthenticationManagerBuilder authManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authManagerBuilder
-//                .userDetailsService(userDetailsService) // Use your CustomUserDetailsService
-//                .passwordEncoder(passwordEncoder()); // Add password encoding
-//        return authManagerBuilder.build();
-//    }
-
 }

@@ -1,13 +1,13 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
 import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
-import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
-import com.danny.ewf_service.payload.response.ProductResponseDto;
-import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 import com.danny.ewf_service.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +36,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('EDIT_PRODUCT', 'ROLE_ADMIN')")
     public ResponseEntity<?> updateProductDetailById(@PathVariable Long id, @RequestBody ProductDetailRequestDto productDetailRequestDto) {
         try {
             ProductDetailResponseDto product = productService.updateProductDetailById(id ,productDetailRequestDto);

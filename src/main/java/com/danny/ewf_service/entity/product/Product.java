@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.Price;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.List;
 
 
@@ -16,7 +17,7 @@ import java.util.List;
 @Getter
 @ToString
 @Setter
-public class Product {
+public class Product implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

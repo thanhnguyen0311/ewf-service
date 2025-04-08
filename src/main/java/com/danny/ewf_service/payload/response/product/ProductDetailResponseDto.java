@@ -1,9 +1,9 @@
-package com.danny.ewf_service.payload.response;
+package com.danny.ewf_service.payload.response.product;
 
+import com.danny.ewf_service.payload.response.ComponentProductDetailResponseDto;
 import lombok.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
