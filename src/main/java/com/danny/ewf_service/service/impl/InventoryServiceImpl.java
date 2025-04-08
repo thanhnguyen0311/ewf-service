@@ -6,7 +6,7 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductWithQuantity;
 import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
 import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
-import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ConfigurationRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;

@@ -1,7 +1,6 @@
 package com.danny.ewf_service.repository;
 
 import com.danny.ewf_service.entity.product.ProductComponent;
-import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
 import com.danny.ewf_service.service.impl.ProductServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

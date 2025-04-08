@@ -2,7 +2,8 @@ package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.configuration.security.JwtUtility;
 import com.danny.ewf_service.payload.request.RegisterRequest;
-import com.danny.ewf_service.service.auth.AuthService;
+import com.danny.ewf_service.payload.response.user.UserResponseDto;
+import com.danny.ewf_service.service.auth.AuthServiceImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,7 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     @Setter
@@ -33,14 +34,13 @@ public class AuthController {
     private JwtUtility jwtUtility;
 
     @Autowired
-    private AuthService authService;
+    private AuthServiceImpl authService;
 
 
     @PostMapping("/login")
     public ResponseEntity<String>
     login(@RequestBody AuthRequest request) throws AuthenticationException {
         try {
-            System.out.println(request.toString());
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
@@ -56,6 +56,16 @@ public class AuthController {
         try {
             authService.register(request);
             return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getInfo() {
+        try {
+            UserResponseDto userResponseDto = authService.getInfo();
+            return ResponseEntity.ok().body(userResponseDto);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }

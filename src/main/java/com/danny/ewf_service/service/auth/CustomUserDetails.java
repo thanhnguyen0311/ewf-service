@@ -14,11 +14,13 @@ public class CustomUserDetails extends User {
     private final Long userId;
     private final String firstName;
     private final String lastName;
+    private final String role;
 
-    public CustomUserDetails(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities, Long userId, String firstName, String lastName) {
+    public CustomUserDetails(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities, Long userId, String firstName, String lastName, String role) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.role = role;
     }
 }

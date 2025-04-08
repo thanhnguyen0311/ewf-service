@@ -2,9 +2,9 @@ package com.danny.ewf_service.service;
 
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
-import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
-import com.danny.ewf_service.payload.response.ProductResponseDto;
-import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 
 import java.util.List;
 

@@ -5,11 +5,10 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
 import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
-import org.springframework.beans.factory.annotation.Qualifier;
 import com.danny.ewf_service.entity.product.ProductComponent;
-import com.danny.ewf_service.payload.response.ProductDetailResponseDto;
-import com.danny.ewf_service.payload.response.ProductResponseDto;
-import com.danny.ewf_service.payload.response.ProductSearchResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.CacheService;
@@ -17,12 +16,9 @@ import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.imports.SKUGenerator;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.cache.annotation.CacheEvict;
 
 
 import java.util.ArrayList;
@@ -112,10 +108,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailResponseDto updateProductDetailById(Long id, ProductDetailRequestDto productDetailRequestDto) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found: " + id));
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
         updateProductFromDto(product, productDetailRequestDto);
-        product = cacheService.saveProduct(product);
-        return productMapper.productToProductDetailResponseDto(product);
+        Product savedProduct = cacheService.saveProduct(product);
+        return productMapper.productToProductDetailResponseDto(savedProduct);
     }
 
     @Override

@@ -6,10 +6,12 @@ import com.danny.ewf_service.service.CacheService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,28 +28,58 @@ public class CacheServiceImpl implements CacheService {
     private final CacheManager cacheManager;
 
     @Override
-    @Cacheable(value = "productsCache")
+    @Cacheable(value = "productsCache", key = "'allProducts'")
     public List<Product> getAllProducts() {
+        System.out.println("Cache miss - loading all products from database");
         return productRepository.findAllProducts();
     }
 
     @Override
     @Cacheable(value = "productsCache", key = "#productId")
     public Product getProductById(Long productId) {
+        System.out.println("Cache miss - loading product " + productId + " from database");
         return productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found: " + productId));
     }
 
     @Override
     @Transactional
-    @CachePut(value="productsCache")
+    @CachePut(value = "productsCache", key = "#product.id")
     public Product saveProduct(Product product) {
-        Product updatedProduct = productRepository.save(product);
+        Product savedProduct = productRepository.save(product);
 
-        return updatedProduct;
+        // Update product in the allProducts cache list if it exists
+        updateProductInAllProductsCache(savedProduct);
+
+        return savedProduct;
     }
-//
-//    public void reloadProductInCache(Product product) {
-//        Objects.requireNonNull(cacheManager.getCache("productsCache")).put(product.getId(), product);
-//    }
 
+    private void updateProductInAllProductsCache(Product updatedProduct) {
+        Cache cache = cacheManager.getCache("productsCache");
+        if (cache != null) {
+            Cache.ValueWrapper wrapper = cache.get("allProducts");
+            if (wrapper != null) {
+                @SuppressWarnings("unchecked")
+                List<Product> products = (List<Product>) wrapper.get();
+                if (products != null) {
+                    // Find and replace the updated product in the list
+                    boolean found = false;
+                    for (int i = 0; i < products.size(); i++) {
+                        if (products.get(i).getId().equals(updatedProduct.getId())) {
+                            products.set(i, updatedProduct);
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    // If product wasn't in the list, add it (for new products)
+                    if (!found) {
+                        products.add(updatedProduct);
+                    }
+
+                    // Update the cache with the modified list
+                    cache.put("allProducts", products);
+                }
+            }
+        }
+    }
 }

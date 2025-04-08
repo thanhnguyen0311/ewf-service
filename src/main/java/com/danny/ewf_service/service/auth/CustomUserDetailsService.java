@@ -52,7 +52,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 authorities, // Authorities can be added later if needed
                 user.getId(),
                 user.getFirstName(),
-                user.getLastName()
+                user.getLastName(),
+                user.getRole().getSlug().toUpperCase()
         );
     }
 

@@ -1,6 +1,7 @@
-package com.danny.ewf_service.payload.response;
+package com.danny.ewf_service.payload.response.product;
 
 import com.danny.ewf_service.entity.ImageUrls;
+import com.danny.ewf_service.payload.response.ComponentResponseDto;
 import lombok.*;
 
 import java.util.ArrayList;

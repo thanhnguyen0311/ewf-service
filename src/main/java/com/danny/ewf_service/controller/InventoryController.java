@@ -3,8 +3,7 @@ package com.danny.ewf_service.controller;
 import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
 import com.danny.ewf_service.payload.request.ProductInventorySearchRequestDto;
 import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
-import com.danny.ewf_service.payload.response.PagingResponse;
-import com.danny.ewf_service.payload.response.ProductInventoryResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,6 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping("/components")
-    @PreAuthorize("hasAuthority('VIEW_INVENTORY')")
     public ResponseEntity<?> getComponentsInventory() {
         try {
             List<ComponentInventoryResponseDto> componentInventoryResponseDtos = inventoryService.findAllComponentsInventory();
@@ -62,6 +60,7 @@ public class InventoryController {
     }
 
     @PutMapping("/components")
+    @PreAuthorize("hasAnyAuthority('EDIT_INVENTORY', 'ROLE_ADMIN')")
     public ResponseEntity<?> updateComponentInventory(@RequestBody ComponentInventoryRequestDto componentInventoryRequestDto) {
         try {
             ComponentInventoryResponseDto newComponentInventoryResponseDto = inventoryService.updateComponent(componentInventoryRequestDto);
