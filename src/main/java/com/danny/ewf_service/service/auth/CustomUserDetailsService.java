@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -45,11 +44,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new CustomUserDetails(
                 username,
                 user.getPasswordHash(),
-                user.getActive(),
+                user.getIsActive(),
                 true,
                 true,
                 true,
-                authorities, // Authorities can be added later if needed
+                authorities,
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
