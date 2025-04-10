@@ -3,6 +3,8 @@ package com.danny.ewf_service.entity.auth;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "user")
 @AllArgsConstructor
@@ -17,7 +19,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     @ToString.Exclude
     private Role role;
@@ -35,14 +37,12 @@ public class User {
     private String passwordHash;
 
     @Column(name= "active")
-    private Boolean active;
+    private Boolean isActive;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "registered_at", updatable = false)
-    private java.util.Date registeredAt;
+    private LocalDateTime createdAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_login")
-    private java.util.Date lastLogin;
+    private LocalDateTime lastLogin;
 
 }

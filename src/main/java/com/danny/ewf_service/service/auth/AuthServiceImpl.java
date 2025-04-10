@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class AuthServiceImpl implements AuthService {
     @Autowired
@@ -28,22 +30,20 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email is already taken!");
         }
-        // Assign default ROLE_USER (you can adjust this based on your use case)
+
         Role role = roleRepository.findBySlug("USER")
                 .orElseThrow(() -> new IllegalStateException("Default role not found"));
 
-        // Create a new user entity
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(role)
-                .active(true) // Set true if the user is active by default
-                .registeredAt(new java.util.Date()) // Set registration date
+                .isActive(true) // Set true if the user is active by default
+                .createdAt(LocalDateTime.now()) // Set registration date
                 .build();
 
-        // Save the user to the database
         userRepository.save(user);
     }
 
