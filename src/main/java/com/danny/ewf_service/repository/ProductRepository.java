@@ -40,5 +40,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p JOIN FETCH p.price WHERE p.sku IN :skus")
     List<Product> findAllBySkuInIgnoreCase(@Param("skus") List<String> skus);
 
-
+    @Query("SELECT p FROM Product p WHERE p.asin IS NOT NULL")
+    List<Product> findAllByAsinIsNotNull();
 }
