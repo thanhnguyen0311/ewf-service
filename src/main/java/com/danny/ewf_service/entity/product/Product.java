@@ -69,6 +69,10 @@ public class Product implements Serializable {
     @JoinColumn(name = "detail_id", referencedColumnName = "id")
     private ProductDetail productDetail;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "metadata_id", referencedColumnName = "id")
+    private ProductMetadata metadata;
+
     @Column(name = "title")
     private String title;
 
