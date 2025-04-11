@@ -23,7 +23,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllProducts();
 
     @Query("SELECT p FROM Product p JOIN p.wholesales w WHERE w.ewfdirect = true")
-    List<Product> findProductsByWholesalesEwfdirectTrue();
+    List<Product> findProductsByWholesalesEwfdirect();
 
     Optional<Product> findBySkuIgnoreCase(String sku);
 
