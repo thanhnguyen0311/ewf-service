@@ -108,6 +108,13 @@ public class ShopifyExport {
 //                    String.valueOf(productPrice)
 //            });
 
+            if (productPrice > 2000) {
+                productPrice = productPrice*0.85;
+            } else if (productPrice > 1000) {
+                productPrice = productPrice*0.9;
+            } else if (productPrice > 500) {
+                productPrice = productPrice*0.95;
+            }
 
             rows.add(new String[]{
                     product.getSku().toLowerCase(),
