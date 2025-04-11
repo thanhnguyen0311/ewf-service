@@ -65,19 +65,19 @@ public class ShopifyExport {
                     } else if (componentWeight <= 30) {
                         shippingCost = 20;
                     } else if (componentWeight <= 40) {
-                        shippingCost = 25;
+                        shippingCost = 20;
                     } else if (componentWeight <= 50) {
-                        shippingCost = 30;
+                        shippingCost = 25;
                     } else if (componentWeight <= 60) {
-                        shippingCost = 35;
+                        shippingCost = 30;
                     } else if (componentWeight <= 70) {
-                        shippingCost = 47;
+                        shippingCost = 43;
                     } else if (componentWeight <= 80) {
-                        shippingCost = 58;
+                        shippingCost = 53;
                     } else if (componentWeight <= 100) {
-                        shippingCost = 65;
+                        shippingCost = 60;
                     } else {
-                        shippingCost = 80;
+                        shippingCost = 75;
                     }
 
                     totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
@@ -95,11 +95,11 @@ public class ShopifyExport {
 //            });
 
             if (productPrice > 2000) {
-                productPrice = productPrice * 85;
+                productPrice = productPrice * 0.85;
             } else if (productPrice > 1000) {
-                productPrice = productPrice * 90;
+                productPrice = productPrice * 0.90;
             } else if (productPrice > 500) {
-                productPrice = productPrice * 95;
+                productPrice = productPrice * 0.95;
             }
 
             rows.add(new String[]{

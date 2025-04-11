@@ -26,7 +26,8 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            shopifyExport.exportAmazonReviews();
+            String filename = "ewfdirect_pricesets.csv";
+            shopifyExport.exportShopifyProductsWeight(filename);
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
