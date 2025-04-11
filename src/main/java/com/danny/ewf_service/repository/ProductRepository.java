@@ -23,7 +23,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllProducts();
 
     @Query("SELECT p FROM Product p JOIN p.wholesales w WHERE w.ewfdirect = true")
-    List<Product> findProductsByWholesalesEwfdirectTrue();
+    List<Product> findProductsByWholesalesEwfdirect();
 
     Optional<Product> findBySkuIgnoreCase(String sku);
 
@@ -40,5 +40,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p JOIN FETCH p.price WHERE p.sku IN :skus")
     List<Product> findAllBySkuInIgnoreCase(@Param("skus") List<String> skus);
 
-
+    @Query("SELECT p FROM Product p WHERE p.asin IS NOT NULL")
+    List<Product> findAllByAsinIsNotNull();
 }

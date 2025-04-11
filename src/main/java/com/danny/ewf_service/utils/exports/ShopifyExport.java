@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.utils.CsvWriter;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -29,21 +29,7 @@ public class ShopifyExport {
     private final ProductComponentRepository productComponentRepository;
 
     public void exportShopifyProductsWeight(String filePath) throws Exception {
-        String skuExportListPath = "src/main/resources/data/report.csv";
-        Set<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
-        List<String> uppercaseSkus = skus.stream()
-                .map(String::toUpperCase)
-                .toList();
-        List<Product> products = productRepository.findAllBySkuInIgnoreCase(uppercaseSkus);
-
-        Set<String> foundSkus = products.stream()
-                .map(Product::getSku)
-                .collect(Collectors.toSet());
-
-        List<String> missingSkus = uppercaseSkus.stream()
-                .filter(sku -> !foundSkus.contains(sku))
-                .toList();
-
+        List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
         List<String[]> rows = new ArrayList<>();
 //        String[] header = {"SKU", "QB7","shipping", "Price"};
         String[] header = {"Handle", "Title", "Variant Price"};
@@ -94,8 +80,8 @@ public class ShopifyExport {
                         shippingCost = 80;
                     }
 
-                    totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity()/quantityBox);
-                    productPrice = productPrice + shippingCost * ((double) productComponent.getQuantity()/quantityBox);
+                    totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
+                    productPrice = productPrice + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
 //                    rows.add(new String[]{"",productComponent.getComponent().getSku(), String.valueOf(shippingCost * ((double) productComponent.getQuantity()/quantityBox))});
 //                    productWeight = productWeight + componentWeight * ((double) productComponent.getQuantity()/quantityBox);
                 }
@@ -108,6 +94,13 @@ public class ShopifyExport {
 //                    String.valueOf(productPrice)
 //            });
 
+            if (productPrice > 2000) {
+                productPrice = productPrice * 85;
+            } else if (productPrice > 1000) {
+                productPrice = productPrice * 90;
+            } else if (productPrice > 500) {
+                productPrice = productPrice * 95;
+            }
 
             rows.add(new String[]{
                     product.getSku().toLowerCase(),
@@ -121,7 +114,7 @@ public class ShopifyExport {
         csvWriter.exportToCsv(rows, filePath);
     }
 
-    public void exportShopifyProductsInventory(String filePath){
+    public void exportShopifyProductsInventory(String filePath) {
         List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
         List<String[]> rows = new ArrayList<>();
         String[] header = {"Handle", "Title", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Option3 Name", "Option3 Value", "SKU", "HS Code", "COO", "175 Southbelt Industrial Drive"};
@@ -149,7 +142,7 @@ public class ShopifyExport {
         csvWriter.exportToCsv(rows, filePath);
     }
 
-    public void exportShopifyProductsTrackInventory(String filePath){
+    public void exportShopifyProductsTrackInventory(String filePath) {
         List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
         List<String[]> rows = new ArrayList<>();
         String[] header = {"Handle", "Title", "Variant Inventory Policy"};
@@ -166,7 +159,7 @@ public class ShopifyExport {
         csvWriter.exportToCsv(rows, filePath);
     }
 
-    public void exportShopifyDiscountPrice(String filePath){
+    public void exportShopifyDiscountPrice(String filePath) {
         String skuExportListPath = "src/main/resources/data/discount_sku.csv";
         Set<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
 
@@ -189,14 +182,31 @@ public class ShopifyExport {
                 rows.add(new String[]{
                         product.getSku().toLowerCase(),
                         product.getLocalTitle(),
-                        String.valueOf(product.getPrice().getQB7()*0.7),
+                        String.valueOf(product.getPrice().getQB7() * 0.7),
                         String.valueOf(product.getPrice().getQB7())
                 });
 
-                System.out.println("Exported " + product.getSku() + " price " + product.getPrice().getQB7()*0.7 + "/" + product.getPrice().getQB7());
+                System.out.println("Exported " + product.getSku() + " price " + product.getPrice().getQB7() * 0.7 + "/" + product.getPrice().getQB7());
             }
         }
 
         csvWriter.exportToCsv(rows, filePath);
+    }
+
+    public void exportAmazonReviews() {
+        List<String[]> rows = new ArrayList<>();
+        String[] header = {"product_title", "product_handle", "URL_of_product_on_Amazon"};
+        List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
+        rows.add(header);
+        for (Product product : products) {
+            if (product.getTitle() != null && product.getAsin() != null) {
+                rows.add(new String[]{
+                        product.getTitle(),
+                        product.getSku().toLowerCase(),
+                        "https://www.amazon.com/dp/" + product.getAsin()
+                });
+            }
+        }
+        csvWriter.exportToCsv(rows, "amazon_reviews.csv");
     }
 }
