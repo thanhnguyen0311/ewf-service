@@ -38,4 +38,6 @@ public class Price {
     @Column(name = "QB7")
     private Double QB7;
 
+    @Column(name = "amazon")
+    private Double amazonPrice;
 }
