@@ -389,54 +389,46 @@ public class ComponentsImport {
         }
     }
 
-    @Transactional
     public void importPrices() {
-        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/component_price.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
-            Set<String> componentSkus = new HashSet<>();
             String line;
-            while ((line = reader.readLine()) != null) {
-                String[] columns = line.split(",");
-                String sku = columns[0].trim();
-                double QB1 = Double.parseDouble(columns[1].trim());
-                double QB2 = Double.parseDouble(columns[2].trim());
-                double QB3 = Double.parseDouble(columns[3].trim());
-                double QB4 = Double.parseDouble(columns[4].trim());
-                double QB5 = Double.parseDouble(columns[5].trim());
-                double QB6 = Double.parseDouble(columns[6].trim());
-                double QB7 = Double.parseDouble(columns[7].trim());
 
-                if (sku.isEmpty() || componentSkus.contains(sku)) {
+            while ((line = reader.readLine()) != null) {
+
+                String[] columns = line.split(",");
+                if (columns.length < 2) {
                     continue;
                 }
 
-                if (sku.equalsIgnoreCase("20-DEC") || sku.equals("46011") || sku.equals("12/20/2025")) sku = "DEC-20";
+                String sku = columns[0].trim().toUpperCase();
+                double qb1 = Double.parseDouble(columns[1].trim());
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
 
                 try {
-                    Product product;
                     Component component;
                     Optional<Component> optionalComponent = componentRepository.findBySku(sku);
                     if (optionalComponent.isPresent()) {
                         component = optionalComponent.get();
-                        if (component.getPrice() == null) {
-                            Price price = Price.builder().QB1(QB1).QB2(QB2).QB3(QB3).QB4(QB4).QB5(QB5).QB6(QB6).QB7(QB7).build();
-                            component.setPrice(price);
-                            componentRepository.save(component);
-                            System.out.println("Successfully Updated Component SKU : " + sku + " VALUES : " + price.toString());
-                        }
+                    } else {
+                        component = new Component();
+                        component.setSku(sku);
+
+                        System.out.println("Successfully create component: " + sku);
                     }
-                    Optional<Product> optionalProduct = productRepository.findBySku(sku);
-                    if (optionalProduct.isPresent()) {
-                        product = optionalProduct.get();
-                        if (product.getPrice() == null) {
-                            Price price = Price.builder().QB1(QB1).QB2(QB2).QB3(QB3).QB4(QB4).QB5(QB5).QB6(QB6).QB7(QB7).build();
-                            product.setPrice(price);
-                            productRepository.save(product);
-                            System.out.println("Successfully Updated Product SKU : " + sku + " VALUES : " + price.toString());
-                        }
-                    }
-                    componentSkus.add(sku);
+
+                    Price price = component.getPrice();
+                    if (price == null) price = new Price();
+                    price.setQB1(qb1);
+                    component.setPrice(price);
+                    componentRepository.save(component);
+                    System.out.println("Successfully Updated product : " + sku + " VALUES : " + qb1);
+
+
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
                 }

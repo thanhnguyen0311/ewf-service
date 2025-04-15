@@ -2,6 +2,7 @@ package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
+import com.danny.ewf_service.utils.imports.ComponentsImport;
 import com.danny.ewf_service.utils.imports.ProductsImport;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class ImportController {
     @Autowired
     private final ProductsImport productsImport;
 
+    @Autowired
+    private final ComponentsImport componentsImport;
+
 
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
@@ -29,7 +33,8 @@ public class ImportController {
             String filepath = "amazon-price.csv";
 //            amazonDataExport.extractDataFromAmazon();
 //            shopifyExport.exportShopifyProductsPrice(filepath);
-            productsImport.importProductPrice();
+//            productsImport.importProductPrice();
+            componentsImport.importPrices();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
