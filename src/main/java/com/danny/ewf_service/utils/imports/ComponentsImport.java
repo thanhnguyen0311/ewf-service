@@ -1,7 +1,6 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
-import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;

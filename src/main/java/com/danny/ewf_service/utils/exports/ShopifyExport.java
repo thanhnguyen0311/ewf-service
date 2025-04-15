@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.CsvWriter;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,10 @@ public class ShopifyExport {
     @Autowired
     private final ProductComponentRepository productComponentRepository;
 
-    public void exportShopifyProductsWeight(String filePath) throws Exception {
+    @Autowired
+    private ProductService productService;
+
+    public void exportShopifyProductsPrice(String filePath) throws Exception {
         List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
         List<String[]> rows = new ArrayList<>();
 //        String[] header = {"SKU", "QB7","shipping", "Price"};
@@ -36,71 +40,7 @@ public class ShopifyExport {
         rows.add(header);
         products.forEach(product -> {
             if (product.getPrice() == null) return;
-            double productWeight = 0;
-            double productPrice = product.getPrice().getQB7();
-            double totalShipCost = 0;
-            List<ProductComponent> components = product.getComponents();
-
-            for (ProductComponent productComponent : components) {
-
-                double shippingCost = 0;
-
-                Dimension dimension = productComponent.getComponent().getDimension();
-                long quantityBox;
-
-                if (dimension != null) {
-
-                    quantityBox = productComponent.getComponent().getDimension().getQuantityBox();
-                    if (quantityBox == 0) {
-                        quantityBox = 1;
-                    }
-
-                    double componentWeight = (dimension.getBoxLength() * dimension.getBoxWidth() * dimension.getBoxHeight()) / 139;
-
-                    if (componentWeight < dimension.getBoxWeight()) {
-                        componentWeight = dimension.getBoxWeight();
-                    }
-                    if (componentWeight <= 20) {
-                        shippingCost = 15;
-                    } else if (componentWeight <= 30) {
-                        shippingCost = 20;
-                    } else if (componentWeight <= 40) {
-                        shippingCost = 20;
-                    } else if (componentWeight <= 50) {
-                        shippingCost = 25;
-                    } else if (componentWeight <= 60) {
-                        shippingCost = 30;
-                    } else if (componentWeight <= 70) {
-                        shippingCost = 43;
-                    } else if (componentWeight <= 80) {
-                        shippingCost = 53;
-                    } else if (componentWeight <= 100) {
-                        shippingCost = 60;
-                    } else {
-                        shippingCost = 75;
-                    }
-
-                    totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
-                    productPrice = productPrice + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
-//                    rows.add(new String[]{"",productComponent.getComponent().getSku(), String.valueOf(shippingCost * ((double) productComponent.getQuantity()/quantityBox))});
-//                    productWeight = productWeight + componentWeight * ((double) productComponent.getQuantity()/quantityBox);
-                }
-            }
-
-//            rows.add(new String[]{
-//                    product.getSku().toLowerCase(),
-//                    String.valueOf(product.getPrice().getQB7()),
-//                    String.valueOf(totalShipCost),
-//                    String.valueOf(productPrice)
-//            });
-
-            if (productPrice > 2000) {
-                productPrice = productPrice * 0.85;
-            } else if (productPrice > 1000) {
-                productPrice = productPrice * 0.90;
-            } else if (productPrice > 500) {
-                productPrice = productPrice * 0.95;
-            }
+            double productPrice = productService.calculateEWFDirectPrice(product);
 
             rows.add(new String[]{
                     product.getSku().toLowerCase(),
@@ -108,7 +48,7 @@ public class ShopifyExport {
                     String.valueOf(productPrice)
             });
 
-            System.out.println("Exported " + product.getSku() + " weight " + productWeight + " price " + productPrice);
+            System.out.println("Exported " + product.getSku() + " price " + productPrice);
         });
 
         csvWriter.exportToCsv(rows, filePath);

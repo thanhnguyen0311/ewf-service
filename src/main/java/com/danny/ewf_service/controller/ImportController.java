@@ -22,7 +22,9 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            amazonDataExport.extractDataFromAmazon();
+            String filepath = "amazon-price.csv";
+//            amazonDataExport.extractDataFromAmazon();
+            shopifyExport.exportShopifyProductsPrice(filepath);
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {

@@ -34,7 +34,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("")
+    @PutMapping("")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> updateUser(@RequestBody UserListRequestDto userListRequestDto) {
         try {
