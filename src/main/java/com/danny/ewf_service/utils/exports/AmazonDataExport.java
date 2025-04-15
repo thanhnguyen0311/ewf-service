@@ -47,7 +47,6 @@ public class AmazonDataExport {
                     product.setMetadata(metadata);
                     productRepository.save(product);
                     System.out.println("Saved metadata for " + product.getSku() + " with ASIN " + product.getAsin());
-                    return;
                 } catch (Exception e) {
                     System.err.println("Error fetching data for ASIN " + product.getAsin() + ": " + e.getMessage());
                 }
