@@ -1,6 +1,7 @@
 package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IProductMapper;
+import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
@@ -112,6 +113,73 @@ public class ProductServiceImpl implements ProductService {
         updateProductFromDto(product, productDetailRequestDto);
         Product savedProduct = cacheService.saveProduct(product);
         return productMapper.productToProductDetailResponseDto(savedProduct);
+    }
+
+    @Override
+    public double calculateEWFDirectPrice(Product product) {
+        double productWeight = 0;
+        double productPrice = product.getPrice().getQB7();
+        double totalShipCost = 0;
+        List<ProductComponent> components = product.getComponents();
+
+        for (ProductComponent productComponent : components) {
+
+            double shippingCost = 0;
+
+            Dimension dimension = productComponent.getComponent().getDimension();
+            long quantityBox;
+
+            if (dimension != null) {
+
+                quantityBox = productComponent.getComponent().getDimension().getQuantityBox();
+                if (quantityBox == 0) {
+                    quantityBox = 1;
+                }
+
+                double componentWeight = (dimension.getBoxLength() * dimension.getBoxWidth() * dimension.getBoxHeight()) / 139;
+
+                if (componentWeight < dimension.getBoxWeight()) {
+                    componentWeight = dimension.getBoxWeight();
+                }
+                if (componentWeight <= 20) {
+                    shippingCost = 15;
+                } else if (componentWeight <= 30) {
+                    shippingCost = 25;
+                } else if (componentWeight <= 40) {
+                    shippingCost = 25;
+                } else if (componentWeight <= 50) {
+                    shippingCost = 30;
+                } else if (componentWeight <= 60) {
+                    shippingCost = 42;
+                } else if (componentWeight <= 70) {
+                    shippingCost = 50;
+                } else if (componentWeight <= 80) {
+                    shippingCost = 60;
+                } else if (componentWeight <= 100) {
+                    shippingCost = 70;
+                } else {
+                    shippingCost = 80;
+                }
+
+                totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
+                productPrice = productPrice + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
+            }
+        }
+
+
+        if (productPrice > 2000) {
+            productPrice = productPrice * 0.85;
+        } else if (productPrice > 1000) {
+            productPrice = productPrice * 0.90;
+        } else if (productPrice > 500) {
+            productPrice = productPrice * 0.95;
+        }
+
+        if (product.getPrice().getAmazonPrice() > 0.0 && productPrice > product.getPrice().getAmazonPrice()) {
+            productPrice = product.getPrice().getAmazonPrice() * 1.05;
+        }
+
+        return productPrice;
     }
 
     @Override

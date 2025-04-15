@@ -19,4 +19,6 @@ public interface ProductService {
     List<Product> findMergedProducts(Product product);
 
     ProductDetailResponseDto updateProductDetailById(Long id, ProductDetailRequestDto productDetailRequestDto);
+
+    double calculateEWFDirectPrice(Product product);
 }
