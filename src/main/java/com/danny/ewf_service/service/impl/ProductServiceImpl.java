@@ -196,7 +196,7 @@ public class ProductServiceImpl implements ProductService {
 
 
         if (productPrice > 2000) {
-            productPrice = productPrice * 0.83;
+            productPrice = productPrice * 0.85;
         } else if (productPrice > 1000) {
             productPrice = productPrice * 0.90;
         } else if (productPrice > 500) {
@@ -216,9 +216,6 @@ public class ProductServiceImpl implements ProductService {
                 String.valueOf(totalShipCost),
                 String.valueOf(productPrice),
                 String.valueOf(product.getPrice().getAmazonPrice()),
-                String.valueOf(productPrice*0.95),
-                String.valueOf(productPrice*0.90),
-                String.valueOf(productPrice*0.80),
         });
         return productPrice;
     }
