@@ -390,7 +390,7 @@ public class ComponentsImport {
     }
 
     public void importPrices() {
-        try (InputStream file = getClass().getResourceAsStream("/data/component_price.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
@@ -423,12 +423,14 @@ public class ComponentsImport {
 
                     Price price = component.getPrice();
                     if (price == null) price = new Price();
+                    if (price.getQB1() != null) {
+                        continue;
+                    }
+
                     price.setQB1(qb1);
                     component.setPrice(price);
                     componentRepository.save(component);
                     System.out.println("Successfully Updated product : " + sku + " VALUES : " + qb1);
-
-
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
                 }

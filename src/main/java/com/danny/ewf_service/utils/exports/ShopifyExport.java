@@ -33,7 +33,7 @@ public class ShopifyExport {
         List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
         List<String[]> rows = new ArrayList<>();
 
-        String[] header = {"Handle", "Title", "Total Weight", "Shipping Method" , "Variant Price","Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price","-5%", "-10%", "-20%" };
+        String[] header = {"Handle", "Title", "Total Weight", "Shipping Method" , "Variant Price","Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price", "Amazon Price","-5%", "-10%", "-20%" };
         rows.add(header);
         products.forEach(product -> {
             if (product.getPrice() == null) return;
