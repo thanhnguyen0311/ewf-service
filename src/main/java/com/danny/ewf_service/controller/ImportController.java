@@ -33,8 +33,8 @@ public class ImportController {
             String filepath = "amazon-price.csv";
 //            amazonDataExport.extractDataFromAmazon();
 //            shopifyExport.exportShopifyProductsPrice(filepath);
-//            productsImport.importProductPrice();
-            componentsImport.importPrices();
+            productsImport.importProductShipping();
+//            componentsImport.importPrices();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
