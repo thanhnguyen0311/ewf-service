@@ -22,9 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -116,16 +114,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public double calculateEWFDirectPrice(Product product,  List<String[]> rows) {
+    public double calculateEWFDirectPriceGround(Product product,  List<String[]> rows) {
         double productWeight = 0;
-        double productPrice = product.getPrice().getQB7();
+        double productPrice = 0;
         double totalShipCost = 0;
+
         List<ProductComponent> components = product.getComponents();
 
         for (ProductComponent productComponent : components) {
-
-            double shippingCost = 0;
-
+            double shippingCost;
+            double girth;
             Dimension dimension = productComponent.getComponent().getDimension();
             long quantityBox;
 
@@ -136,21 +134,23 @@ public class ProductServiceImpl implements ProductService {
                     quantityBox = 1;
                 }
 
+
+
                 double componentWeight = (dimension.getBoxLength() * dimension.getBoxWidth() * dimension.getBoxHeight()) / 139;
 
                 if (componentWeight < dimension.getBoxWeight()) {
                     componentWeight = dimension.getBoxWeight();
                 }
+                productWeight = productWeight + componentWeight;
+
                 if (componentWeight <= 20) {
-                    shippingCost = 15;
-                } else if (componentWeight <= 30) {
-                    shippingCost = 25;
+                    shippingCost = 10;
                 } else if (componentWeight <= 40) {
-                    shippingCost = 25;
+                    shippingCost = 15;
                 } else if (componentWeight <= 50) {
-                    shippingCost = 30;
+                    shippingCost = 20;
                 } else if (componentWeight <= 60) {
-                    shippingCost = 42;
+                    shippingCost = 25;
                 } else if (componentWeight <= 65) {
                     shippingCost = 30;
                 } else if (componentWeight <= 70) {
@@ -163,14 +163,39 @@ public class ProductServiceImpl implements ProductService {
                     shippingCost = 80;
                 }
 
+
+                girth = dimension.getBoxLength() + 2*(dimension.getBoxWidth() + dimension.getBoxHeight());
+                if (girth > 118) {
+                    shippingCost = shippingCost + 100;
+                } else {
+                    if (dimension.getBoxLength() >= 44) {
+                        shippingCost = shippingCost + 30;
+                    }
+                }
+
+                rows.add(new String[]{
+                        "", "", "","","",
+                        productComponent.getComponent().getSku(),
+                        String.valueOf(componentWeight),
+                        String.valueOf(girth),
+                        String.valueOf(quantityBox),
+                        String.valueOf(productComponent.getComponent().getPrice().getQB1()),
+                        String.valueOf(shippingCost),
+                        String.valueOf(productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox) + shippingCost * ((double) productComponent.getQuantity() / quantityBox)),
+                });
+
                 totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
-                productPrice = productPrice + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
+                if (Objects.equals(product.getShippingMethod(), "LTL")) {
+                    totalShipCost = totalShipCost*0.8;
+                }
+
+                productPrice = productPrice + (productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox) + shippingCost);
             }
         }
 
 
         if (productPrice > 2000) {
-            productPrice = productPrice * 0.85;
+            productPrice = productPrice * 0.80;
         } else if (productPrice > 1000) {
             productPrice = productPrice * 0.90;
         } else if (productPrice > 500) {
@@ -181,7 +206,25 @@ public class ProductServiceImpl implements ProductService {
             productPrice = product.getPrice().getAmazonPrice() * 1.05;
         }
 
+        rows.add(new String[]{
+                product.getSku().toLowerCase(),
+                product.getTitle(),
+                String.valueOf(productWeight),
+                String.valueOf(product.getShippingMethod()),
+                String.valueOf(productPrice),
+                "","","","","",
+                String.valueOf(totalShipCost),
+                String.valueOf(productPrice),
+                String.valueOf(productPrice*0.95),
+                String.valueOf(productPrice*0.90),
+                String.valueOf(productPrice*0.80),
+        });
         return productPrice;
+    }
+
+    @Override
+    public double calculateEWFDirectPriceLTL(Product product, List<String[]> rows) {
+        return 0;
     }
 
     @Override
