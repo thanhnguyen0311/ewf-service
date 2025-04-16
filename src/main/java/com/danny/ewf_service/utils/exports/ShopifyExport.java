@@ -35,9 +35,7 @@ public class ShopifyExport {
 
         String[] header = {"Handle", "Title", "Total Weight", "Shipping Method" , "Variant Price","Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price","-5%", "-10%", "-20%" };
         rows.add(header);
-        products.stream()
-                .limit(5).
-        forEach(product -> {
+        products.forEach(product -> {
             if (product.getPrice() == null) return;
             double productPrice = productService.calculateEWFDirectPriceGround(product, rows);
             System.out.println("Exported " + product.getSku() + " price " + productPrice);
