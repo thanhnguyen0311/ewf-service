@@ -40,7 +40,7 @@ public class ShopifyExport {
         rows.add(header);
         products.forEach(product -> {
             if (product.getPrice() == null) return;
-            double productPrice = productService.calculateEWFDirectPrice(product);
+            double productPrice = productService.calculateEWFDirectPrice(product, rows);
 
             rows.add(new String[]{
                     product.getSku().toLowerCase(),

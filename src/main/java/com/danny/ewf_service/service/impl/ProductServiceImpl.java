@@ -116,7 +116,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public double calculateEWFDirectPrice(Product product) {
+    public double calculateEWFDirectPrice(Product product,  List<String[]> rows) {
         double productWeight = 0;
         double productPrice = product.getPrice().getQB7();
         double totalShipCost = 0;
@@ -151,10 +151,12 @@ public class ProductServiceImpl implements ProductService {
                     shippingCost = 30;
                 } else if (componentWeight <= 60) {
                     shippingCost = 42;
+                } else if (componentWeight <= 65) {
+                    shippingCost = 30;
                 } else if (componentWeight <= 70) {
-                    shippingCost = 50;
+                    shippingCost = 35;
                 } else if (componentWeight <= 80) {
-                    shippingCost = 60;
+                    shippingCost = 50;
                 } else if (componentWeight <= 100) {
                     shippingCost = 70;
                 } else {
