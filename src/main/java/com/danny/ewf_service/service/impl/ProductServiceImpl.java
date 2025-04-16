@@ -203,10 +203,11 @@ public class ProductServiceImpl implements ProductService {
         } else if (productPrice > 500) {
             productPrice = productPrice * 0.95;
         }
-
+        product.getPrice().setEwfdirect(productPrice);
+        productRepository.save(product);
 
         rows.add(new String[]{
-                product.getSku().toUpperCase(),
+                product.getSku().toLowerCase(),
                 product.getTitle(),
                 String.valueOf(productWeight),
                 String.valueOf(product.getShippingMethod()),
