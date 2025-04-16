@@ -20,5 +20,5 @@ public interface ProductService {
 
     ProductDetailResponseDto updateProductDetailById(Long id, ProductDetailRequestDto productDetailRequestDto);
 
-    double calculateEWFDirectPrice(Product product);
+    double calculateEWFDirectPrice(Product product, List<String[]> rows);
 }

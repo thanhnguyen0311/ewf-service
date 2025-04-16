@@ -310,4 +310,45 @@ public class ProductsImport {
             throw new RuntimeException("Error reading CSV file", e);
         }
     }
+
+    public void importProductShipping(){
+        try (InputStream file = getClass().getResourceAsStream("/data/shipping.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] columns = line.split(",");
+                if (columns.length < 2) {
+                    continue;
+                }
+
+                String sku = columns[0].trim().toUpperCase();
+                String method = columns[1].trim();
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    Product product;
+                    Optional<Product> optionalProduct = productRepository.findBySku(sku);
+                    if (optionalProduct.isPresent()) {
+                        product = optionalProduct.get();
+                        product.setShippingMethod(method);
+                        productRepository.save(product);
+                        System.out.println("Successfully Updated product : " + sku + " VALUES : " + method);
+                    }
+
+
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
 }
