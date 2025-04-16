@@ -115,11 +115,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public double calculateEWFDirectPriceGround(Product product,  List<String[]> rows) {
-        System.out.println("Processing  " + product.getSku() + " " + product.getTitle());
         double productWeight = 0;
         double productPrice = 0;
         double totalShipCost = 0;
         double totalQB1 = 0;
+        int stt = 1;
 
         List<ProductComponent> components = product.getComponents();
 
@@ -146,37 +146,40 @@ public class ProductServiceImpl implements ProductService {
                 productWeight = productWeight + componentWeight;
 
                 if (componentWeight <= 20) {
-                    shippingCost = 10;
-                } else if (componentWeight <= 40) {
                     shippingCost = 15;
-                } else if (componentWeight <= 50) {
+                } else if (componentWeight <= 40) {
                     shippingCost = 20;
-                } else if (componentWeight <= 60) {
+                } else if (componentWeight <= 50) {
                     shippingCost = 25;
-                } else if (componentWeight <= 65) {
-                    shippingCost = 30;
-                } else if (componentWeight <= 70) {
+                } else if (componentWeight <= 60) {
                     shippingCost = 35;
+                } else if (componentWeight <= 70) {
+                    shippingCost = 45;
                 } else if (componentWeight <= 80) {
-                    shippingCost = 50;
+                    shippingCost = 60;
                 } else if (componentWeight <= 100) {
-                    shippingCost = 70;
-                } else {
                     shippingCost = 80;
+                } else {
+                    shippingCost = 90;
                 }
 
 
                 girth = dimension.getBoxLength() + 2*(dimension.getBoxWidth() + dimension.getBoxHeight());
                 if (girth > 118) {
-                    shippingCost = shippingCost + 105;
+                    shippingCost = shippingCost + 115;
                 } else {
                     if (dimension.getBoxLength() >= 44) {
-                        shippingCost = shippingCost + 30;
+                        shippingCost = shippingCost + 35;
                     }
                 }
+
                 totalQB1 = totalQB1 + (productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox));
                 rows.add(new String[]{
-                        "", "", "","","",
+                        String.valueOf(stt),
+                        product.getSku().toUpperCase(),
+                        "", "",
+                        product.getShippingMethod(),
+                        "",
                         productComponent.getComponent().getSku(),
                         String.valueOf(componentWeight),
                         String.valueOf(girth),
@@ -187,10 +190,10 @@ public class ProductServiceImpl implements ProductService {
                 });
 
                 totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
-                if (Objects.equals(product.getShippingMethod(), "LTL")) {
-                    totalShipCost = totalShipCost*0.8;
-                }
-
+//                if (Objects.equals(product.getShippingMethod(), "LTL")) {
+//                    totalShipCost = totalShipCost*0.9;
+//                }
+                stt++;
                 productPrice = productPrice + (productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox) + shippingCost);
             }
         }
@@ -207,7 +210,8 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
 
         rows.add(new String[]{
-                product.getSku().toLowerCase(),
+                String.valueOf(stt),
+                product.getSku().toUpperCase(),
                 product.getTitle(),
                 String.valueOf(productWeight),
                 String.valueOf(product.getShippingMethod()),
