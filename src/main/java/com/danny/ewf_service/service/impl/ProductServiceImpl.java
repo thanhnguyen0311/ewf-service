@@ -174,16 +174,16 @@ public class ProductServiceImpl implements ProductService {
                     }
                 }
 
-                rows.add(new String[]{
-                        "", "", "","","",
-                        productComponent.getComponent().getSku(),
-                        String.valueOf(componentWeight),
-                        String.valueOf(girth),
-                        String.valueOf(quantityBox),
-                        String.valueOf(productComponent.getComponent().getPrice().getQB1()),
-                        String.valueOf(shippingCost),
-                        String.valueOf(productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox) + shippingCost * ((double) productComponent.getQuantity() / quantityBox)),
-                });
+//                rows.add(new String[]{
+//                        "", "", "","","",
+//                        productComponent.getComponent().getSku(),
+//                        String.valueOf(componentWeight),
+//                        String.valueOf(girth),
+//                        String.valueOf(quantityBox),
+//                        String.valueOf(productComponent.getComponent().getPrice().getQB1()),
+//                        String.valueOf(shippingCost),
+//                        String.valueOf(productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox) + shippingCost * ((double) productComponent.getQuantity() / quantityBox)),
+//                });
 
                 totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
                 if (Objects.equals(product.getShippingMethod(), "LTL")) {
@@ -196,16 +196,15 @@ public class ProductServiceImpl implements ProductService {
 
 
         if (productPrice > 2000) {
-            productPrice = productPrice * 0.80;
+            productPrice = productPrice * 0.83;
         } else if (productPrice > 1000) {
             productPrice = productPrice * 0.90;
         } else if (productPrice > 500) {
             productPrice = productPrice * 0.95;
         }
 
-        if (product.getPrice().getAmazonPrice() > 0.0 && productPrice > product.getPrice().getAmazonPrice()) {
-            productPrice = product.getPrice().getAmazonPrice() * 1.05;
-        }
+        product.getPrice().setEwfdirect(productPrice);
+        productRepository.save(product);
 
         rows.add(new String[]{
                 product.getSku().toLowerCase(),
