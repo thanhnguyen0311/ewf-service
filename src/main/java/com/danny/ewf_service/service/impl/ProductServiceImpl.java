@@ -119,6 +119,7 @@ public class ProductServiceImpl implements ProductService {
         double productWeight = 0;
         double productPrice = 0;
         double totalShipCost = 0;
+        double totalQB1 = 0;
 
         List<ProductComponent> components = product.getComponents();
 
@@ -167,13 +168,13 @@ public class ProductServiceImpl implements ProductService {
 
                 girth = dimension.getBoxLength() + 2*(dimension.getBoxWidth() + dimension.getBoxHeight());
                 if (girth > 118) {
-                    shippingCost = shippingCost + 100;
+                    shippingCost = shippingCost + 105;
                 } else {
                     if (dimension.getBoxLength() >= 44) {
                         shippingCost = shippingCost + 30;
                     }
                 }
-
+                totalQB1 = totalQB1 + (productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox));
                 rows.add(new String[]{
                         "", "", "","","",
                         productComponent.getComponent().getSku(),
@@ -196,30 +197,29 @@ public class ProductServiceImpl implements ProductService {
 
 
         if (productPrice > 2000) {
-            productPrice = productPrice * 0.80;
+            productPrice = productPrice * 0.85;
         } else if (productPrice > 1000) {
             productPrice = productPrice * 0.90;
         } else if (productPrice > 500) {
             productPrice = productPrice * 0.95;
         }
 
-        if (product.getPrice().getAmazonPrice() > 0.0 && productPrice > product.getPrice().getAmazonPrice()) {
-            productPrice = product.getPrice().getAmazonPrice() * 1.05;
-        }
 
         rows.add(new String[]{
-                product.getSku().toLowerCase(),
+                product.getSku().toUpperCase(),
                 product.getTitle(),
                 String.valueOf(productWeight),
                 String.valueOf(product.getShippingMethod()),
                 String.valueOf(productPrice),
-                "","","","","",
+                "","","","",
+                String.valueOf(totalQB1),
                 String.valueOf(totalShipCost),
                 String.valueOf(productPrice),
                 String.valueOf(product.getPrice().getAmazonPrice()),
                 String.valueOf(productPrice*0.95),
                 String.valueOf(productPrice*0.90),
                 String.valueOf(productPrice*0.80),
+                "http://www.amazon.com/dp/"+product.getAsin(),
         });
         return productPrice;
     }
