@@ -20,5 +20,6 @@ public interface ProductService {
 
     ProductDetailResponseDto updateProductDetailById(Long id, ProductDetailRequestDto productDetailRequestDto);
 
-    double calculateEWFDirectPrice(Product product, List<String[]> rows);
+    double calculateEWFDirectPriceGround(Product product, List<String[]> rows);
+    double calculateEWFDirectPriceLTL(Product product, List<String[]> rows);
 }

@@ -11,10 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -35,19 +32,14 @@ public class ShopifyExport {
     public void exportShopifyProductsPrice(String filePath) throws Exception {
         List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
         List<String[]> rows = new ArrayList<>();
-//        String[] header = {"SKU", "QB7","shipping", "Price"};
-        String[] header = {"Handle", "Title", "Variant Price"};
+
+        String[] header = {"Handle", "Title", "Total Weight", "Shipping Method" , "Variant Price","Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price","-5%", "-10%", "-20%" };
         rows.add(header);
-        products.forEach(product -> {
+        products.stream()
+                .limit(5).
+        forEach(product -> {
             if (product.getPrice() == null) return;
-            double productPrice = productService.calculateEWFDirectPrice(product, rows);
-
-            rows.add(new String[]{
-                    product.getSku().toLowerCase(),
-                    product.getTitle(),
-                    String.valueOf(productPrice)
-            });
-
+            double productPrice = productService.calculateEWFDirectPriceGround(product, rows);
             System.out.println("Exported " + product.getSku() + " price " + productPrice);
         });
 
