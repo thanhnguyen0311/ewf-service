@@ -115,11 +115,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public double calculateEWFDirectPriceGround(Product product,  List<String[]> rows) {
-        System.out.println("Processing  " + product.getSku() + " " + product.getTitle());
         double productWeight = 0;
         double productPrice = 0;
         double totalShipCost = 0;
         double totalQB1 = 0;
+        int stt = 1;
 
         List<ProductComponent> components = product.getComponents();
 
@@ -174,9 +174,14 @@ public class ProductServiceImpl implements ProductService {
                         shippingCost = shippingCost + 30;
                     }
                 }
+
                 totalQB1 = totalQB1 + (productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox));
                 rows.add(new String[]{
-                        "", "", "","","",
+                        String.valueOf(stt),
+                        product.getSku().toUpperCase(),
+                        "", "",
+                        product.getShippingMethod(),
+                        "",
                         productComponent.getComponent().getSku(),
                         String.valueOf(componentWeight),
                         String.valueOf(girth),
@@ -190,7 +195,7 @@ public class ProductServiceImpl implements ProductService {
                 if (Objects.equals(product.getShippingMethod(), "LTL")) {
                     totalShipCost = totalShipCost*0.8;
                 }
-
+                stt++;
                 productPrice = productPrice + (productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox) + shippingCost);
             }
         }
@@ -206,6 +211,7 @@ public class ProductServiceImpl implements ProductService {
 
 
         rows.add(new String[]{
+                String.valueOf(stt),
                 product.getSku().toUpperCase(),
                 product.getTitle(),
                 String.valueOf(productWeight),
