@@ -32,9 +32,9 @@ public class ImportController {
         try {
             String filepath = "ewfdirect_prices.csv";
 //            amazonDataExport.extractDataFromAmazon();
-            shopifyExport.exportShopifyProductsPrice(filepath);
+//            shopifyExport.exportShopifyProductsPrice(filepath);
 //            productsImport.importProductShipping();
-//            componentsImport.importPrices();
+            componentsImport.importPrices();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

@@ -115,6 +115,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public double calculateEWFDirectPriceGround(Product product,  List<String[]> rows) {
+        System.out.println("Processing  " + product.getSku() + " " + product.getTitle());
         double productWeight = 0;
         double productPrice = 0;
         double totalShipCost = 0;
@@ -215,6 +216,7 @@ public class ProductServiceImpl implements ProductService {
                 "","","","","",
                 String.valueOf(totalShipCost),
                 String.valueOf(productPrice),
+                String.valueOf(product.getPrice().getAmazonPrice()),
                 String.valueOf(productPrice*0.95),
                 String.valueOf(productPrice*0.90),
                 String.valueOf(productPrice*0.80),
