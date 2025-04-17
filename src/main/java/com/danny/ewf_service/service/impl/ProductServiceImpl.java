@@ -208,8 +208,8 @@ public class ProductServiceImpl implements ProductService {
             totalShipCost = totalShipCost * 0.8;
         }
 
-        product.getPrice().setEwfdirect(productPrice);
-        productRepository.save(product);
+//        product.getPrice().setEwfdirect(productPrice);
+//        productRepository.save(product);
 
         rows.add(new String[]{
                 String.valueOf(stt),
