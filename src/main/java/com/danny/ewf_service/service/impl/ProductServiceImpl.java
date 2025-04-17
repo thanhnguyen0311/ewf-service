@@ -124,12 +124,12 @@ public class ProductServiceImpl implements ProductService {
         List<ProductComponent> components = product.getComponents();
 
         for (ProductComponent productComponent : components) {
-            double shippingCost;
-            double girth;
+            double shippingCost = 0;
+            double girth = 0;
             Dimension dimension = productComponent.getComponent().getDimension();
-            long quantityBox;
+            long quantityBox = 0;
             double componentPrice = productComponent.getComponent().getPrice().getQB1();
-            double boxCount;
+            double boxCount = 0;
             if (dimension != null) {
 
                 quantityBox = productComponent.getComponent().getDimension().getQuantityBox();
