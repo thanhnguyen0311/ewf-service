@@ -2,6 +2,7 @@ package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Dimension;
+import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.product.ProductWholesales;
@@ -266,7 +267,128 @@ public class ProductsImport {
         }
     }
 
-    public void importProductShopify() {
+    public void importProductPrice() {
+        try (InputStream file = getClass().getResourceAsStream("/data/new_price.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] columns = line.split(",");
+                if (columns.length < 2) {
+                    continue;
+                }
+
+                String sku = columns[0].trim().toUpperCase();
+                double qb2025 = Double.parseDouble(columns[1].trim());
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    Product product;
+                    Optional<Product> optionalProduct = productRepository.findBySku(sku);
+                    if (optionalProduct.isPresent()) {
+                        product = optionalProduct.get();
+                        Price price = product.getPrice();
+                        if (price == null) price = new Price();
+                        price.setQB2025(qb2025);
+                        product.setPrice(price);
+                        productRepository.save(product);
+                        System.out.println("Successfully Updated product : " + sku + " VALUES : " + price);
+                    }
+
+
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
     }
+
+    public void importProductShipping(){
+        try (InputStream file = getClass().getResourceAsStream("/data/shipping.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] columns = line.split(",");
+                if (columns.length < 2) {
+                    continue;
+                }
+
+                String sku = columns[0].trim().toUpperCase();
+                String method = columns[1].trim();
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    Product product;
+                    Optional<Product> optionalProduct = productRepository.findBySku(sku);
+                    if (optionalProduct.isPresent()) {
+                        product = optionalProduct.get();
+                        product.setShippingMethod(method);
+                        productRepository.save(product);
+                        System.out.println("Successfully Updated product : " + sku + " VALUES : " + method);
+                    }
+
+
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
+
+    public void updateComponentQuantity(){
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] columns = line.split(",");
+                if (columns.length < 1) {
+                    continue;
+                }
+
+                String sku = columns[0].trim();
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
+                Optional<Product> optionalProduct = productRepository.findBySku(sku);
+                if (optionalProduct.isPresent()) {
+                    Product product = optionalProduct.get();
+                    List<ProductComponent> productComponents = product.getComponents();
+                    if (productComponents.size() == 1) {
+                        productComponents.get(0).setQuantity(2L);
+                    } else{
+                        System.err.println("ERROR : " + sku + " VALUES : " + productComponents.get(0).getComponent().getSku() );
+                        continue;
+                    }
+                    product.setComponents(productComponents);
+                    productRepository.save(product);
+                    System.out.println("Successfully Updated Component SKU : " + sku + " VALUES : " + productComponents.get(0).getComponent().getSku() + " Quantity 2" );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
+
 }

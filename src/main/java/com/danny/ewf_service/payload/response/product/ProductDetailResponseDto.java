@@ -39,6 +39,7 @@ public class ProductDetailResponseDto {
     private Boolean ewfdirect = false;
     private Boolean houstonDirect = false;
     private Boolean ewfmain = false;
+    private String sizeShape;
 
 }
 

@@ -19,4 +19,7 @@ public interface ProductService {
     List<Product> findMergedProducts(Product product);
 
     ProductDetailResponseDto updateProductDetailById(Long id, ProductDetailRequestDto productDetailRequestDto);
+
+    double calculateEWFDirectPriceGround(Product product, List<String[]> rows);
+    double calculateEWFDirectPriceLTL(Product product, List<String[]> rows);
 }

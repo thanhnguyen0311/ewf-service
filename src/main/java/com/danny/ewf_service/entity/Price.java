@@ -40,4 +40,11 @@ public class Price {
 
     @Column(name = "amazon")
     private Double amazonPrice;
+
+    @Column(name = "QB2025")
+    private Double QB2025;
+
+    @Column(name = "ewfdirect")
+    private Double ewfdirect;
+
 }

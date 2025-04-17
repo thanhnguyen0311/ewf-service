@@ -9,7 +9,8 @@ import java.util.List;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-    boolean existsByPhone(String phone); //
+
+    boolean existsByPhone(String phone);
 
     List<Customer> findByPhone(String phone);
 

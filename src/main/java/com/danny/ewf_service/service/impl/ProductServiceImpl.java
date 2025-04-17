@@ -1,6 +1,7 @@
 package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IProductMapper;
+import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
@@ -21,9 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,6 +114,125 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public double calculateEWFDirectPriceGround(Product product,  List<String[]> rows) {
+        double productWeight = 0;
+        double productPrice = 0;
+        double totalShipCost = 0;
+        double totalQB1 = 0;
+        int stt = 1;
+
+        List<ProductComponent> components = product.getComponents();
+
+        for (ProductComponent productComponent : components) {
+            double shippingCost;
+            double girth;
+            Dimension dimension = productComponent.getComponent().getDimension();
+            long quantityBox;
+            double componentPrice = productComponent.getComponent().getPrice().getQB1();
+            double boxCount;
+            if (dimension != null) {
+
+                quantityBox = productComponent.getComponent().getDimension().getQuantityBox();
+
+                if (quantityBox == 0) {
+                    quantityBox = 1;
+                }
+
+                boxCount = (double) productComponent.getQuantity() / quantityBox;
+                double componentWeight = (dimension.getBoxLength() * dimension.getBoxWidth() * dimension.getBoxHeight()) / 139;
+
+                if (componentWeight < dimension.getBoxWeight()) {
+                    componentWeight = dimension.getBoxWeight();
+                }
+                productWeight = productWeight + componentWeight;
+
+                if (componentWeight <= 20) {
+                    shippingCost = 15;
+                } else if (componentWeight <= 40) {
+                    shippingCost = 18;
+                } else if (componentWeight <= 60) {
+                    shippingCost = 22;
+                } else if (componentWeight <= 70) {
+                    shippingCost = 25;
+                } else if (componentWeight <= 80) {
+                    shippingCost = 27;
+                } else {
+                    shippingCost = 30;
+                }
+
+
+                girth = dimension.getBoxLength() + 2*(dimension.getBoxWidth() + dimension.getBoxHeight());
+                if (girth > 118) {
+                    shippingCost = shippingCost + 105;
+                } else {
+                    if (dimension.getBoxLength() >= 44) {
+                        shippingCost = shippingCost + 30;
+                    }
+                }
+
+                totalQB1 = totalQB1 + (componentPrice*productComponent.getQuantity());
+                shippingCost = shippingCost * boxCount;
+                totalShipCost = totalShipCost + shippingCost;
+                productPrice = productPrice + (componentPrice*productComponent.getQuantity() + shippingCost);
+
+                rows.add(new String[]{
+                        String.valueOf(stt),
+                        "",
+                        "",
+                        product.getShippingMethod(),
+                        "",
+                        productComponent.getComponent().getSku(),
+                        String.valueOf(componentWeight),
+                        String.valueOf(girth),
+                        String.valueOf(boxCount),
+                        String.valueOf(productComponent.getComponent().getPrice().getQB1()),
+                        String.valueOf(shippingCost),
+                        String.valueOf(componentPrice*boxCount +shippingCost),
+                });
+//                if (Objects.equals(product.getShippingMethod(), "LTL")) {
+//                    totalShipCost = totalShipCost*0.9;
+//                }
+                stt++;
+            }
+        }
+
+        if (productPrice > 2000) {
+            productPrice = productPrice * 0.85;
+        } else if (productPrice > 1000) {
+            productPrice = productPrice * 0.90;
+        } else if (productPrice > 500) {
+            productPrice = productPrice * 0.95;
+        }
+
+        if(Objects.equals(product.getShippingMethod(), "LTL")) {
+            totalShipCost = totalShipCost * 0.8;
+        }
+
+        product.getPrice().setEwfdirect(productPrice);
+        productRepository.save(product);
+
+        rows.add(new String[]{
+                String.valueOf(stt),
+                product.getSku().toLowerCase(),
+                product.getTitle(),
+                String.valueOf(product.getShippingMethod()),
+                String.valueOf(productPrice),
+                "","","","",
+                String.valueOf(totalQB1),
+                String.valueOf(totalShipCost),
+                String.valueOf(productPrice),
+                String.valueOf(product.getPrice().getAmazonPrice()),
+                "http://www.amazon.com/dp/"+product.getAsin(),
+        });
+        return productPrice;
+    }
+
+    @Override
+    public double calculateEWFDirectPriceLTL(Product product, List<String[]> rows) {
+        return 0;
+    }
+
+    @Override
     public List<Product> findMergedProducts(Product product) {
 
         List<ProductComponent> groupComponents = product.getComponents().stream()
@@ -190,6 +308,7 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getShippingMethod() != null) product.setShippingMethod(dto.getShippingMethod());
         if (dto.getDiscontinued() != null) product.setDiscontinued(dto.getDiscontinued());
 
+
         // Initialize productDetail if null
         if (product.getProductDetail() == null) {
             product.setProductDetail(new ProductDetail());
@@ -216,6 +335,13 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getEwfdirect() != null) product.getWholesales().setEwfdirect(dto.getEwfdirect());
         if (dto.getHoustondirect() != null) product.getWholesales().setHoustonDirect(dto.getHoustondirect());
         if (dto.getEwfmain() != null) product.getWholesales().setEwfmain(dto.getEwfmain());
+
+        if (dto.getSizeShape() != null) {
+            Dimension dimension = product.getDimension();
+            if (dimension == null) dimension = new Dimension();
+            dimension.setSizeShape(dto.getSizeShape());
+            product.setDimension(dimension);
+        }
     }
 }
 

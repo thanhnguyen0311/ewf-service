@@ -46,4 +46,6 @@ public class ProductDetail {
     @Column(name = "finish")
     private String finish;
 
+    @Column(name = "style")
+    private String stype;
 }

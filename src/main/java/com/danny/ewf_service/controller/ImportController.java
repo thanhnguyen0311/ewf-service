@@ -2,6 +2,8 @@ package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
+import com.danny.ewf_service.utils.imports.ComponentsImport;
+import com.danny.ewf_service.utils.imports.ProductsImport;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +20,21 @@ public class ImportController {
     @Autowired
     private final ShopifyExport shopifyExport;
 
+    @Autowired
+    private final ProductsImport productsImport;
+
+    @Autowired
+    private final ComponentsImport componentsImport;
+
 
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            amazonDataExport.extractDataFromAmazon();
+            String filepath = "ewfdirect_prices.csv";
+//            amazonDataExport.extractDataFromAmazon();
+            shopifyExport.exportShopifyProductsPrice(filepath);
+//            productsImport.updateComponentQuantity();
+//            componentsImport.importPrices();
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
