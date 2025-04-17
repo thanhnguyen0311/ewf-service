@@ -389,7 +389,7 @@ public class ComponentsImport {
     }
 
     public void importPrices() {
-        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/discount_sku.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
@@ -422,9 +422,6 @@ public class ComponentsImport {
 
                     Price price = component.getPrice();
                     if (price == null) price = new Price();
-                    if (price.getQB1() != null) {
-                        continue;
-                    }
 
                     price.setQB1(qb1);
                     component.setPrice(price);
