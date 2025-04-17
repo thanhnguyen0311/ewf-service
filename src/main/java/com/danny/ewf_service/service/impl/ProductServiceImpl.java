@@ -128,16 +128,15 @@ public class ProductServiceImpl implements ProductService {
             double girth;
             Dimension dimension = productComponent.getComponent().getDimension();
             long quantityBox;
-
+            double componentPrice = productComponent.getComponent().getPrice().getQB1();
+            double boxCount;
             if (dimension != null) {
 
                 quantityBox = productComponent.getComponent().getDimension().getQuantityBox();
                 if (quantityBox == 0) {
                     quantityBox = 1;
                 }
-
-
-
+                boxCount = (double) productComponent.getQuantity() / quantityBox;
                 double componentWeight = (dimension.getBoxLength() * dimension.getBoxWidth() * dimension.getBoxHeight()) / 139;
 
                 if (componentWeight < dimension.getBoxWeight()) {
@@ -148,19 +147,17 @@ public class ProductServiceImpl implements ProductService {
                 if (componentWeight <= 20) {
                     shippingCost = 15;
                 } else if (componentWeight <= 40) {
-                    shippingCost = 20;
-                } else if (componentWeight <= 50) {
-                    shippingCost = 25;
+                    shippingCost = 22;
                 } else if (componentWeight <= 60) {
-                    shippingCost = 35;
+                    shippingCost = 28;
                 } else if (componentWeight <= 70) {
-                    shippingCost = 45;
+                    shippingCost = 35;
                 } else if (componentWeight <= 80) {
-                    shippingCost = 60;
+                    shippingCost = 50;
                 } else if (componentWeight <= 100) {
-                    shippingCost = 80;
+                    shippingCost = 70;
                 } else {
-                    shippingCost = 90;
+                    shippingCost = 80;
                 }
 
 
@@ -173,31 +170,32 @@ public class ProductServiceImpl implements ProductService {
                     }
                 }
 
-                totalQB1 = totalQB1 + (productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox));
+                totalQB1 = totalQB1 + (componentPrice*boxCount);
+
+                shippingCost = shippingCost * boxCount;
+                totalShipCost = totalShipCost + shippingCost;
+                productPrice = productPrice + (componentPrice*boxCount + shippingCost);
+
                 rows.add(new String[]{
                         String.valueOf(stt),
-                        product.getSku().toUpperCase(),
-                        "", "",
+                        "",
+                        "",
                         product.getShippingMethod(),
                         "",
                         productComponent.getComponent().getSku(),
                         String.valueOf(componentWeight),
                         String.valueOf(girth),
-                        String.valueOf(quantityBox),
+                        String.valueOf(boxCount),
                         String.valueOf(productComponent.getComponent().getPrice().getQB1()),
                         String.valueOf(shippingCost),
-                        String.valueOf(productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox) + shippingCost * ((double) productComponent.getQuantity() / quantityBox)),
+                        String.valueOf(componentPrice+shippingCost),
                 });
-
-                totalShipCost = totalShipCost + shippingCost * ((double) productComponent.getQuantity() / quantityBox);
 //                if (Objects.equals(product.getShippingMethod(), "LTL")) {
 //                    totalShipCost = totalShipCost*0.9;
 //                }
                 stt++;
-                productPrice = productPrice + (productComponent.getComponent().getPrice().getQB1()*((double) productComponent.getQuantity() / quantityBox) + shippingCost);
             }
         }
-
 
         if (productPrice > 2000) {
             productPrice = productPrice * 0.85;
@@ -206,14 +204,15 @@ public class ProductServiceImpl implements ProductService {
         } else if (productPrice > 500) {
             productPrice = productPrice * 0.95;
         }
+
+
         product.getPrice().setEwfdirect(productPrice);
         productRepository.save(product);
 
         rows.add(new String[]{
                 String.valueOf(stt),
-                product.getSku().toUpperCase(),
+                product.getSku().toLowerCase(),
                 product.getTitle(),
-                String.valueOf(productWeight),
                 String.valueOf(product.getShippingMethod()),
                 String.valueOf(productPrice),
                 "","","","",
@@ -221,9 +220,6 @@ public class ProductServiceImpl implements ProductService {
                 String.valueOf(totalShipCost),
                 String.valueOf(productPrice),
                 String.valueOf(product.getPrice().getAmazonPrice()),
-                String.valueOf(productPrice*0.95),
-                String.valueOf(productPrice*0.90),
-                String.valueOf(productPrice*0.80),
                 "http://www.amazon.com/dp/"+product.getAsin(),
         });
         return productPrice;

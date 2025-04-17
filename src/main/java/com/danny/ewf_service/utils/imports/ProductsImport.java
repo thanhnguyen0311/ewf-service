@@ -351,4 +351,44 @@ public class ProductsImport {
             throw new RuntimeException("Error reading CSV file", e);
         }
     }
+
+    public void updateComponentQuantity(){
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] columns = line.split(",");
+                if (columns.length < 1) {
+                    continue;
+                }
+
+                String sku = columns[0].trim();
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
+                Optional<Product> optionalProduct = productRepository.findBySku(sku);
+                if (optionalProduct.isPresent()) {
+                    Product product = optionalProduct.get();
+                    List<ProductComponent> productComponents = product.getComponents();
+                    if (productComponents.size() == 1) {
+                        productComponents.get(0).setQuantity(2L);
+                    } else{
+                        System.err.println("ERROR : " + sku + " VALUES : " + productComponents.get(0).getComponent().getSku() );
+                        continue;
+                    }
+                    product.setComponents(productComponents);
+                    productRepository.save(product);
+                    System.out.println("Successfully Updated Component SKU : " + sku + " VALUES : " + productComponents.get(0).getComponent().getSku() + " Quantity 2" );
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
+
 }

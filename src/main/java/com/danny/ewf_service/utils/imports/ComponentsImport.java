@@ -138,7 +138,6 @@ public class ComponentsImport {
         return true;
     }
 
-    @Transactional
     public void importProductComponentMapping() {
         try (InputStream file = getClass().getResourceAsStream("/data/import_components.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
@@ -440,4 +439,6 @@ public class ComponentsImport {
             throw new RuntimeException("Error reading CSV file", e);
         }
     }
+
+
 }
