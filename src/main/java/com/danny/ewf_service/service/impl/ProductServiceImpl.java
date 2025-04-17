@@ -133,9 +133,11 @@ public class ProductServiceImpl implements ProductService {
             if (dimension != null) {
 
                 quantityBox = productComponent.getComponent().getDimension().getQuantityBox();
+
                 if (quantityBox == 0) {
                     quantityBox = 1;
                 }
+
                 boxCount = (double) productComponent.getQuantity() / quantityBox;
                 double componentWeight = (dimension.getBoxLength() * dimension.getBoxWidth() * dimension.getBoxHeight()) / 139;
 
@@ -170,11 +172,10 @@ public class ProductServiceImpl implements ProductService {
                     }
                 }
 
-                totalQB1 = totalQB1 + (componentPrice*boxCount);
-
+                totalQB1 = totalQB1 + (componentPrice*productComponent.getQuantity());
                 shippingCost = shippingCost * boxCount;
                 totalShipCost = totalShipCost + shippingCost;
-                productPrice = productPrice + (componentPrice*boxCount + shippingCost);
+                productPrice = productPrice + (componentPrice*productComponent.getQuantity() + shippingCost);
 
                 rows.add(new String[]{
                         String.valueOf(stt),
