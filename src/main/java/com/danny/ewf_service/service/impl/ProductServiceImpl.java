@@ -157,18 +157,18 @@ public class ProductServiceImpl implements ProductService {
                 } else if (componentWeight <= 80) {
                     shippingCost = 40;
                 } else if (componentWeight <= 100) {
-                    shippingCost = 70;
+                    shippingCost = 50;
                 } else {
-                    shippingCost = 80;
+                    shippingCost = 60;
                 }
 
 
                 girth = dimension.getBoxLength() + 2*(dimension.getBoxWidth() + dimension.getBoxHeight());
                 if (girth > 118) {
-                    shippingCost = shippingCost + 115;
+                    shippingCost = shippingCost + 105;
                 } else {
                     if (dimension.getBoxLength() >= 44) {
-                        shippingCost = shippingCost + 35;
+                        shippingCost = shippingCost + 30;
                     }
                 }
 
@@ -189,7 +189,7 @@ public class ProductServiceImpl implements ProductService {
                         String.valueOf(boxCount),
                         String.valueOf(productComponent.getComponent().getPrice().getQB1()),
                         String.valueOf(shippingCost),
-                        String.valueOf(componentPrice+shippingCost),
+                        String.valueOf(componentPrice*boxCount +shippingCost),
                 });
 //                if (Objects.equals(product.getShippingMethod(), "LTL")) {
 //                    totalShipCost = totalShipCost*0.9;
@@ -206,6 +206,9 @@ public class ProductServiceImpl implements ProductService {
             productPrice = productPrice * 0.95;
         }
 
+        if(Objects.equals(product.getShippingMethod(), "LTL")) {
+            totalShipCost = totalShipCost * 0.8;
+        }
 
         product.getPrice().setEwfdirect(productPrice);
         productRepository.save(product);
@@ -307,6 +310,7 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getShippingMethod() != null) product.setShippingMethod(dto.getShippingMethod());
         if (dto.getDiscontinued() != null) product.setDiscontinued(dto.getDiscontinued());
 
+
         // Initialize productDetail if null
         if (product.getProductDetail() == null) {
             product.setProductDetail(new ProductDetail());
@@ -333,6 +337,13 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getEwfdirect() != null) product.getWholesales().setEwfdirect(dto.getEwfdirect());
         if (dto.getHoustondirect() != null) product.getWholesales().setHoustonDirect(dto.getHoustondirect());
         if (dto.getEwfmain() != null) product.getWholesales().setEwfmain(dto.getEwfmain());
+
+        if (dto.getSizeShape() != null) {
+            Dimension dimension = product.getDimension();
+            if (dimension == null) dimension = new Dimension();
+            dimension.setSizeShape(dto.getSizeShape());
+            product.setDimension(dimension);
+        }
     }
 }
 

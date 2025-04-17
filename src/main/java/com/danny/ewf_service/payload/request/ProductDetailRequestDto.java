@@ -32,4 +32,5 @@ public class ProductDetailRequestDto {
     private Boolean ewfdirect;
     private Boolean houstondirect;
     private Boolean ewfmain;
+    private String sizeShape;
 }

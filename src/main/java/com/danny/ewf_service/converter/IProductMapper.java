@@ -82,6 +82,7 @@ public interface IProductMapper {
     @Mapping(target = "subCategory", source = "product.productDetail.subCategory")
     @Mapping(target = "collection", source = "product.productDetail.collection")
     @Mapping(target = "pieces", source = "product.productDetail.pieces")
+    @Mapping(target = "sizeShape", source = "product.dimension.sizeShape")
     ProductDetailResponseDto productToProductDetailResponseDto(Product product);
     List<ProductDetailResponseDto> productListToProductDetailResponseDtoList(List<Product> products);
 
