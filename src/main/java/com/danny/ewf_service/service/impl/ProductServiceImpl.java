@@ -120,6 +120,7 @@ public class ProductServiceImpl implements ProductService {
         double totalShipCost = 0;
         double totalQB1 = 0;
         int stt = 1;
+        long totalQuantity = 0;
 
         List<ProductComponent> components = product.getComponents();
 
@@ -174,7 +175,7 @@ public class ProductServiceImpl implements ProductService {
                 shippingCost = shippingCost * boxCount;
                 totalShipCost = totalShipCost + shippingCost;
                 productPrice = productPrice + (componentPrice*productComponent.getQuantity() + shippingCost);
-
+                totalQuantity = totalQuantity + productComponent.getQuantity();
                 rows.add(new String[]{
                         String.valueOf(stt),
                         "",
@@ -184,7 +185,7 @@ public class ProductServiceImpl implements ProductService {
                         productComponent.getComponent().getSku(),
                         String.valueOf(componentWeight),
                         String.valueOf(girth),
-                        String.valueOf(boxCount),
+                        String.valueOf(componentPrice*productComponent.getQuantity()),
                         String.valueOf(productComponent.getComponent().getPrice().getQB3()),
                         String.valueOf(shippingCost),
                         String.valueOf(componentPrice*boxCount +shippingCost),
@@ -217,7 +218,8 @@ public class ProductServiceImpl implements ProductService {
                 product.getTitle(),
                 String.valueOf(product.getShippingMethod()),
                 String.valueOf(productPrice),
-                "","","","",
+                "","","",
+                String.valueOf(totalQuantity),
                 String.valueOf(totalQB1),
                 String.valueOf(totalShipCost),
                 String.valueOf(productPrice),
