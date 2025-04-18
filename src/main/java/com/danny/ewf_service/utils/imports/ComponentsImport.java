@@ -402,7 +402,11 @@ public class ComponentsImport {
                 }
 
                 String sku = columns[0].trim().toUpperCase();
-                double qb1 = Double.parseDouble(columns[1].trim());
+                double qb2 = Double.parseDouble(columns[1].trim());
+                double qb3 = Double.parseDouble(columns[2].trim());
+                double qb4 = Double.parseDouble(columns[3].trim());
+                double qb5 = Double.parseDouble(columns[4].trim());
+                double qb6 = Double.parseDouble(columns[5].trim());
 
                 if (sku.isEmpty()) {
                     continue;
@@ -423,10 +427,14 @@ public class ComponentsImport {
                     Price price = component.getPrice();
                     if (price == null) price = new Price();
 
-                    price.setQB1(qb1);
+                    price.setQB2(qb2);
+                    price.setQB3(qb3);
+                    price.setQB4(qb4);
+                    price.setQB5(qb5);
+                    price.setQB6(qb6);
                     component.setPrice(price);
                     componentRepository.save(component);
-                    System.out.println("Successfully Updated product : " + sku + " VALUES : " + qb1);
+                    System.out.println("Successfully Updated product : " + sku + " VALUES : " + price);
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
                 }
