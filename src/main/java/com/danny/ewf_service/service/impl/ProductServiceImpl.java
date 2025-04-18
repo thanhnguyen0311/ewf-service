@@ -128,7 +128,7 @@ public class ProductServiceImpl implements ProductService {
             double girth = 0;
             Dimension dimension = productComponent.getComponent().getDimension();
             long quantityBox = 0;
-            double componentPrice = productComponent.getComponent().getPrice().getQB1();
+            double componentPrice = productComponent.getComponent().getPrice().getQB3();
             double boxCount = 0;
             if (dimension != null) {
 
@@ -185,13 +185,13 @@ public class ProductServiceImpl implements ProductService {
                         String.valueOf(componentWeight),
                         String.valueOf(girth),
                         String.valueOf(boxCount),
-                        String.valueOf(productComponent.getComponent().getPrice().getQB1()),
+                        String.valueOf(productComponent.getComponent().getPrice().getQB3()),
                         String.valueOf(shippingCost),
                         String.valueOf(componentPrice*boxCount +shippingCost),
                 });
-//                if (Objects.equals(product.getShippingMethod(), "LTL")) {
-//                    totalShipCost = totalShipCost*0.9;
-//                }
+                if (Objects.equals(product.getShippingMethod(), "LTL")) {
+                    totalShipCost = totalShipCost*0.9;
+                }
                 stt++;
             }
         }
@@ -208,8 +208,8 @@ public class ProductServiceImpl implements ProductService {
             totalShipCost = totalShipCost * 0.8;
         }
 
-//        product.getPrice().setEwfdirect(productPrice);
-//        productRepository.save(product);
+        product.getPrice().setEwfdirect(productPrice);
+        productRepository.save(product);
 
         rows.add(new String[]{
                 String.valueOf(stt),

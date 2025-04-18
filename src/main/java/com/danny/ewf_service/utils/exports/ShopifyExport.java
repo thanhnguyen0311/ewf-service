@@ -38,7 +38,7 @@ public class ShopifyExport {
         products.forEach(product -> {
             if (product.getPrice() == null) return;
             double productPrice = productService.calculateEWFDirectPriceGround(product, rows);
-//            System.out.println("Exported " + product.getSku() + " price " + productPrice);
+            System.out.println("Exported " + product.getSku() + " price " + productPrice);
         });
 
         csvWriter.exportToCsv(rows, filePath);
