@@ -34,8 +34,8 @@ public class ImportController {
 //            amazonDataExport.extractDataFromAmazon();
 //            productsImport.updateComponentQuantity();
 //            componentsImport.importPrices();
-            shopifyExport.exportShopifyProductsPrice(filepath);
-//            productsImport.importProductDetails();
+//            shopifyExport.exportShopifyProductsPrice(filepath);
+            productsImport.importProductDetails();
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {

@@ -28,6 +28,9 @@ public class ProductDetail {
     @Column(name = "product_types")
     private String productType;
 
+    @Column(name = "chair_type")
+    private String chairType;
+
     @Column(name = "pieces")
     private String pieces;
 

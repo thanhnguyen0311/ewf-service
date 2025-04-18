@@ -47,6 +47,9 @@ public class Product implements Serializable {
     @Column(name = "`order`")
     private String order;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "local_sku")
     private String localSku;
 
