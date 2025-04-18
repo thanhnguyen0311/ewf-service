@@ -9,6 +9,7 @@ import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.CsvWriter;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -45,31 +46,53 @@ public class ShopifyExport {
     }
 
     public void exportShopifyProductsInventory(String filePath) {
-        List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
-        List<String[]> rows = new ArrayList<>();
-        String[] header = {"Handle", "Title", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Option3 Name", "Option3 Value", "SKU", "HS Code", "COO", "175 Southbelt Industrial Drive"};
-        rows.add(header);
-        System.out.println("Found " + rawResult.size());
-        for (Object[] result : rawResult) {
-            if (result[0] != "" && result[1] != "" && result[2] != "") {
-                rows.add(new String[]{
-                        result[0].toString().toLowerCase(),
-                        result[1].toString(),
-                        "Title",
-                        "Default Title",
-                        "",
-                        "",
-                        "",
-                        "",
-                        result[0].toString(),
-                        "",
-                        "",
-                        result[2].toString(),
+        try {
+            List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
+            List<String[]> rows = new ArrayList<>();
+            String[] header = {"Handle", "Title", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Option3 Name", "Option3 Value", "SKU", "HS Code", "COO", "Location", "Incoming", "Unavailable","Committed","Available","On hand"};
+            rows.add(header);
+            String title = "";
+            System.out.println("Found " + rawResult.size());
+            for (Object[] result : rawResult) {
+                if (result[0] != "" && result[1] != "" && result[2] != "") {
+                    if (result[1] == null) {
+                        Optional<Product> optionalProduct = productRepository.findBySku(result[0].toString());
+                        if (optionalProduct.isPresent()) {
+                            Product product = optionalProduct.get();
+                            if (product.getTitle() == null) {
+                                title = product.getName();
+                            } else {
+                                title = product.getTitle();
+                            }
+                        }
+                    }
+                    rows.add(new String[]{
+                            result[0].toString().toLowerCase(),
+                            title,
+                            "Title",
+                            "Default Title",
+                            "",
+                            "",
+                            "",
+                            "",
+                            result[0].toString(),
+                            "",
+                            "",
+                            "175 Southbelt Industrial Drive",
+                            "0",
+                            "0",
+                            "0",
+                            result[2].toString(),
+                            result[2].toString()
 
-                });
+                    });
+                    System.out.println(result[0].toString());
+                }
             }
+            csvWriter.exportToCsv(rows, filePath);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        csvWriter.exportToCsv(rows, filePath);
     }
 
     public void exportShopifyProductsTrackInventory(String filePath) {
