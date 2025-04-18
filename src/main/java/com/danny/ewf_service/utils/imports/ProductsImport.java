@@ -1,15 +1,20 @@
 package com.danny.ewf_service.utils.imports;
 
-import com.danny.ewf_service.entity.Component;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.enums.CSVReaderNullFieldIndicator;
+
 import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
-import com.opencsv.CSVReader;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,135 +44,172 @@ public class ProductsImport {
     @Transactional
     public void importProductDetails() {
         try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(file));
-             CSVReader csvReader = new CSVReader(reader)) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
-            String productSku;
-            String cat;
-            String cat2;
-            String item1sku;
-            String item2sku;
-            String[] columns;
+            CSVParserBuilder parserBuilder = new CSVParserBuilder()
+                    .withSeparator(',')
+                    .withQuoteChar('"')
+                    .withEscapeChar('\\')
+                    .withStrictQuotes(false)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreQuotations(false)
+                    .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
 
-            int newSkus = 0;
-            int existingSkus = 0;
+            CSVParser parser = parserBuilder.build();
 
-            while ((columns = csvReader.readNext()) != null) {
-                productSku = getValueByIndex(columns, 0);
-                cat = getValueByIndex(columns, 1);
-                cat2 = getValueByIndex(columns, 2);
+            // Create reader with the configured parser
+            CSVReaderBuilder readerBuilder = new CSVReaderBuilder(reader)
+                    .withCSVParser(parser)
+                    .withMultilineLimit(-1); // No limit on multiline fields
 
-                if (productSku.isEmpty()) {
-                    continue;
-                }
+            try (CSVReader csvReader = readerBuilder.build()) {
+                String productSku;
+                String upc;
+                String name;
+                String description;
+                String mainCategory;
+                String subCategory;
+                String chairType;
+                String finish;
+                String sizeShape;
+                String style;
+                String pieces;
+                String collection;
+                String productType;
+                String feature1;
+                String feature2;
+                String feature3;
+                String feature4;
+                String feature5;
+                String feature6;
+                String feature7;
+                String feature8;
+                String[] columns;
 
-                Optional<Product> optionalProduct = productRepository.findBySku(productSku);
-                Product product;
+                while ((columns = csvReader.readNext()) != null) {
+                    productSku = getValueByIndex(columns, 0);
+                    upc = getValueByIndex(columns, 1);
+                    name = getValueByIndex(columns, 2);
+                    description = getValueByIndex(columns, 3);
+                    mainCategory = getValueByIndex(columns, 4);
+                    subCategory = getValueByIndex(columns, 5);
+                    chairType = getValueByIndex(columns, 6);
+                    finish = getValueByIndex(columns, 7);
+                    sizeShape = getValueByIndex(columns, 8);
+                    style = getValueByIndex(columns, 9);
+                    pieces = getValueByIndex(columns, 10);
+                    collection = getValueByIndex(columns, 11);
+                    productType = getValueByIndex(columns, 12);
 
-                long pos = 1;
 
-                if (optionalProduct.isPresent()) {
-                    product = optionalProduct.get();
-                    existingSkus++;
-                } else {
-                    product = new Product();
-                    product.setSku(productSku);
-                    product.setLocalSku(skuGenerator.generateNewSKU(productSku));
-                    productRepository.save(product);
-                    System.out.println("Inserted new SKU: " + productSku);
-                    newSkus++;
-                }
+//                feature1 = getValueByIndex(columns, 6);
+//                feature2 = getValueByIndex(columns, 7);
+//                feature3 = getValueByIndex(columns, 8);
+//                feature4 = getValueByIndex(columns, 9);
+//                feature5 = getValueByIndex(columns, 10);
+//                feature6 = getValueByIndex(columns, 11);
+//                feature7 = getValueByIndex(columns, 12);
+//                feature8 = getValueByIndex(columns, 13);
 
-                if (!cat.isEmpty()) {
-                    product.setCategory(cat);
-                }
 
-                if (!cat2.isEmpty()) {
-                    product.setCategory2(cat2);
-                }
-
-                List<ProductComponent> productComponentList = product.getComponents();
-                if (productComponentList == null) {
-                    productComponentList = new ArrayList<>();
-                }
-                if (!productComponentList.isEmpty()) {
-                    continue;
-                }
-
-                item1sku = getValueByIndex(columns, 3);
-                item2sku = getValueByIndex(columns, 4);
-
-                if (!item1sku.isEmpty()) {
-                    Optional<Component> optionalComponent = componentRepository.findBySku(item1sku);
-                    if (optionalComponent.isPresent()) {
-                        Component component = optionalComponent.get();
-                        ProductComponent productComponent = new ProductComponent();
-                        productComponent.setProduct(product);
-                        productComponent.setComponent(component);
-                        productComponent.setQuantity(1L);
-
-                        component.setPos(pos);
-                        componentRepository.save(component);
-
-                        productComponentRepository.save(productComponent);
-                        System.out.println("Inserted component " + component.getSku() + " for product " + product.getSku() + " quantity " + productComponent.getQuantity());
+                    if (productSku.isEmpty()) {
+                        continue;
                     }
-                }
-                pos = 2 ;
 
-                if (!item2sku.isEmpty()) {
-                    Optional<Component> optionalComponent = componentRepository.findBySku(item2sku);
-                    if (optionalComponent.isPresent()) {
-                        Component component = optionalComponent.get();
-                        ProductComponent productComponent = new ProductComponent();
-                        productComponent.setProduct(product);
-                        productComponent.setComponent(component);
-                        productComponent.setQuantity(1L);
-                        productComponentRepository.save(productComponent);
+                    System.out.println("Processing SKU: " + productSku);
 
-                        component.setPos(pos);
-                        componentRepository.save(component);
 
-                        System.out.println("Inserted component " + component.getSku() + " for product " + product.getSku() + " quantity " + productComponent.getQuantity());
+                    Optional<Product> optionalProduct = productRepository.findBySku(productSku);
+                    Product product;
+
+
+                    if (optionalProduct.isPresent()) {
+                        product = optionalProduct.get();
+                    } else {
+                        product = new Product();
+                        product.setSku(productSku);
+                        product.setLocalSku(skuGenerator.generateNewSKU(productSku));
+                        productRepository.save(product);
+                        System.out.println("Inserted new SKU: " + productSku);
                     }
-                }
 
-                for (int i = 5; i <= 17; i = i + 3) {
-                    pos++;
-                    if (!getValueByIndex(columns, i).isEmpty()) {
-                        Optional<Component> optionalComponent = componentRepository.findBySku(getValueByIndex(columns, i));
-                        if (optionalComponent.isPresent()) {
-                            Component component = optionalComponent.get();
-                            ProductComponent productComponent = new ProductComponent();
-                            productComponent.setProduct(product);
-                            productComponent.setComponent(component);
-                            long quantity = Long.parseLong(getValueByIndex(columns, i + 2));
-                            if (quantity == 0) {
-                                quantity = Long.parseLong(getValueByIndex(columns, i + 1)) * component.getDimension().getQuantityBox();
-                            }
-                            productComponent.setQuantity(quantity);
-                            productComponentRepository.save(productComponent);
+                    ProductDetail productDetail = product.getProductDetail();
+                    if (productDetail == null) productDetail = new ProductDetail();
 
+                    if(!upc.isEmpty()) product.setUpc(upc);
+                    if(!name.isEmpty()) product.setName(name);
+                    if(!description.isEmpty()) productDetail.setDescription(description);
+                    if(!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
+                    if(!subCategory.isEmpty()) productDetail.setSubCategory(subCategory);
+                    if (!chairType.isEmpty()) productDetail.setChairType(chairType);
+                    if (!finish.isEmpty()) productDetail.setFinish(finish);
+                    if (!style.isEmpty()) productDetail.setStyle(style);
+                    if (!collection.isEmpty()) productDetail.setCollection(collection);
+                    if (!pieces.isEmpty()) productDetail.setPieces(pieces);
+                    if (!productType.isEmpty()) productDetail.setProductType(productType);
 
-                            component.setPos(pos);
-                            componentRepository.save(component);
-
-                            System.out.println("Inserted component " + component.getSku() + " for product " + product.getSku() + " quantity " + productComponent.getQuantity());
+                    if (!sizeShape.isEmpty()) {
+                        Dimension dimension = product.getDimension();
+                        if (dimension == null) {
+                            dimension = new Dimension();
                         }
+                        dimension.setSizeShape(sizeShape);
+                        product.setDimension(dimension);
                     }
+
+//                if (!feature1.isEmpty()) {
+//                    productDetail.setFeature1(feature1);
+//                }
+//
+//                if (!feature2.isEmpty()) {
+//                    productDetail.setFeature2(feature2);
+//                }
+//
+//                if (!feature3.isEmpty()) {
+//                    productDetail.setFeature3(feature3);
+//                }
+//
+//                if (!feature4.isEmpty()) {
+//                    productDetail.setFeature4(feature4);
+//                }
+//
+//                if (!feature5.isEmpty()) {
+//                    productDetail.setFeature5(feature5);
+//                }
+//
+//                if (!feature6.isEmpty()) {
+//                    productDetail.setFeature6(feature6);
+//                }
+//
+//                if (!feature7.isEmpty()) {
+//                    productDetail.setFeature7(feature7);
+//                }
+//
+//                if (!feature8.isEmpty()) {
+//                    productDetail.setFeature8(feature8);
+//                }
+
+                    product.setProductDetail(productDetail);
+                    productRepository.save(product);
+                    System.out.println("Saved product " + productSku);
+
                 }
             }
-            System.out.println("\nImport Summary:");
-            System.out.println("Total SKUs processed: " + (newSkus + existingSkus));
-            System.out.println("Total SKUs new: " + (newSkus));
-        } catch (Exception e) {
-            System.err.println("Error importing SKUs: " + e.getMessage());
-            e.printStackTrace();
-        }
+
+
+            } catch (Exception e) {
+                System.err.println("Error importing SKUs: " + e.getMessage());
+                e.printStackTrace();
+            }
     }
 
     private String getValueByIndex(String[] array, int index) {
-        return index < array.length ? array[index].trim() : "";
+        String value = "";
+        if (index < array.length && array[index] != null) { // Check for null
+            value = array[index].trim();
+        }
+        System.out.println("Column " + index + " value: " + value);
+        return value;
     }
 
 
@@ -203,8 +245,6 @@ public class ProductsImport {
                 }
                 System.out.println("Saved product " + productSku);
             }
-
-            System.out.println("Not found " + notFound);
 
         } catch (Exception e) {
             System.err.println("Error importing SKUs: " + e.getMessage());
@@ -359,7 +399,6 @@ public class ProductsImport {
             String line;
 
             while ((line = reader.readLine()) != null) {
-
                 String[] columns = line.split(",");
                 if (columns.length < 1) {
                     continue;
@@ -377,7 +416,7 @@ public class ProductsImport {
                     if (productComponents.size() == 1) {
                         productComponents.get(0).setQuantity(2L);
                     } else{
-                        System.err.println("ERROR : " + sku + " VALUES : " + productComponents.get(0).getComponent().getSku() );
+                        System.err.println("ERROR : " + sku + " VALUES : " + productComponents.get(0).getComponent().getSku());
                         continue;
                     }
                     product.setComponents(productComponents);

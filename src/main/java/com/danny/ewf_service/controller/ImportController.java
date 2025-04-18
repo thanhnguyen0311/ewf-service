@@ -30,11 +30,12 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "ewfdirect_prices.csv";
+            String filepath = "ewfdirect_inventory.csv";
 //            amazonDataExport.extractDataFromAmazon();
-            shopifyExport.exportShopifyProductsPrice(filepath);
 //            productsImport.updateComponentQuantity();
-//            componentsImport.importPrices();
+//            componentsImport.importComponentsInventory();
+            shopifyExport.exportShopifyProductsInventory(filepath);
+//            productsImport.importProductDetails();
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
