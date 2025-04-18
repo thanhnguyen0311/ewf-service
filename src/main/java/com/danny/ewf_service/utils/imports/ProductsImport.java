@@ -100,6 +100,8 @@ public class ProductsImport {
                     pieces = getValueByIndex(columns, 10);
                     collection = getValueByIndex(columns, 11);
                     productType = getValueByIndex(columns, 12);
+
+
 //                feature1 = getValueByIndex(columns, 6);
 //                feature2 = getValueByIndex(columns, 7);
 //                feature3 = getValueByIndex(columns, 8);
@@ -113,8 +115,6 @@ public class ProductsImport {
                     if (productSku.isEmpty()) {
                         continue;
                     }
-
-                    if (productSku.length() > 50) continue;
 
                     System.out.println("Processing SKU: " + productSku);
 
@@ -204,7 +204,14 @@ public class ProductsImport {
     }
 
     private String getValueByIndex(String[] array, int index) {
-        return index < array.length ? array[index].trim() : "";
+        String value;
+        if (index < array.length) {
+            value = array[index].trim();
+        } else {
+            value = "";
+        }
+        System.out.println("Column " + index + " value: " + value);
+        return value;
     }
 
 
