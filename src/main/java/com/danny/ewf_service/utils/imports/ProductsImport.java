@@ -204,11 +204,9 @@ public class ProductsImport {
     }
 
     private String getValueByIndex(String[] array, int index) {
-        String value;
-        if (index < array.length) {
+        String value = "";
+        if (index < array.length && array[index] != null) { // Check for null
             value = array[index].trim();
-        } else {
-            value = "";
         }
         System.out.println("Column " + index + " value: " + value);
         return value;
