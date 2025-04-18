@@ -71,15 +71,17 @@ public class ProductsImport {
                 upc = getValueByIndex(columns, 1);
                 name = getValueByIndex(columns, 2);
                 description = getValueByIndex(columns, 3);
-                mainCategory = getValueByIndex(columns, 4);
-                subCategory = getValueByIndex(columns, 5);
-                chairType = getValueByIndex(columns, 6);
-                finish = getValueByIndex(columns, 7);
-                sizeShape = getValueByIndex(columns, 8);
-                style = getValueByIndex(columns, 9);
-                pieces = getValueByIndex(columns, 10);
-                collection = getValueByIndex(columns, 11);
-                productType = getValueByIndex(columns, 12);
+
+//                mainCategory = getValueByIndex(columns, 4);
+//                subCategory = getValueByIndex(columns, 5);
+//                chairType = getValueByIndex(columns, 6);
+//                finish = getValueByIndex(columns, 7);
+//                sizeShape = getValueByIndex(columns, 8);
+//                style = getValueByIndex(columns, 9);
+//                pieces = getValueByIndex(columns, 10);
+//                collection = getValueByIndex(columns, 11);
+//                productType = getValueByIndex(columns, 12);
+
 //                feature1 = getValueByIndex(columns, 6);
 //                feature2 = getValueByIndex(columns, 7);
 //                feature3 = getValueByIndex(columns, 8);
@@ -119,23 +121,23 @@ public class ProductsImport {
                 if(!upc.isEmpty()) product.setUpc(upc);
                 if(!name.isEmpty()) product.setName(name);
                 if(!description.isEmpty()) productDetail.setDescription(description);
-                if(!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
-                if(!subCategory.isEmpty()) productDetail.setSubCategory(subCategory);
-                if (!chairType.isEmpty()) productDetail.setChairType(chairType);
-                if (!finish.isEmpty()) productDetail.setFinish(finish);
-                if (!style.isEmpty()) productDetail.setStyle(style);
-                if (!collection.isEmpty()) productDetail.setCollection(collection);
-                if (!pieces.isEmpty()) productDetail.setPieces(pieces);
-                if (!productType.isEmpty()) productDetail.setProductType(productType);
+//                if(!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
+//                if(!subCategory.isEmpty()) productDetail.setSubCategory(subCategory);
+//                if (!chairType.isEmpty()) productDetail.setChairType(chairType);
+//                if (!finish.isEmpty()) productDetail.setFinish(finish);
+//                if (!style.isEmpty()) productDetail.setStyle(style);
+//                if (!collection.isEmpty()) productDetail.setCollection(collection);
+//                if (!pieces.isEmpty()) productDetail.setPieces(pieces);
+//                if (!productType.isEmpty()) productDetail.setProductType(productType);
 
-                if (!sizeShape.isEmpty()) {
-                    Dimension dimension = product.getDimension();
-                    if (dimension == null) {
-                        dimension = new Dimension();
-                    }
-                    dimension.setSizeShape(sizeShape);
-                    product.setDimension(dimension);
-                }
+//                if (!sizeShape.isEmpty()) {
+//                    Dimension dimension = product.getDimension();
+//                    if (dimension == null) {
+//                        dimension = new Dimension();
+//                    }
+//                    dimension.setSizeShape(sizeShape);
+//                    product.setDimension(dimension);
+//                }
 
 //                if (!feature1.isEmpty()) {
 //                    productDetail.setFeature1(feature1);
