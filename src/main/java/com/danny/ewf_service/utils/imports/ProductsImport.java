@@ -44,9 +44,16 @@ public class ProductsImport {
              CSVReader csvReader = new CSVReader(reader)) {
 
             String productSku;
+            String upc;
+            String name;
+            String description;
+            String mainCategory;
+            String subCategory;
+            String chairType;
             String finish;
             String sizeShape;
             String style;
+            String pieces;
             String collection;
             String productType;
             String feature1;
@@ -61,24 +68,36 @@ public class ProductsImport {
 
             while ((columns = csvReader.readNext()) != null) {
                 productSku = getValueByIndex(columns, 0);
-                finish = getValueByIndex(columns, 1);
-                sizeShape = getValueByIndex(columns, 2);
-                style = getValueByIndex(columns, 3);
-                collection = getValueByIndex(columns, 4);
-                productType = getValueByIndex(columns, 5);
-                feature1 = getValueByIndex(columns, 6);
-                feature2 = getValueByIndex(columns, 7);
-                feature3 = getValueByIndex(columns, 8);
-                feature4 = getValueByIndex(columns, 9);
-                feature5 = getValueByIndex(columns, 10);
-                feature6 = getValueByIndex(columns, 11);
-                feature7 = getValueByIndex(columns, 12);
-                feature8 = getValueByIndex(columns, 13);
+                upc = getValueByIndex(columns, 1);
+                name = getValueByIndex(columns, 2);
+                description = getValueByIndex(columns, 3);
+                mainCategory = getValueByIndex(columns, 4);
+                subCategory = getValueByIndex(columns, 5);
+                chairType = getValueByIndex(columns, 6);
+                finish = getValueByIndex(columns, 7);
+                sizeShape = getValueByIndex(columns, 8);
+                style = getValueByIndex(columns, 9);
+                pieces = getValueByIndex(columns, 10);
+                collection = getValueByIndex(columns, 11);
+                productType = getValueByIndex(columns, 12);
+//                feature1 = getValueByIndex(columns, 6);
+//                feature2 = getValueByIndex(columns, 7);
+//                feature3 = getValueByIndex(columns, 8);
+//                feature4 = getValueByIndex(columns, 9);
+//                feature5 = getValueByIndex(columns, 10);
+//                feature6 = getValueByIndex(columns, 11);
+//                feature7 = getValueByIndex(columns, 12);
+//                feature8 = getValueByIndex(columns, 13);
 
 
                 if (productSku.isEmpty()) {
                     continue;
                 }
+
+                if (productSku.length() > 50) continue;
+
+                System.out.println("Processing SKU: " + productSku);
+
 
                 Optional<Product> optionalProduct = productRepository.findBySku(productSku);
                 Product product;
@@ -97,9 +116,16 @@ public class ProductsImport {
                 ProductDetail productDetail = product.getProductDetail();
                 if (productDetail == null) productDetail = new ProductDetail();
 
-                if (!finish.isEmpty()) {
-                    productDetail.setFinish(finish);
-                }
+                if(!upc.isEmpty()) product.setUpc(upc);
+                if(!name.isEmpty()) product.setName(name);
+                if(!description.isEmpty()) productDetail.setDescription(description);
+                if(!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
+                if(!subCategory.isEmpty()) productDetail.setSubCategory(subCategory);
+                if (!chairType.isEmpty()) productDetail.setChairType(chairType);
+                if (!finish.isEmpty()) productDetail.setFinish(finish);
+                if (!style.isEmpty()) productDetail.setStyle(style);
+                if (!collection.isEmpty()) productDetail.setCollection(collection);
+                if (!productType.isEmpty()) productDetail.setProductType(productType);
 
                 if (!sizeShape.isEmpty()) {
                     Dimension dimension = product.getDimension();
@@ -110,49 +136,38 @@ public class ProductsImport {
                     product.setDimension(dimension);
                 }
 
-                if (!style.isEmpty()) {
-                    productDetail.setStyle(style);
-                }
+//                if (!feature1.isEmpty()) {
+//                    productDetail.setFeature1(feature1);
+//                }
+//
+//                if (!feature2.isEmpty()) {
+//                    productDetail.setFeature2(feature2);
+//                }
+//
+//                if (!feature3.isEmpty()) {
+//                    productDetail.setFeature3(feature3);
+//                }
+//
+//                if (!feature4.isEmpty()) {
+//                    productDetail.setFeature4(feature4);
+//                }
+//
+//                if (!feature5.isEmpty()) {
+//                    productDetail.setFeature5(feature5);
+//                }
+//
+//                if (!feature6.isEmpty()) {
+//                    productDetail.setFeature6(feature6);
+//                }
+//
+//                if (!feature7.isEmpty()) {
+//                    productDetail.setFeature7(feature7);
+//                }
+//
+//                if (!feature8.isEmpty()) {
+//                    productDetail.setFeature8(feature8);
+//                }
 
-                if (!collection.isEmpty()) {
-                    productDetail.setCollection(collection);
-                }
-
-                if (!productType.isEmpty()) {
-                    productDetail.setProductType(productType);
-                }
-
-                if (!feature1.isEmpty()) {
-                    productDetail.setFeature1(feature1);
-                }
-
-                if (!feature2.isEmpty()) {
-                    productDetail.setFeature2(feature2);
-                }
-
-                if (!feature3.isEmpty()) {
-                    productDetail.setFeature3(feature3);
-                }
-
-                if (!feature4.isEmpty()) {
-                    productDetail.setFeature4(feature4);
-                }
-
-                if (!feature5.isEmpty()) {
-                    productDetail.setFeature5(feature5);
-                }
-
-                if (!feature6.isEmpty()) {
-                    productDetail.setFeature6(feature6);
-                }
-
-                if (!feature7.isEmpty()) {
-                    productDetail.setFeature7(feature7);
-                }
-
-                if (!feature8.isEmpty()) {
-                    productDetail.setFeature8(feature8);
-                }
                 product.setProductDetail(productDetail);
                 productRepository.save(product);
                 System.out.println("Saved product " + productSku);

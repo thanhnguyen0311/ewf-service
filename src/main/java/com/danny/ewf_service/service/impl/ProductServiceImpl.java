@@ -185,7 +185,7 @@ public class ProductServiceImpl implements ProductService {
                         productComponent.getComponent().getSku(),
                         String.valueOf(componentWeight),
                         String.valueOf(girth),
-                        String.valueOf(componentPrice*productComponent.getQuantity()),
+                        String.valueOf(productComponent.getQuantity()),
                         String.valueOf(productComponent.getComponent().getPrice().getQB3()),
                         String.valueOf(shippingCost),
                         String.valueOf(componentPrice*boxCount +shippingCost),
