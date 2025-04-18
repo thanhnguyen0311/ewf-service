@@ -125,6 +125,7 @@ public class ProductsImport {
                 if (!finish.isEmpty()) productDetail.setFinish(finish);
                 if (!style.isEmpty()) productDetail.setStyle(style);
                 if (!collection.isEmpty()) productDetail.setCollection(collection);
+                if (!pieces.isEmpty()) productDetail.setPieces(pieces);
                 if (!productType.isEmpty()) productDetail.setProductType(productType);
 
                 if (!sizeShape.isEmpty()) {
