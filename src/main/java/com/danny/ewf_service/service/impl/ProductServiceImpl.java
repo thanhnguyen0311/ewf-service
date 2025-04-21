@@ -148,17 +148,19 @@ public class ProductServiceImpl implements ProductService {
                 productWeight = productWeight + componentWeight;
 
                 if (componentWeight <= 20) {
-                    shippingCost = 15;
-                } else if (componentWeight <= 40) {
                     shippingCost = 18;
-                } else if (componentWeight <= 60) {
+                } else if (componentWeight <= 40) {
                     shippingCost = 22;
-                } else if (componentWeight <= 70) {
-                    shippingCost = 25;
-                } else if (componentWeight <= 80) {
+                } else if (componentWeight <= 50) {
+                    shippingCost = 24;
+                } else if (componentWeight <= 60) {
                     shippingCost = 27;
-                } else {
+                } else if (componentWeight <= 70) {
+                    shippingCost = 28;
+                } else if (componentWeight <= 80) {
                     shippingCost = 30;
+                } else {
+                    shippingCost = 32;
                 }
 
 
@@ -188,7 +190,7 @@ public class ProductServiceImpl implements ProductService {
                         String.valueOf(productComponent.getQuantity()),
                         String.valueOf(productComponent.getComponent().getPrice().getQB3()),
                         String.valueOf(shippingCost),
-                        String.valueOf(componentPrice*boxCount +shippingCost),
+                        String.valueOf(componentPrice*productComponent.getQuantity() +shippingCost),
                 });
                 if (Objects.equals(product.getShippingMethod(), "LTL")) {
                     totalShipCost = totalShipCost*0.9;
@@ -204,9 +206,8 @@ public class ProductServiceImpl implements ProductService {
         } else if (productPrice > 500) {
             productPrice = productPrice * 0.95;
         }
-
-        if(Objects.equals(product.getShippingMethod(), "LTL")) {
-            totalShipCost = totalShipCost * 0.8;
+        if (product.getComponents().size() == 1) {
+            productPrice = productPrice * 1.05;
         }
 
         product.getPrice().setEwfdirect(productPrice);
