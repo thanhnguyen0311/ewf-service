@@ -3,6 +3,7 @@ package com.danny.ewf_service.controller;
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
 import com.danny.ewf_service.utils.imports.ComponentsImport;
+import com.danny.ewf_service.utils.imports.ImagesImport;
 import com.danny.ewf_service.utils.imports.ProductsImport;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class ImportController {
     @Autowired
     private final ComponentsImport componentsImport;
 
+    @Autowired
+    private final ImagesImport imagesImport;
+
 
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
@@ -34,8 +38,9 @@ public class ImportController {
 //            amazonDataExport.extractDataFromAmazon();
 //            productsImport.updateComponentQuantity();
 //            componentsImport.importPrices();
-            shopifyExport.exportShopifyProductsPrice(filepath);
+//            shopifyExport.exportShopifyProductsPrice(filepath);
 //            productsImport.importProductDetails();
+            imagesImport.updateProductImages();
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {

@@ -48,6 +48,7 @@ public class ImagesImport {
                     String[] columns = line.split(",");
 
                     if (columns.length >= 2) {
+                        if (columns[1].contains(" ")) continue;
                         if (columns[1].contains(product.getSku()) && columns[1].contains(".jpg")) {
                             if (columns[1].contains("/DIM/")) {
                                 imageUrls.getDim().add(columns[1]);

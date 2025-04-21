@@ -3,13 +3,11 @@ package com.danny.ewf_service.service.impl;
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.service.ImageService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -23,48 +21,29 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public String buildJsonString(ImageUrls imageUrl) {
-        Map<String, List<String>> imagesMap = new HashMap<>();
+        try {
+            // Handle null lists to avoid NullPointerException
+            List<String> img = imageUrl.getImg() != null ? imageUrl.getImg() : new ArrayList<>();
+            List<String> dim = imageUrl.getDim() != null ? imageUrl.getDim() : new ArrayList<>();
+            List<String> cgi = imageUrl.getCgi() != null ? imageUrl.getCgi() : new ArrayList<>();
 
-        imageUrl.getImg().sort(Comparator.comparing((String link) -> !link.contains("/CGI/"))
-                .thenComparing(link -> !link.contains("/DNS/")));
-        imagesMap.put("dim", imageUrl.getDim());
-        imagesMap.put("img", imageUrl.getImg());
-        imagesMap.put("cgi", imageUrl.getCgi());
+            // Sorting logic
+            img.sort(Comparator.comparing((String link) -> !link.contains("/CGI/"))
+                    .thenComparing(link -> !link.contains("/DNS/")));
+            dim.sort(String::compareTo);
 
-        imagesMap.get("dim").sort(String::compareTo);
+            // Use a map to store the JSON structure
+            Map<String, List<String>> imagesMap = new HashMap<>();
+            imagesMap.put("dim", dim);
+            imagesMap.put("img", img);
+            imagesMap.put("cgi", cgi);
 
-        StringBuilder jsonBuilder = new StringBuilder("{");
-
-        // Add 'img' links
-        jsonBuilder.append("\"img\": [");
-        for (int i = 0; i < imagesMap.get("img").size(); i++) {
-            jsonBuilder.append("\"").append(imagesMap.get("img").get(i)).append("\"");
-            if (i < imagesMap.get("img").size() - 1) {
-                jsonBuilder.append(",");
-            }
+            // Use ObjectMapper for JSON serialization
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(imagesMap);
+        } catch (Exception e) {
+            // In case of errors, return a default empty JSON
+            return "{\"img\":[],\"dim\":[],\"cgi\":[]}";
         }
-        jsonBuilder.append("],");
-
-        // Add 'dim' links
-        jsonBuilder.append("\"dim\": [");
-        for (int i = 0; i < imagesMap.get("dim").size(); i++) {
-            jsonBuilder.append("\"").append(imagesMap.get("dim").get(i)).append("\"");
-            if (i < imagesMap.get("dim").size() - 1) {
-                jsonBuilder.append(",");
-            }
-        }
-        jsonBuilder.append("],");
-
-        // Add 'cgi' links
-        jsonBuilder.append("\"cgi\": [");
-        for (int i = 0; i < imagesMap.get("cgi").size(); i++) {
-            jsonBuilder.append("\"").append(imagesMap.get("cgi").get(i)).append("\"");
-            if (i < imagesMap.get("cgi").size() - 1) {
-                jsonBuilder.append(",");
-            }
-        }
-        jsonBuilder.append("]}");
-
-        return jsonBuilder.toString();
     }
 }
