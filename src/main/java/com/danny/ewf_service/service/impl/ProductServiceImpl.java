@@ -114,6 +114,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<String> getAllImagesProduct(Product product) {
+
+        return List.of();
+    }
+
+    @Override
     public double calculateEWFDirectPriceGround(Product product,  List<String[]> rows) {
         double productWeight = 0;
         double productPrice = 0;

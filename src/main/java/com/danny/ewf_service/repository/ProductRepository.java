@@ -19,7 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "LEFT JOIN FETCH p.components " +
            "LEFT JOIN FETCH p.wholesales " +
            "LEFT JOIN FETCH p.price " +
-           "LEFT JOIN FETCH p.productDetail")
+           "LEFT JOIN FETCH p.productDetail " +
+           "WHERE p.isDeleted = false ")
     List<Product> findAllProducts();
 
     @Query("SELECT p FROM Product p JOIN p.wholesales w WHERE w.ewfdirect = true")

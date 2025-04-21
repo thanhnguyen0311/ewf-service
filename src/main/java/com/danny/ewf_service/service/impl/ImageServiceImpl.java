@@ -1,32 +1,38 @@
-package com.danny.ewf_service.entity;
+package com.danny.ewf_service.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.*;
+import com.danny.ewf_service.entity.ImageUrls;
+import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.service.ImageService;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+@Service
 @AllArgsConstructor
-@NoArgsConstructor
-@Builder
-@Setter
-@Getter
-@ToString
-@Data
-public class ImageUrls {
-    private List<String> cgi = new ArrayList<>();
-    private List<String> dim = new ArrayList<>();
-    private List<String> img = new ArrayList<>();
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+public class ImageServiceImpl implements ImageService {
 
+    @Override
+    public List<String> getAllProductImages(Product product) {
 
-    public String buildJsonString() {
+        return List.of();
+    }
+
+    @Override
+    public String buildJsonString(ImageUrls imageUrl) {
         Map<String, List<String>> imagesMap = new HashMap<>();
 
-        img.sort(Comparator.comparing((String link) -> !link.contains("/CGI/"))
+        imageUrl.getImg().sort(Comparator.comparing((String link) -> !link.contains("/CGI/"))
                 .thenComparing(link -> !link.contains("/DNS/")));
-        imagesMap.put("dim", dim);
-        imagesMap.put("img", img);
-        imagesMap.put("cgi", cgi);
+        imagesMap.put("dim", imageUrl.getDim());
+        imagesMap.put("img", imageUrl.getImg());
+        imagesMap.put("cgi", imageUrl.getCgi());
+
+        imagesMap.get("dim").sort(String::compareTo);
+
         StringBuilder jsonBuilder = new StringBuilder("{");
 
         // Add 'img' links
@@ -60,13 +66,5 @@ public class ImageUrls {
         jsonBuilder.append("]}");
 
         return jsonBuilder.toString();
-    }
-
-    public ImageUrls parseImageJson(String jsonString) {
-        try {
-            return OBJECT_MAPPER.readValue(jsonString, ImageUrls.class);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid JSON for ImageUrls: " + jsonString, e);
-        }
     }
 }

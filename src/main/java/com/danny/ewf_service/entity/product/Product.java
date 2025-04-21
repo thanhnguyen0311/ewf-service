@@ -88,4 +88,6 @@ public class Product implements Serializable {
     @Column(name = "asin")
     private String asin;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 }
