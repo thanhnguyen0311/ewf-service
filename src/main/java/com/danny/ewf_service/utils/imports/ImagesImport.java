@@ -82,10 +82,14 @@ public class ImagesImport {
                     String[] columns = line.split(",");
 
                     if (columns.length >= 2) {
-                        if (columns[1].contains("/" + component.getSku()) && columns[1].contains(".jpg")) {
+                        if (columns[1].contains(" ")) continue;
+                        if (columns[1].contains(component.getSku()) && columns[1].contains(".jpg")) {
                             if (columns[1].contains("/DIM/")) {
                                 imageUrls.getDim().add(columns[1]);
+                            } else if (columns[1].contains("/CGI/")) {
+                                imageUrls.getCgi().add(columns[1]);
                             } else {
+                                if (imageUrls.getImg().contains(columns[1])) continue;
                                 imageUrls.getImg().add(columns[1]);
                             }
                         }

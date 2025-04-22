@@ -10,4 +10,8 @@ public interface ImageService {
     List<String> getAllProductImages(Product product);
 
     String buildJsonString(ImageUrls imageUrl);
+
+    ImageUrls parseImageJson(String jsonString);
+
+    List<String> toList(ImageUrls imageUrl);
 }

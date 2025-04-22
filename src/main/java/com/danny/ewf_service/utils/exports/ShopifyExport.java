@@ -1,10 +1,15 @@
 package com.danny.ewf_service.utils.exports;
 
 import com.danny.ewf_service.entity.Dimension;
+import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.CacheService;
+import com.danny.ewf_service.service.ImageService;
+import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.CsvWriter;
 import lombok.AllArgsConstructor;
@@ -29,11 +34,21 @@ public class ShopifyExport {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private final CacheService cacheService;
+
+    @Autowired
+    private final InventoryService inventoryService;
+
+    @Autowired
+    private ImageService imageService;
+
+
     public void exportShopifyProductsPrice(String filePath) throws Exception {
         List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
         List<String[]> rows = new ArrayList<>();
 
-        String[] header = {"", "Handle", "Title", "Shipping Method" , "Variant Price","Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price", "Amazon Price"};
+        String[] header = {"", "Handle", "Title", "Shipping Method", "Variant Price", "Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price", "Amazon Price"};
         rows.add(header);
         products.forEach(product -> {
             if (product.getPrice() == null) return;
@@ -138,5 +153,152 @@ public class ShopifyExport {
             }
         }
         csvWriter.exportToCsv(rows, "amazon_reviews.csv");
+    }
+
+    public void exportProductListing(String filePath) {
+        List<String[]> rows = new ArrayList<>();
+        String[] header = {
+                "Handle",
+                "Title",
+                "Body (HTML)",
+                "Vendor",
+                "Product Category",
+                "Type",
+                "Tags",
+                "Published",
+                "Option1 Name",
+                "Option1 Value",
+                "Variant SKU",
+                "Variant Grams",
+                "Variant Inventory Tracker",
+                "Variant Inventory Qty",
+                "Variant Inventory Policy",
+                "Variant Fulfillment Service",
+                "Variant Price",
+                "Variant Compare At Price",
+                "Variant Requires Shipping",
+                "Variant Taxable",
+                "Variant Barcode",
+                "Image Src",
+                "Image Position",
+                "Gift Card",
+                "SEO Title",
+                "SEO Description",
+                "Google Shopping / Google Product Category",
+                "Google Shopping / Gender",
+                "Google Shopping / Age Group",
+                "Google Shopping / MPN",
+                "Finish (product.metafields.my_fields.finish)",
+                "Variant Weight Unit",
+                "Included / United States",
+                "Compare At Price / United States",
+                "Status",
+        };
+        List<Product> products = cacheService.getAllProducts();
+        rows.add(header);
+
+        double productPrice;
+        double comparePrice = 0;
+
+        List<String>  images;
+        ImageUrls productImages;
+
+        for (Product product : products) {
+
+            images = new ArrayList<>();
+
+            productImages = imageService.parseImageJson(product.getImages());
+            images.addAll(imageService.toList(productImages));
+
+            if (images.isEmpty()) continue;
+
+            List<Product> mergedProducts = productService.findMergedProducts(product);
+            for (Product mergedProduct : mergedProducts) {
+                if (!Objects.equals(mergedProduct.getSku(), product.getSku())) {
+
+                    productImages = imageService.parseImageJson(mergedProduct.getImages());
+                    images.addAll(imageService.toList(productImages));
+                }
+            }
+
+
+            ProductDetail productDetail = product.getProductDetail();
+            if (productDetail == null) productDetail = new ProductDetail();
+            productPrice = productService.calculateEWFDirectPriceGround(product, new ArrayList<>());
+
+//            if (product.getPrice() != null) {
+//                if (product.getPrice().getAmazonPrice() != 0) {
+//                    if (productPrice / product.getPrice().getAmazonPrice() < 0.9) {
+//                        comparePrice = product.getPrice().getAmazonPrice() * 1.1;
+//                    }
+//                }
+//            }
+            rows.add(new String[]{
+                    product.getSku().toLowerCase(),
+                    product.getTitle() != null ? product.getTitle() : product.getName(),
+                    productDetail.getHtmlDescription() != null ? productDetail.getHtmlDescription() : "",
+                    "East West Furniture",
+                    Objects.equals(productDetail.getSubCategory(), "Dining Room Set") ? "Furniture > Furniture Sets > Kitchen & Dining Furniture Sets" : "",
+                    productDetail.getSubCategory(),
+                    productDetail.getSizeShape() != null ? productDetail.getSizeShape() : "",
+                    "TRUE",
+                    "Title",
+                    "Default Title",
+                    product.getSku(),
+                    Objects.equals(product.getShippingMethod(), "LTL") ? "22679.6185" : "0.00",
+                    "shopify",
+                    inventoryService.getInventoryProductCountById(product.getId()) + "",
+                    "deny",
+                    "manual",
+                    productPrice + "",                                              // Variant Price
+                    comparePrice != 0 ? comparePrice + "" : "",                     // Variant Compare At Price
+                    "TRUE",
+                    "TRUE",
+                    product.getUpc(),
+                    images.get(0),                                                  // img src
+                    "1",                                                            // img position
+                    "FALSE",
+                    product.getTitle() != null ? product.getTitle() : product.getName(),
+                    productDetail.getDescription() != null ? productDetail.getDescription() : "",
+                    "6347",
+                    "Unisex",
+                    "Adult",
+                    product.getSku(),
+                    productDetail.getFinish() != null ? productDetail.getFinish() : "",
+                    "lb",
+                    "TRUE",
+                    "",
+                    "active"
+            });
+            for (int i = 1; i < images.size(); i++) {
+                rows.add(new String[]{
+                        product.getSku().toLowerCase(),
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        images.get(i),
+                        String.valueOf(i + 1),
+                });
+            }
+            System.out.println("Exported " + product.getSku() + " | " + images);
+        }
+        csvWriter.exportToCsv(rows, filePath);
     }
 }

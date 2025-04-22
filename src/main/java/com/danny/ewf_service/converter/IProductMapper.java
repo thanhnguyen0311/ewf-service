@@ -23,6 +23,7 @@ import java.util.List;
 public interface IProductMapper {
     ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // For JSON parsing
 
+
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
     @Mapping(target = "localSku", source = "product.localSku")

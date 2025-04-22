@@ -13,6 +13,8 @@ import java.util.*;
 @AllArgsConstructor
 public class ImageServiceImpl implements ImageService {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @Override
     public List<String> getAllProductImages(Product product) {
 
@@ -38,12 +40,28 @@ public class ImageServiceImpl implements ImageService {
             imagesMap.put("img", img);
             imagesMap.put("cgi", cgi);
 
-            // Use ObjectMapper for JSON serialization
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(imagesMap);
+            return OBJECT_MAPPER.writeValueAsString(imagesMap);
         } catch (Exception e) {
             // In case of errors, return a default empty JSON
             return "{\"img\":[],\"dim\":[],\"cgi\":[]}";
         }
+    }
+
+    @Override
+    public ImageUrls parseImageJson(String jsonString) {
+        try {
+            return OBJECT_MAPPER.readValue(jsonString, ImageUrls.class);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid JSON for ImageUrls: " + jsonString, e);
+        }
+    }
+
+    @Override
+    public List<String> toList(ImageUrls imageUrl) {
+        List<String> images = new ArrayList<>();
+        images.addAll(imageUrl.getCgi());
+        images.addAll(imageUrl.getImg());
+        images.addAll(imageUrl.getDim());
+        return images;
     }
 }
