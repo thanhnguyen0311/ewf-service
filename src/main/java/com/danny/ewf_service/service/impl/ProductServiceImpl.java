@@ -172,7 +172,7 @@ public class ProductServiceImpl implements ProductService {
 
                 girth = dimension.getBoxLength() + 2*(dimension.getBoxWidth() + dimension.getBoxHeight());
                 if (girth > 118) {
-                    shippingCost = shippingCost + 105;
+                    shippingCost = shippingCost + 115;
                     if (girth > 165 && product.getComponents().size() == 1) {
                         shippingCost = shippingCost + 50;
                     }
@@ -203,14 +203,25 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
-        productPrice = totalQB1 + totalShipCost;
-        if (productPrice > 2000) {
-            productPrice = productPrice * 0.87;
-        } else if (productPrice > 1000) {
-            productPrice = productPrice * 0.92;
-        } else if (productPrice > 500) {
-            productPrice = productPrice * 0.96;
+        if (Objects.equals(product.getShippingMethod(), "LTL")){
+            if (totalShipCost > 500) {
+                totalShipCost = totalShipCost * 0.8;
+            } else if (totalShipCost > 400) {
+                totalShipCost = totalShipCost * 0.85;
+            } else if (totalShipCost > 300) {
+                totalShipCost = totalShipCost * 0.9;
+            }
         }
+
+//        if (totalQB1 > 2000) {
+//            totalQB1 = totalQB1 * 0.9;
+//        } else if (totalQB1 > 1000) {
+//            totalQB1 = totalQB1 * 0.95;
+//        } else if (totalQB1 > 500) {
+//            totalQB1 = totalQB1 * 0.95;
+//        }
+        productPrice = totalQB1 + totalShipCost;
+
 
         product.getPrice().setEwfdirect(productPrice);
         productRepository.save(product);

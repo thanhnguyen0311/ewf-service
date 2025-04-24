@@ -194,7 +194,7 @@ public class ShopifyExport {
                 "Compare At Price / United States",
                 "Status",
         };
-        List<Product> products = cacheService.getAllProducts();
+        List<Product> products = productRepository.findAllProducts();
         rows.add(header);
 
         double productPrice;
@@ -205,10 +205,8 @@ public class ShopifyExport {
 
         for (Product product : products) {
 
-            images = new ArrayList<>();
-
             productImages = imageService.parseImageJson(product.getImages());
-            images.addAll(imageService.toList(productImages));
+            images = new ArrayList<>(imageService.toList(productImages));
 
             if (images.isEmpty()) continue;
 

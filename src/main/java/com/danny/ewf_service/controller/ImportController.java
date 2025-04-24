@@ -34,11 +34,11 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "ewfdirect_products.csv";
+            String filepath = "ewfdirect_prices.csv";
 //            amazonDataExport.extractDataFromAmazon();
 //            productsImport.updateComponentQuantity();
 //            componentsImport.importPrices();
-            shopifyExport.exportProductListing(filepath);
+            shopifyExport.exportShopifyProductsPrice(filepath);
 //            productsImport.importProductDetails();
 //            imagesImport.updateComponentImages();
 
