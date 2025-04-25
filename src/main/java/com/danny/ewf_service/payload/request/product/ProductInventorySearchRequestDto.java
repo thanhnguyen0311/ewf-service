@@ -1,4 +1,4 @@
-package com.danny.ewf_service.payload.request;
+package com.danny.ewf_service.payload.request.product;
 
 import lombok.*;
 

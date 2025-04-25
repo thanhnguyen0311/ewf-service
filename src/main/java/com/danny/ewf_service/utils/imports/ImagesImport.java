@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.ImageService;
 import com.danny.ewf_service.utils.ImageCheck;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,9 @@ public class ImagesImport {
 
     private final String filepath = "src/main/resources/data/sirv.csv";
 
+    @Autowired
+    private final ImageService imageService;
+
 
     public void updateProductImages() {
         List<Product> products = productRepository.findAll();
@@ -44,10 +48,12 @@ public class ImagesImport {
                     String[] columns = line.split(",");
 
                     if (columns.length >= 2) {
-                        if (columns[1].contains("/" + product.getSku()) && columns[1].contains(".jpg")) {
+                        if (columns[1].contains(" ")) continue;
+                        if (columns[1].contains(product.getSku()) && columns[1].contains(".jpg")) {
                             if (columns[1].contains("/DIM/")) {
-                                if (imageUrls.getDim().contains(columns[1])) continue;
                                 imageUrls.getDim().add(columns[1]);
+                            } else if (columns[1].contains("/CGI/")) {
+                                imageUrls.getCgi().add(columns[1]);
                             } else {
                                 if (imageUrls.getImg().contains(columns[1])) continue;
                                 imageUrls.getImg().add(columns[1]);
@@ -58,14 +64,13 @@ public class ImagesImport {
             } catch (IOException e) {
                 System.err.println("Error reading the CSV file: " + e.getMessage());
             }
-            String imagesJsonString = imageUrls.buildJsonString();
+            String imagesJsonString = imageService.buildJsonString(imageUrls);
             product.setImages(imagesJsonString);
             productRepository.save(product);
             System.out.println("SAVED : " + product.getSku() + "/n IMG : " + imagesJsonString);
         }
     }
 
-    @Transactional
     public void updateComponentImages(){
         List<Component> components = componentRepository.findAll();
         ImageUrls imageUrls;
@@ -77,10 +82,14 @@ public class ImagesImport {
                     String[] columns = line.split(",");
 
                     if (columns.length >= 2) {
-                        if (columns[1].contains("/" + component.getSku()) && columns[1].contains(".jpg")) {
+                        if (columns[1].contains(" ")) continue;
+                        if (columns[1].contains(component.getSku()) && columns[1].contains(".jpg")) {
                             if (columns[1].contains("/DIM/")) {
                                 imageUrls.getDim().add(columns[1]);
+                            } else if (columns[1].contains("/CGI/")) {
+                                imageUrls.getCgi().add(columns[1]);
                             } else {
+                                if (imageUrls.getImg().contains(columns[1])) continue;
                                 imageUrls.getImg().add(columns[1]);
                             }
                         }
@@ -89,7 +98,7 @@ public class ImagesImport {
             } catch (IOException e) {
                 System.err.println("Error reading the CSV file: " + e.getMessage());
             }
-            String imagesJsonString = imageUrls.buildJsonString();
+            String imagesJsonString = imageService.buildJsonString(imageUrls);
             component.setImages(imagesJsonString);
             componentRepository.save(component);
             System.out.println("SAVED : " + component.getSku() + "/n IMG : " + imagesJsonString);

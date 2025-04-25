@@ -67,7 +67,7 @@ public class Component {
     @JoinColumn(name = "dimensions_id", referencedColumnName = "id")
     private Dimension dimension;
 
-    @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductComponent> productComponents = new ArrayList<>();
 
     @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)

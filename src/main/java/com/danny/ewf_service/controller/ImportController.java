@@ -3,11 +3,14 @@ package com.danny.ewf_service.controller;
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
 import com.danny.ewf_service.utils.imports.ComponentsImport;
+import com.danny.ewf_service.utils.imports.ImagesImport;
 import com.danny.ewf_service.utils.imports.ProductsImport;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 
 
 @RequestMapping("/import")
@@ -26,16 +29,13 @@ public class ImportController {
     @Autowired
     private final ComponentsImport componentsImport;
 
+    @Autowired
+    private final ImagesImport imagesImport;
+
 
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "ewfdirect_inventory.csv";
-//            amazonDataExport.extractDataFromAmazon();
-//            productsImport.updateComponentQuantity();
-//            componentsImport.importComponentsInventory();
-            shopifyExport.exportShopifyProductsInventory(filepath);
-//            productsImport.importProductDetails();
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {

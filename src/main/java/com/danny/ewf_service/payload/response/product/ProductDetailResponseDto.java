@@ -1,5 +1,6 @@
 package com.danny.ewf_service.payload.response.product;
 
+import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.payload.response.ComponentProductDetailResponseDto;
 import lombok.*;
 
@@ -40,6 +41,7 @@ public class ProductDetailResponseDto {
     private Boolean houstonDirect = false;
     private Boolean ewfmain = false;
     private String sizeShape;
+    private ImageUrls images;
 
 }
 

@@ -1,8 +1,6 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.request.UserListRequestDto;
-import com.danny.ewf_service.payload.response.RoleResponseDto;
 import com.danny.ewf_service.payload.response.user.UserListResponseDto;
 import com.danny.ewf_service.service.UserService;
 import lombok.AllArgsConstructor;
