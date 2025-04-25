@@ -5,18 +5,17 @@ import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
-import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
+import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.payload.response.ComponentProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
-import com.danny.ewf_service.service.CacheService;
-import com.danny.ewf_service.service.ComponentService;
-import com.danny.ewf_service.service.InventoryService;
-import com.danny.ewf_service.service.ProductService;
+import com.danny.ewf_service.service.*;
 import com.danny.ewf_service.utils.imports.SKUGenerator;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,9 +47,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private InventoryService inventoryService;
+    @Autowired
+    private ImageService imageService;
 
     public interface ProductMergedProjection {
         Long getId();
+
         String getSku();
     }
 
@@ -91,7 +93,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDetailResponseDto> findAllProductsToDtos() {
         List<Product> products = cacheService.getAllProducts();
-        return productMapper.productListToProductDetailResponseDtoList(products);
+        // Process products in parallel
+        // Map each product to a ProductDetailResponseDto using the existing method
+        // Collect the results into a list
+        return products
+                .parallelStream() // Process products in parallel
+                .map(this::toProductDetailResponseDto) // Map each product to a ProductDetailResponseDto using the existing method
+                .toList();
     }
 
 
@@ -110,17 +118,16 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
         updateProductFromDto(product, productDetailRequestDto);
         Product savedProduct = cacheService.saveProduct(product);
-        return productMapper.productToProductDetailResponseDto(savedProduct);
+        return toProductDetailResponseDto(savedProduct);
     }
 
     @Override
     public List<String> getAllImagesProduct(Product product) {
-
         return List.of();
     }
 
     @Override
-    public double calculateEWFDirectPriceGround(Product product,  List<String[]> rows) {
+    public double calculateEWFDirectPriceGround(Product product, List<String[]> rows) {
         double productWeight = 0;
         double productPrice = 0;
         double totalShipCost = 0;
@@ -170,7 +177,7 @@ public class ProductServiceImpl implements ProductService {
                 }
 
 
-                girth = dimension.getBoxLength() + 2*(dimension.getBoxWidth() + dimension.getBoxHeight());
+                girth = dimension.getBoxLength() + 2 * (dimension.getBoxWidth() + dimension.getBoxHeight());
                 if (girth > 118) {
                     shippingCost = shippingCost + 115;
                     if (girth > 165 && product.getComponents().size() == 1) {
@@ -182,7 +189,7 @@ public class ProductServiceImpl implements ProductService {
                     }
                 }
 
-                totalQB1 = totalQB1 + (componentPrice*productComponent.getQuantity());
+                totalQB1 = totalQB1 + (componentPrice * productComponent.getQuantity());
                 shippingCost = shippingCost * boxCount;
                 totalShipCost = totalShipCost + shippingCost;
                 totalQuantity = totalQuantity + productComponent.getQuantity();
@@ -198,12 +205,12 @@ public class ProductServiceImpl implements ProductService {
                         String.valueOf(productComponent.getQuantity()),
                         String.valueOf(productComponent.getComponent().getPrice().getQB3()),
                         String.valueOf(shippingCost),
-                        String.valueOf(componentPrice*productComponent.getQuantity() +shippingCost),
+                        String.valueOf(componentPrice * productComponent.getQuantity() + shippingCost),
                 });
                 stt++;
             }
         }
-        if (Objects.equals(product.getShippingMethod(), "LTL")){
+        if (Objects.equals(product.getShippingMethod(), "LTL")) {
             if (totalShipCost > 500) {
                 totalShipCost = totalShipCost * 0.8;
             } else if (totalShipCost > 400) {
@@ -232,13 +239,13 @@ public class ProductServiceImpl implements ProductService {
                 product.getTitle(),
                 String.valueOf(product.getShippingMethod()),
                 String.valueOf(productPrice),
-                "","","",
+                "", "", "",
                 String.valueOf(totalQuantity),
                 String.valueOf(totalQB1),
                 String.valueOf(totalShipCost),
                 String.valueOf(productPrice),
                 String.valueOf(product.getPrice().getAmazonPrice()),
-                "http://www.amazon.com/dp/"+product.getAsin(),
+                "http://www.amazon.com/dp/" + product.getAsin(),
         });
         return productPrice;
     }
@@ -247,6 +254,7 @@ public class ProductServiceImpl implements ProductService {
     public double calculateEWFDirectPriceLTL(Product product, List<String[]> rows) {
         return 0;
     }
+
 
     @Override
     public List<Product> findMergedProducts(Product product) {
@@ -324,7 +332,6 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getShippingMethod() != null) product.setShippingMethod(dto.getShippingMethod());
         if (dto.getDiscontinued() != null) product.setDiscontinued(dto.getDiscontinued());
 
-
         // Initialize productDetail if null
         if (product.getProductDetail() == null) {
             product.setProductDetail(new ProductDetail());
@@ -358,6 +365,88 @@ public class ProductServiceImpl implements ProductService {
             dimension.setSizeShape(dto.getSizeShape());
             product.setDimension(dimension);
         }
+    }
+
+    private ProductDetailResponseDto toProductDetailResponseDto(Product product) {
+        ProductDetailResponseDto responseDto = new ProductDetailResponseDto();
+        if (product != null) {
+            if (product.getId() != null) responseDto.setId(product.getId());
+            if (product.getSku() != null) responseDto.setSku(product.getSku());
+            if (product.getLocalSku() != null) responseDto.setLocalSku(product.getLocalSku());
+            if (product.getUpc() != null) responseDto.setUpc(product.getUpc());
+            if (product.getOrder() != null) responseDto.setOrder(product.getOrder());
+            if (product.getCategory() != null) responseDto.setCategory(product.getCategory());
+            if (product.getAsin() != null) responseDto.setAsin(product.getAsin());
+            if (product.getTitle() != null) responseDto.setTitle(product.getTitle());
+            if (product.getLocalTitle() != null) responseDto.setLocalTitle(product.getLocalTitle());
+            if (product.getShippingMethod() != null) responseDto.setShippingMethod(product.getShippingMethod());
+            if (product.getType() != null) responseDto.setType(product.getType());
+            if (product.getDiscontinued() != null) responseDto.setDiscontinued(product.getDiscontinued());
+
+
+            // Wholesale mappings
+            if (product.getWholesales() != null) {
+                if (product.getWholesales().getAmazon() != null) responseDto.setAmazon(product.getWholesales().getAmazon());
+                if (product.getWholesales().getCymax() != null) responseDto.setCymax(product.getWholesales().getCymax());
+                if (product.getWholesales().getWayfair() != null) responseDto.setWayfair(product.getWholesales().getWayfair());
+                if (product.getWholesales().getEwfdirect() != null) responseDto.setEwfdirect(product.getWholesales().getEwfdirect());
+                if (product.getWholesales().getEwfmain() != null) responseDto.setEwfmain(product.getWholesales().getEwfmain());
+                if (product.getWholesales().getHoustonDirect() != null) responseDto.setHoustonDirect(product.getWholesales().getHoustonDirect());
+                if (product.getWholesales().getOverstock() != null) responseDto.setOverstock(product.getWholesales().getOverstock());
+            }
+
+
+            // Product detail mappings
+            if (product.getProductDetail() != null) {
+                if (product.getProductDetail().getDescription() != null)
+                    responseDto.setDescription(product.getProductDetail().getDescription());
+                if (product.getProductDetail().getHtmlDescription() != null)
+                    responseDto.setHtmlDescription(product.getProductDetail().getHtmlDescription());
+                if (product.getProductDetail().getMainCategory() != null)
+                    responseDto.setMainCategory(product.getProductDetail().getMainCategory());
+                if (product.getProductDetail().getSubCategory() != null)
+                    responseDto.setSubCategory(product.getProductDetail().getSubCategory());
+                if (product.getProductDetail().getCollection() != null)
+                    responseDto.setCollection(product.getProductDetail().getCollection());
+                if (product.getProductDetail().getPieces() != null)
+                    responseDto.setPieces(product.getProductDetail().getPieces());
+            }
+
+
+            // Dimension mappings
+            if (product.getDimension() != null) {
+                if (product.getDimension().getSizeShape() != null)
+                    responseDto.setSizeShape(product.getDimension().getSizeShape());
+            }
+
+
+            // Dimension mappings
+            if (product.getDimension() != null) responseDto.setSizeShape(product.getDimension().getSizeShape());
+
+            List<ComponentProductDetailResponseDto> componentList = new ArrayList<>();
+            for (ProductComponent productComponent : product.getComponents()) {
+                componentList.add(
+                        new ComponentProductDetailResponseDto(
+                                productComponent.getId(),
+                                productComponent.getComponent().getId(),
+                                productComponent.getComponent().getSku(),
+                                productComponent.getQuantity(),
+                                productComponent.getComponent().getPos()
+                        ));
+            }
+            responseDto.setComponents(componentList);
+
+
+            responseDto.setImages(imageService.parseImageJson(product.getImages()));
+        }
+
+        return responseDto;
+    }
+
+    @PostConstruct
+    public void preloadProductsCache() {
+        System.out.println("Preloading all products into cache at startup...");
+        cacheService.getAllProducts(); // Triggers the @Cacheable mechanism
     }
 }
 

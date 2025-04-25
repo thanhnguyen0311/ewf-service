@@ -3,7 +3,7 @@ package com.danny.ewf_service.converter;
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
-import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
+import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.*;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
@@ -55,37 +55,6 @@ public interface IProductMapper {
     ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
 
     List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
-
-
-    @Mapping(target = "id", source = "product.id")
-    @Mapping(target = "sku", source = "product.sku")
-    @Mapping(target = "localSku", source = "product.localSku")
-    @Mapping(target = "upc", source = "product.upc")
-    @Mapping(target = "order", source = "product.order")
-    @Mapping(target = "category", source = "product.category")
-    @Mapping(target = "asin", source = "product.asin")
-    @Mapping(target = "title", source = "product.title")
-    @Mapping(target = "localTitle", source = "product.localTitle")
-    @Mapping(target = "shippingMethod", source = "product.shippingMethod")
-    @Mapping(target = "type", source = "product.type")
-    @Mapping(target = "discontinued", source = "product.discontinued")
-    @Mapping(target = "components", source = "product.components", qualifiedByName = "listComponents")
-    @Mapping(target = "amazon", source = "product.wholesales.amazon")
-    @Mapping(target = "cymax", source = "product.wholesales.cymax")
-    @Mapping(target = "wayfair", source = "product.wholesales.wayfair")
-    @Mapping(target = "ewfdirect", source = "product.wholesales.ewfdirect")
-    @Mapping(target = "ewfmain", source = "product.wholesales.ewfmain")
-    @Mapping(target = "houstonDirect", source = "product.wholesales.houstonDirect")
-    @Mapping(target = "overstock", source = "product.wholesales.overstock")
-    @Mapping(target = "description", source = "product.productDetail.description")
-    @Mapping(target = "htmlDescription", source = "product.productDetail.htmlDescription")
-    @Mapping(target = "mainCategory", source = "product.productDetail.mainCategory")
-    @Mapping(target = "subCategory", source = "product.productDetail.subCategory")
-    @Mapping(target = "collection", source = "product.productDetail.collection")
-    @Mapping(target = "pieces", source = "product.productDetail.pieces")
-    @Mapping(target = "sizeShape", source = "product.dimension.sizeShape")
-    ProductDetailResponseDto productToProductDetailResponseDto(Product product);
-    List<ProductDetailResponseDto> productListToProductDetailResponseDtoList(List<Product> products);
 
 
 

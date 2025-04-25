@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+
 
 @RequestMapping("/import")
 @RestController
@@ -34,11 +36,11 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "ewfdirect_prices.csv";
+            String filepath = "ewfdirect_products.csv";
 //            amazonDataExport.extractDataFromAmazon();
 //            productsImport.updateComponentQuantity();
 //            componentsImport.importPrices();
-            shopifyExport.exportShopifyProductsPrice(filepath);
+            shopifyExport.exportProductListing(new ArrayList<>(),filepath);
 //            productsImport.importProductDetails();
 //            imagesImport.updateComponentImages();
 

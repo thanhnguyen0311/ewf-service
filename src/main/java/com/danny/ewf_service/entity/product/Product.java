@@ -29,7 +29,7 @@ public class Product implements Serializable {
     @Column(name = "type")
     private String type;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ProductComponent> components;
 
     @Column(name = "shipping")
@@ -56,19 +56,19 @@ public class Product implements Serializable {
     @Column(name = "discontinued")
     private Boolean discontinued;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "wholesales_id", referencedColumnName = "id")
     private ProductWholesales wholesales;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "price_id", referencedColumnName = "id")
     private Price price;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "dimension_id", referencedColumnName = "id")
     private Dimension dimension;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "detail_id", referencedColumnName = "id")
     private ProductDetail productDetail;
 
@@ -81,6 +81,9 @@ public class Product implements Serializable {
 
     @Column(name = "images")
     private String images;
+
+    @Column(name = "created_at")
+    private String createdAt;
 
     @Column(name = "upc")
     private String upc;

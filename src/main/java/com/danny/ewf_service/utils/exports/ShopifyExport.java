@@ -155,7 +155,12 @@ public class ShopifyExport {
         csvWriter.exportToCsv(rows, "amazon_reviews.csv");
     }
 
-    public void exportProductListing(String filePath) {
+    public void exportProductListing(List<Long> ids, String filePath) {
+        List<Product> products;
+        if (ids.isEmpty()) products = productRepository.findAllProducts();
+        else {
+            products = productRepository.findAllByIds(ids);
+        }
         List<String[]> rows = new ArrayList<>();
         String[] header = {
                 "Handle",
@@ -194,7 +199,7 @@ public class ShopifyExport {
                 "Compare At Price / United States",
                 "Status",
         };
-        List<Product> products = productRepository.findAllProducts();
+
         rows.add(header);
 
         double productPrice;
@@ -210,15 +215,19 @@ public class ShopifyExport {
 
             if (images.isEmpty()) continue;
 
-            List<Product> mergedProducts = productService.findMergedProducts(product);
-            for (Product mergedProduct : mergedProducts) {
-                if (!Objects.equals(mergedProduct.getSku(), product.getSku())) {
+            if (product.getComponents() == null)  continue;
 
-                    productImages = imageService.parseImageJson(mergedProduct.getImages());
-                    images.addAll(imageService.toList(productImages));
+            List<Product> mergedProducts = productService.findMergedProducts(product);
+
+            if (mergedProducts != null) {
+                for (Product mergedProduct : mergedProducts) {
+                    if (!Objects.equals(mergedProduct.getSku(), product.getSku())) {
+
+                        productImages = imageService.parseImageJson(mergedProduct.getImages());
+                        images.addAll(imageService.toList(productImages));
+                    }
                 }
             }
-
 
             ProductDetail productDetail = product.getProductDetail();
             if (productDetail == null) productDetail = new ProductDetail();
@@ -231,6 +240,7 @@ public class ShopifyExport {
 //                    }
 //                }
 //            }
+
             rows.add(new String[]{
                     product.getSku().toLowerCase(),
                     product.getTitle() != null ? product.getTitle() : product.getName(),

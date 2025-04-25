@@ -1,6 +1,6 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.payload.request.ProductDetailRequestDto;
+import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;

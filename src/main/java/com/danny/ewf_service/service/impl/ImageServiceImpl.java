@@ -2,9 +2,13 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.payload.request.product.ProductImageRequestDto;
+import com.danny.ewf_service.repository.ProductRepository;
+import com.danny.ewf_service.service.CacheService;
 import com.danny.ewf_service.service.ImageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,9 +19,15 @@ public class ImageServiceImpl implements ImageService {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    @Autowired
+    private final ProductRepository productRepository;
+
+    @Autowired
+    private final CacheService cacheService;
+
+
     @Override
     public List<String> getAllProductImages(Product product) {
-
         return List.of();
     }
 
@@ -64,4 +74,16 @@ public class ImageServiceImpl implements ImageService {
         images.addAll(imageUrl.getDim());
         return images;
     }
+
+    @Override
+    public ImageUrls updateProductImages(ProductImageRequestDto productImageRequestDto) {
+        Product product = productRepository.findById(productImageRequestDto.getId()).orElseThrow(() -> new RuntimeException("Product not found with id: " + productImageRequestDto.getId()));
+        ImageUrls newImage = productImageRequestDto.getImages();
+        if (newImage != null) {
+            product.setImages(buildJsonString(productImageRequestDto.getImages()));
+            cacheService.saveProduct(product);
+        }
+        return newImage;
+    }
+
 }

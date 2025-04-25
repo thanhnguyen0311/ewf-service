@@ -1,6 +1,8 @@
-package com.danny.ewf_service.payload.request;
+package com.danny.ewf_service.payload.request.product;
 
 import lombok.*;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,4 +35,5 @@ public class ProductDetailRequestDto {
     private Boolean houstondirect;
     private Boolean ewfmain;
     private String sizeShape;
+    private List<ProductComponentRequestDto> components;
 }

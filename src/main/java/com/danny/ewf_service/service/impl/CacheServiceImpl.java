@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,8 @@ public class CacheServiceImpl implements CacheService {
         System.out.println("Cache miss - loading all products from database");
         return productRepository.findAllProducts();
     }
+
+
 
     @Override
     @Cacheable(value = "productsCache", key = "#productId")
