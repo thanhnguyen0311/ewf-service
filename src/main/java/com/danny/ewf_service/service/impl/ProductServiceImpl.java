@@ -177,6 +177,8 @@ public class ProductServiceImpl implements ProductService {
                     shippingCost = 35;
                 }
 
+                if  (productComponent.getComponent().getSku().contains("DSL-")) shippingCost = 0;
+
 
                 girth = dimension.getBoxLength() + 2 * (dimension.getBoxWidth() + dimension.getBoxHeight());
                 if (girth > 118) {
@@ -224,7 +226,7 @@ public class ProductServiceImpl implements ProductService {
 
 
         productPrice = totalQB1 + totalShipCost;
-        productPrice = productPrice * 1.02;
+        productPrice = productPrice * 1.03;
 
         product.getPrice().setEwfdirect(productPrice);
         productRepository.save(product);
@@ -452,7 +454,7 @@ public class ProductServiceImpl implements ProductService {
     @PostConstruct
     public void preloadProductsCache() {
         System.out.println("Preloading all products into cache at startup...");
-        cacheService.getAllProducts(); // Triggers the @Cacheable mechanism
+        cacheService.getAllProducts();
     }
 }
 
