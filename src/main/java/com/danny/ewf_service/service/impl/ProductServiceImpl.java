@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
+import com.danny.ewf_service.payload.request.product.ProductComponentRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.response.ComponentProductDetailResponseDto;
@@ -210,6 +211,7 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
+
         if (Objects.equals(product.getShippingMethod(), "LTL")) {
             if (totalShipCost > 500) {
                 totalShipCost = totalShipCost * 0.8;
@@ -220,15 +222,9 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-//        if (totalQB1 > 2000) {
-//            totalQB1 = totalQB1 * 0.9;
-//        } else if (totalQB1 > 1000) {
-//            totalQB1 = totalQB1 * 0.95;
-//        } else if (totalQB1 > 500) {
-//            totalQB1 = totalQB1 * 0.95;
-//        }
-        productPrice = totalQB1 + totalShipCost;
 
+        productPrice = totalQB1 + totalShipCost;
+        productPrice = productPrice * 1.02;
 
         product.getPrice().setEwfdirect(productPrice);
         productRepository.save(product);
@@ -247,6 +243,7 @@ public class ProductServiceImpl implements ProductService {
                 String.valueOf(product.getPrice().getAmazonPrice()),
                 "http://www.amazon.com/dp/" + product.getAsin(),
         });
+
         return productPrice;
     }
 
@@ -265,6 +262,7 @@ public class ProductServiceImpl implements ProductService {
         if (groupComponents.size() < 2) {
             return null; // No merged product exists
         }
+
         List<Product> mergedProducts = new ArrayList<>();
 
         for (int size = 2; size <= groupComponents.size(); size++) {
@@ -365,6 +363,13 @@ public class ProductServiceImpl implements ProductService {
             dimension.setSizeShape(dto.getSizeShape());
             product.setDimension(dimension);
         }
+
+        if (dto.getComponents() != null) {
+            List<ProductComponent> components = new ArrayList<>();
+            for (ProductComponentRequestDto componentDto : dto.getComponents()) {
+
+            }
+        }
     }
 
     private ProductDetailResponseDto toProductDetailResponseDto(Product product) {
@@ -431,7 +436,8 @@ public class ProductServiceImpl implements ProductService {
                                 productComponent.getComponent().getId(),
                                 productComponent.getComponent().getSku(),
                                 productComponent.getQuantity(),
-                                productComponent.getComponent().getPos()
+                                productComponent.getComponent().getPos(),
+                                productComponent.getComponent().getDimension()
                         ));
             }
             responseDto.setComponents(componentList);

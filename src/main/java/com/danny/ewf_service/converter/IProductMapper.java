@@ -55,8 +55,7 @@ public interface IProductMapper {
     ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
 
     List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
-
-
+    
 
     Product productDetailRequestToProduct(ProductDetailRequestDto productDetailRequestDto);
 
@@ -114,7 +113,8 @@ public interface IProductMapper {
                             productComponent.getComponent().getId(),
                             productComponent.getComponent().getSku(),
                             productComponent.getQuantity(),
-                            productComponent.getComponent().getPos()
+                            productComponent.getComponent().getPos(),
+                            productComponent.getComponent().getDimension()
                     ));
         }
         return componentList;
