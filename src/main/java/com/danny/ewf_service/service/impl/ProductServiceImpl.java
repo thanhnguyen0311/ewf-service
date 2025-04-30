@@ -130,7 +130,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public double calculateEWFDirectPriceGround(Product product, List<String[]> rows) {
         double productWeight = 0;
-        double productPrice = 0;
+        double productPrice;
         double totalShipCost = 0;
         double totalQB1 = 0;
         int stt = 1;
@@ -372,6 +372,9 @@ public class ProductServiceImpl implements ProductService {
 
             }
         }
+
+        if (dto.getImages() != null) product.setImages(imageService.buildJsonString(dto.getImages()));
+
     }
 
     private ProductDetailResponseDto toProductDetailResponseDto(Product product) {
@@ -419,14 +422,6 @@ public class ProductServiceImpl implements ProductService {
                     responseDto.setPieces(product.getProductDetail().getPieces());
             }
 
-
-            // Dimension mappings
-            if (product.getDimension() != null) {
-                if (product.getDimension().getSizeShape() != null)
-                    responseDto.setSizeShape(product.getDimension().getSizeShape());
-            }
-
-
             // Dimension mappings
             if (product.getDimension() != null) responseDto.setSizeShape(product.getDimension().getSizeShape());
 
@@ -451,10 +446,5 @@ public class ProductServiceImpl implements ProductService {
         return responseDto;
     }
 
-    @PostConstruct
-    public void preloadProductsCache() {
-        System.out.println("Preloading all products into cache at startup...");
-        cacheService.getAllProducts();
-    }
 }
 

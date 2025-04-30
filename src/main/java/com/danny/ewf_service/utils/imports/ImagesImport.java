@@ -50,6 +50,16 @@ public class ImagesImport {
                     if (columns.length >= 2) {
                         if (columns[1].contains(" ")) continue;
                         if (columns[1].contains(product.getSku()) && columns[1].contains(".jpg")) {
+                            int skuLastIndex = columns[1].lastIndexOf(product.getSku()) + product.getSku().length();
+                            if (skuLastIndex < columns[1].length()) {
+                                char nextChar = columns[1].charAt(skuLastIndex);
+
+                                // Check if the next character is a letter or digit
+                                if (Character.isLetterOrDigit(nextChar)) {
+                                    // Skip processing if next character is letter or digit
+                                    continue;
+                                }
+                            }
                             if (columns[1].contains("/DIM/")) {
                                 imageUrls.getDim().add(columns[1]);
                             } else if (columns[1].contains("/CGI/")) {
@@ -83,7 +93,21 @@ public class ImagesImport {
 
                     if (columns.length >= 2) {
                         if (columns[1].contains(" ")) continue;
+
                         if (columns[1].contains(component.getSku()) && columns[1].contains(".jpg")) {
+
+                            int skuLastIndex = columns[1].lastIndexOf(component.getSku()) + component.getSku().length();
+                            if (skuLastIndex < columns[1].length()) {
+                                char nextChar = columns[1].charAt(skuLastIndex);
+
+                                // Check if the next character is a letter or digit
+                                if (Character.isLetterOrDigit(nextChar)) {
+                                    // Skip processing if next character is letter or digit
+                                    continue;
+                                }
+                            }
+
+
                             if (columns[1].contains("/DIM/")) {
                                 imageUrls.getDim().add(columns[1]);
                             } else if (columns[1].contains("/CGI/")) {

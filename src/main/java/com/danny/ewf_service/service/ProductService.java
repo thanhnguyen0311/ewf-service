@@ -26,5 +26,4 @@ public interface ProductService {
 
     double calculateEWFDirectPriceLTL(Product product, List<String[]> rows);
 
-    void preloadProductsCache();
 }

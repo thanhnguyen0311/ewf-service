@@ -36,6 +36,10 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
+            String filepath = "ewfdirect_prices.csv";
+//            shopifyExport.exportShopifyProductsPrice(filepath);
+            imagesImport.updateProductImages();
+            imagesImport.updateComponentImages();
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {

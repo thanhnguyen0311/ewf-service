@@ -42,6 +42,5 @@ public class ProductDetailResponseDto {
     private Boolean ewfmain = false;
     private String sizeShape;
     private ImageUrls images;
-
 }
 
