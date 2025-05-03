@@ -2,6 +2,7 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.Dimension;
+import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
@@ -184,7 +185,7 @@ public class ProductServiceImpl implements ProductService {
                 if (girth > 118) {
                     shippingCost = shippingCost + 115;
                     if (girth > 165 && product.getComponents().size() == 1) {
-                        shippingCost = shippingCost + 50;
+                        shippingCost = shippingCost + 100;
                     }
                 } else {
                     if (dimension.getBoxLength() >= 44) {
@@ -222,12 +223,13 @@ public class ProductServiceImpl implements ProductService {
             } else if (totalShipCost > 300) {
                 totalShipCost = totalShipCost * 0.9;
             }
+
         }
 
 
         productPrice = totalQB1 + totalShipCost;
         productPrice = productPrice * 1.03;
-
+        if (product.getPrice() == null) product.setPrice(new Price());
         product.getPrice().setEwfdirect(productPrice);
         productRepository.save(product);
 

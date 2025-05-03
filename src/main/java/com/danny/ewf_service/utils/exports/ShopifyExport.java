@@ -179,12 +179,7 @@ public class ShopifyExport {
     }
 
     public void exportProductListing(List<Long> ids, String filePath) {
-        List<Product> products;
-        if (ids.isEmpty()) products = productRepository.findAllProducts();
-        else {
-            products = productRepository.findAllByIds(ids);
-        }
-        List<String[]> rows = new ArrayList<>();
+
         String[] header = {
                 "Handle",
                 "Title",
@@ -223,15 +218,37 @@ public class ShopifyExport {
                 "Status",
         };
 
+        List<String[]> rows = new ArrayList<>();
         rows.add(header);
+
+        List<String[]> skuRows = new ArrayList<>();
+
+
+        List<Product> products;
+        if (ids.isEmpty()) products = productRepository.findAllProducts();
+        else {
+            products = productRepository.findAllByIds(ids);
+        }
 
         double productPrice;
         double comparePrice = 0;
 
         List<String>  images;
         ImageUrls productImages;
-
+        String[] row;
         for (Product product : products) {
+            if (product.getWholesales() != null){
+                if (product.getWholesales().getEwfdirect()) continue;
+            }
+            if (product.getComponents().isEmpty()) continue;
+            if (product.getTitle() == null) continue;
+            if( product.getProductDetail() != null ) {
+                if (product.getProductDetail().getDescription() == null ) continue;
+                if (product.getProductDetail().getSubCategory() == null) continue;
+            } else {
+                continue;
+            }
+            if (product.getUpc() == null ) continue;
 
             productImages = imageService.parseImageJson(product.getImages());
             images = new ArrayList<>(imageService.toList(productImages));
@@ -264,7 +281,7 @@ public class ShopifyExport {
 //                }
 //            }
 
-            rows.add(new String[]{
+            row = new String[]{
                     product.getSku().toLowerCase(),
                     product.getTitle() != null ? product.getTitle() : product.getName(),
                     productDetail.getHtmlDescription() != null ? productDetail.getHtmlDescription() : "",
@@ -286,7 +303,7 @@ public class ShopifyExport {
                     "TRUE",
                     "TRUE",
                     product.getUpc(),
-                    images.get(0),                                                  // img src
+                    images.get(0).replace("\"", ""),                                                  // img src
                     "1",                                                            // img position
                     "FALSE",
                     product.getTitle() != null ? product.getTitle() : product.getName(),
@@ -300,7 +317,9 @@ public class ShopifyExport {
                     "TRUE",
                     "",
                     "active"
-            });
+            };
+            rows.add(row);
+            skuRows.add(new String[]{product.getSku()});
             for (int i = 1; i < images.size(); i++) {
                 rows.add(new String[]{
                         product.getSku().toLowerCase(),
@@ -324,12 +343,14 @@ public class ShopifyExport {
                         "",
                         "",
                         "",
-                        images.get(i),
+                        images.get(i).replace("\"", ""),
                         String.valueOf(i + 1),
                 });
             }
             System.out.println("Exported " + product.getSku() + " | " + images);
+            product.getWholesales().setEwfdirect(true);
         }
+        csvWriter.exportToCsv(skuRows, "sku_list.csv");
         csvWriter.exportToCsv(rows, filePath);
     }
 }

@@ -17,23 +17,23 @@ public class ProductWholesales {
     private Long id;
 
     @Column(name = "amazon")
-    private Boolean amazon = false;
+    private Boolean amazon;
 
     @Column(name = "cymax")
-    private Boolean cymax = false;
+    private Boolean cymax;
 
     @Column(name = "wayfair")
-    private Boolean wayfair = false;
+    private Boolean wayfair;
 
     @Column(name = "overstock")
-    private Boolean overstock = false;
+    private Boolean overstock;
 
     @Column(name = "ewfdirect")
-    private Boolean ewfdirect = false;
+    private Boolean ewfdirect;
 
     @Column(name = "ewfmain")
-    private Boolean ewfmain = false;
+    private Boolean ewfmain;
 
     @Column(name = "houstondirect")
-    private Boolean houstonDirect = false;
+    private Boolean houstonDirect;
 }
