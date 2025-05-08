@@ -270,15 +270,12 @@ public class ProductsImport {
             while ((line = reader.readLine()) != null) {
 
                 String[] columns = line.split(",");
-                if (columns.length < 4) {
+                if (columns.length < 2) {
                     continue;
                 }
 
                 String sku = columns[0].trim();
-                String length = columns[1].trim();
-                String width = columns[2].trim();
-                String height = columns[3].trim();
-                String weight = columns[4].trim();
+                String lwh = columns[1].trim();
 
                 if (sku.isEmpty()) {
                     continue;
@@ -296,10 +293,7 @@ public class ProductsImport {
                     if (dimension == null) {
                         dimension = new Dimension();
                     }
-                    dimension.setBoxLength(Double.valueOf(length));
-                    dimension.setBoxWidth(Double.valueOf(width));
-                    dimension.setBoxHeight(Double.valueOf(height));
-                    dimension.setBoxWeight(Double.valueOf(weight));
+                    dimension.setLwh(lwh);
                     product.setDimension(dimension);
                     productRepository.save(product);
                     System.out.println("Successfully Updated Component SKU : " + sku + " VALUES : " + dimension);

@@ -445,5 +445,49 @@ public class ComponentsImport {
         }
     }
 
+    public void importComponentData() {
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
+            String line;
+
+            List<String> skus = new ArrayList<>();
+
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+                if (columns.length < 2) {
+                    continue;
+                }
+
+                String sku = columns[0].trim().toUpperCase();
+                String subType = columns[1].trim();
+
+                if (skus.contains(sku)) continue;
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    Component component;
+                    Optional<Component> optionalComponent = componentRepository.findBySku(sku);
+                    if (optionalComponent.isPresent()) {
+                        component = optionalComponent.get();
+                    } else {
+                        continue;
+                    }
+
+                    component.setSubType(subType);
+                    componentRepository.save(component);
+                    skus.add(sku);
+                    System.out.println("Successfully Updated product : " + sku + " VALUES : " + subType);
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
 }

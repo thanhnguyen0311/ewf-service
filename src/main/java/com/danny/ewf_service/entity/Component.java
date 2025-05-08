@@ -75,4 +75,7 @@ public class Component {
 
     @Column(name = "pos")
     private Long pos;
+
+    @Column(name = "sub_type")
+    private String subType;
 }

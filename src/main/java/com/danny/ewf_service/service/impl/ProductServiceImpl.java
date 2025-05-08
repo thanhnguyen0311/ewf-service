@@ -1,6 +1,7 @@
 package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IProductMapper;
+import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
@@ -371,8 +372,14 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getComponents() != null) {
             List<ProductComponent> components = new ArrayList<>();
             for (ProductComponentRequestDto componentDto : dto.getComponents()) {
-
+                Component component = componentService.findComponentById(componentDto.getId());
+                if (component == null) continue;
+                ProductComponent productComponent = new ProductComponent();
+                productComponent.setComponent(component);
+                productComponent.setQuantity(componentDto.getQuantity());
+                components.add(productComponent);
             }
+            product.setComponents(components);
         }
 
         if (dto.getImages() != null) product.setImages(imageService.buildJsonString(dto.getImages()));
