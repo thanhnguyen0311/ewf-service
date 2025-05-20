@@ -43,8 +43,11 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "ewfdirect_customfields.csv";
-            shopifyExport.exportProductListing(new ArrayList<>(), filepath);
+            String filepath1 = "ewfdirect_listing.csv";
+            String filepath2 = "ewfdirect_prices.csv";
+//            shopifyExport.exportProductListing(new ArrayList<>(), filepath1 , false);
+            shopifyExport.exportShopifyProductsPrice(filepath2);
+//            shopifyExport.exportProductCustomfields(new ArrayList<>(), filepath2);
 //            productsImport.importDimensions();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {

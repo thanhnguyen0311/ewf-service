@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 
@@ -93,4 +94,5 @@ public class Product implements Serializable {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+
 }

@@ -97,12 +97,18 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDetailResponseDto> findAllProductsToDtos() {
         List<Product> products = cacheService.getAllProducts();
         // Process products in parallel
-        // Map each product to a ProductDetailResponseDto using the existing method
-        // Collect the results into a list
-        return products
-                .parallelStream() // Process products in parallel
-                .map(this::toProductDetailResponseDto) // Map each product to a ProductDetailResponseDto using the existing method
-                .toList();
+        List<ProductDetailResponseDto> productDetailResponseDtos;
+        try {
+            productDetailResponseDtos = products
+                    .parallelStream() // Process products in parallel
+                    .map(this::toProductDetailResponseDto) // Map each product to a ProductDetailResponseDto using the existing method
+                    .toList();
+        } catch (Exception e) {
+            System.err.println("Error while mapping all products: " + e.getMessage());
+            throw new RuntimeException("Failed to fetch products from the database", e);
+        }
+        System.out.println(productDetailResponseDtos.size());
+        return productDetailResponseDtos;
     }
 
 
@@ -137,16 +143,16 @@ public class ProductServiceImpl implements ProductService {
         double totalQB1 = 0;
         int stt = 1;
         long totalQuantity = 0;
-
+        double comparePrice = 0;
         List<ProductComponent> components = product.getComponents();
 
         for (ProductComponent productComponent : components) {
-            double shippingCost = 0;
-            double girth = 0;
+            double shippingCost;
+            double girth;
             Dimension dimension = productComponent.getComponent().getDimension();
-            long quantityBox = 0;
+            long quantityBox;
             double componentPrice = productComponent.getComponent().getPrice().getQB3();
-            double boxCount = 0;
+            double boxCount;
             if (dimension != null) {
 
                 quantityBox = productComponent.getComponent().getDimension().getQuantityBox();
@@ -183,24 +189,37 @@ public class ProductServiceImpl implements ProductService {
 
 
                 girth = dimension.getBoxLength() + 2 * (dimension.getBoxWidth() + dimension.getBoxHeight());
-                if (girth > 118) {
-                    shippingCost = shippingCost + 115;
-                    if (girth > 165 && product.getComponents().size() == 1) {
-                        shippingCost = shippingCost + 100;
+
+                if (girth > 160) {
+                    shippingCost = shippingCost + 50;
+                } else if (girth > 136) {
+                    shippingCost = shippingCost + 30;
+                } else if (girth > 118) {
+                    shippingCost = shippingCost + 20;
+                }
+
+                if (components.size() == 1) {
+                    if (girth > 118) {
+                        shippingCost = shippingCost + 50;
                     }
-                } else {
+                    if (girth > 160) {
+                        shippingCost = shippingCost + 50;
+                    }
                     if (dimension.getBoxLength() >= 44) {
-                        shippingCost = shippingCost + 30;
+                        shippingCost = shippingCost + 20;
                     }
                 }
+
 
                 totalQB1 = totalQB1 + (componentPrice * productComponent.getQuantity());
                 shippingCost = shippingCost * boxCount;
                 totalShipCost = totalShipCost + shippingCost;
                 totalQuantity = totalQuantity + productComponent.getQuantity();
+
+                System.out.println(productComponent.getComponent().getSku() + " | " + shippingCost);
                 rows.add(new String[]{
                         String.valueOf(stt),
-                        "",
+                        product.getSku(),
                         "",
                         product.getShippingMethod(),
                         "",
@@ -216,27 +235,24 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        if (Objects.equals(product.getShippingMethod(), "LTL")) {
-            if (totalShipCost > 500) {
-                totalShipCost = totalShipCost * 0.8;
-            } else if (totalShipCost > 400) {
-                totalShipCost = totalShipCost * 0.85;
-            } else if (totalShipCost > 300) {
-                totalShipCost = totalShipCost * 0.9;
-            }
-
-        }
-
-
         productPrice = totalQB1 + totalShipCost;
-        productPrice = productPrice * 1.03;
+//        productPrice = productPrice * 1.03;
+
         if (product.getPrice() == null) product.setPrice(new Price());
         product.getPrice().setEwfdirect(productPrice);
         productRepository.save(product);
 
+        if (product.getPrice() != null) {
+            if (product.getPrice().getAmazonPrice() != null) {
+                if (productPrice < product.getPrice().getAmazonPrice()) {
+                    comparePrice = product.getPrice().getAmazonPrice() * 1.1;
+                }
+            }
+        }
+        System.out.println("Product :" + product.getSku() + " | " + totalShipCost);
         rows.add(new String[]{
                 String.valueOf(stt),
-                product.getSku().toLowerCase(),
+                product.getSku(),
                 product.getTitle(),
                 String.valueOf(product.getShippingMethod()),
                 String.valueOf(productPrice),
@@ -247,6 +263,7 @@ public class ProductServiceImpl implements ProductService {
                 String.valueOf(productPrice),
                 String.valueOf(product.getPrice().getAmazonPrice()),
                 "http://www.amazon.com/dp/" + product.getAsin(),
+                comparePrice == 0 ? "" : String.valueOf(comparePrice),
         });
 
         return productPrice;
@@ -435,21 +452,24 @@ public class ProductServiceImpl implements ProductService {
             if (product.getDimension() != null) responseDto.setSizeShape(product.getDimension().getSizeShape());
 
             List<ComponentProductDetailResponseDto> componentList = new ArrayList<>();
-            for (ProductComponent productComponent : product.getComponents()) {
-                componentList.add(
-                        new ComponentProductDetailResponseDto(
-                                productComponent.getId(),
-                                productComponent.getComponent().getId(),
-                                productComponent.getComponent().getSku(),
-                                productComponent.getQuantity(),
-                                productComponent.getComponent().getPos(),
-                                productComponent.getComponent().getDimension()
-                        ));
+            if (product.getComponents() != null) {
+                for (ProductComponent productComponent : product.getComponents()) {
+                    componentList.add(
+                            new ComponentProductDetailResponseDto(
+                                    productComponent.getId(),
+                                    productComponent.getComponent().getId(),
+                                    productComponent.getComponent().getSku(),
+                                    productComponent.getQuantity(),
+                                    productComponent.getComponent().getPos(),
+                                    productComponent.getComponent().getDimension()
+                            ));
+                }
+                responseDto.setComponents(componentList);
             }
-            responseDto.setComponents(componentList);
 
-
-            responseDto.setImages(imageService.parseImageJson(product.getImages()));
+            if (product.getImages() != null) {
+                responseDto.setImages(imageService.parseImageJson(product.getImages()));
+            }
         }
 
         return responseDto;
