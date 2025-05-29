@@ -394,19 +394,20 @@ public class ProductsImport {
         }
     }
 
-    public void updateComponentQuantity() {
-        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+    public void updateProductPromotion() {
+        try (InputStream file = getClass().getResourceAsStream("/data/discount_sku.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
 
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
-                if (columns.length < 1) {
+                if (columns.length < 2) {
                     continue;
                 }
 
                 String sku = columns[0].trim();
+                Long promotion = Long.parseLong(columns[1].trim());
 
                 if (sku.isEmpty()) {
                     continue;
@@ -415,15 +416,14 @@ public class ProductsImport {
                 if (optionalProduct.isPresent()) {
                     Product product = optionalProduct.get();
                     List<ProductComponent> productComponents = product.getComponents();
-                    if (productComponents.size() == 1) {
-                        productComponents.get(0).setQuantity(2L);
-                    } else {
-                        System.err.println("ERROR : " + sku + " VALUES : " + productComponents.get(0).getComponent().getSku());
-                        continue;
-                    }
-                    product.setComponents(productComponents);
+                    Price price = product.getPrice();
+                    if (product.getPrice() == null) price = new Price();
+                    price.setPromotion(promotion);
+                    product.setPrice(price);
                     productRepository.save(product);
-                    System.out.println("Successfully Updated Component SKU : " + sku + " VALUES : " + productComponents.get(0).getComponent().getSku() + " Quantity 2");
+                    System.out.println("Successfully Updated product : " + sku + " VALUES : " + promotion);
+                } else {
+                    System.err.println("Product not found: " + sku);
                 }
             }
         } catch (Exception e) {

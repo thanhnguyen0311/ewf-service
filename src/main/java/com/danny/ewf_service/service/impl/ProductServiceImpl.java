@@ -200,13 +200,13 @@ public class ProductServiceImpl implements ProductService {
 
                 if (components.size() == 1) {
                     if (girth > 118) {
-                        shippingCost = shippingCost + 50;
+                        shippingCost = shippingCost + 35;
                     }
                     if (girth > 160) {
-                        shippingCost = shippingCost + 50;
+                        shippingCost = shippingCost + 35;
                     }
                     if (dimension.getBoxLength() >= 44) {
-                        shippingCost = shippingCost + 20;
+                        shippingCost = shippingCost + 35;
                     }
                 }
 
@@ -234,9 +234,16 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
+        Price price = product.getPrice();
+        if (price == null) price = new Price();
+        if (price.getPromotion() > 0) {
+            comparePrice = totalQB1 + totalShipCost;
+            totalQB1 = totalQB1 * (1 - (double) price.getPromotion() / 100);
+        }
+
 
         productPrice = totalQB1 + totalShipCost;
-//        productPrice = productPrice * 1.03;
+        productPrice = productPrice * 1.03;
 
         if (product.getPrice() == null) product.setPrice(new Price());
         product.getPrice().setEwfdirect(productPrice);

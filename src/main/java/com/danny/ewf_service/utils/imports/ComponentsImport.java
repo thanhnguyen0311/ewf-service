@@ -446,12 +446,10 @@ public class ComponentsImport {
     }
 
     public void importComponentData() {
-        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/upcs.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
-
-            List<String> skus = new ArrayList<>();
 
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
@@ -460,11 +458,10 @@ public class ComponentsImport {
                 }
 
                 String sku = columns[0].trim().toUpperCase();
-                String subType = columns[1].trim();
+                String upc = columns[1].trim();
 
-                if (skus.contains(sku)) continue;
 
-                if (sku.isEmpty()) {
+                if (sku.isEmpty() || upc.isEmpty()) {
                     continue;
                 }
 
@@ -473,14 +470,10 @@ public class ComponentsImport {
                     Optional<Component> optionalComponent = componentRepository.findBySku(sku);
                     if (optionalComponent.isPresent()) {
                         component = optionalComponent.get();
-                    } else {
-                        continue;
+                        component.setUpc(upc);
+                        componentRepository.save(component);
+                        System.out.println("Successfully Updated product : " + sku + " VALUES : " + upc);
                     }
-
-                    component.setSubType(subType);
-                    componentRepository.save(component);
-                    skus.add(sku);
-                    System.out.println("Successfully Updated product : " + sku + " VALUES : " + subType);
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
                 }

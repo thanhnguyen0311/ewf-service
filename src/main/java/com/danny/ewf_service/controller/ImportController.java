@@ -45,10 +45,7 @@ public class ImportController {
         try {
             String filepath1 = "ewfdirect_listing.csv";
             String filepath2 = "ewfdirect_prices.csv";
-//            shopifyExport.exportProductListing(new ArrayList<>(), filepath1 , false);
             shopifyExport.exportShopifyProductsPrice(filepath2);
-//            shopifyExport.exportProductCustomfields(new ArrayList<>(), filepath2);
-//            productsImport.importDimensions();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

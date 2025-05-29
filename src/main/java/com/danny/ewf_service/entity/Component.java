@@ -54,6 +54,9 @@ public class Component {
     @JoinColumn(name = "price_id", referencedColumnName = "id")
     private Price price;
 
+    @Column(name = "upc")
+    private String upc;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

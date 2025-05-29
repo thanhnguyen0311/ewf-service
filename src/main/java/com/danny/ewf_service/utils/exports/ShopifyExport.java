@@ -3,6 +3,7 @@ package com.danny.ewf_service.utils.exports;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.ImageUrls;
+import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.product.ProductDetail;
@@ -111,26 +112,10 @@ public class ShopifyExport {
         }
     }
 
-    public void exportShopifyProductsTrackInventory(String filePath) {
-        List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
-        List<String[]> rows = new ArrayList<>();
-        String[] header = {"Handle", "Title", "Variant Inventory Policy"};
-        rows.add(header);
-        for (Object[] result : rawResult) {
-            if (result[0] != "" && result[1] != "") {
-                rows.add(new String[]{
-                        result[0].toString().toLowerCase(),
-                        result[1].toString(),
-                        "deny"
-                });
-            }
-        }
-        csvWriter.exportToCsv(rows, filePath);
-    }
 
     public void exportShopifyDiscountPrice(String filePath) {
         String skuExportListPath = "src/main/resources/data/discount_sku.csv";
-        Set<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
+        List<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
 
         List<String> uppercaseSkus = skus.stream()
                 .map(String::toUpperCase)
@@ -215,7 +200,6 @@ public class ShopifyExport {
                 "Finish (product.metafields.my_fields.finish)",
                 "Variant Weight Unit",
                 "Included / United States",
-                "Compare At Price / United States",
                 "Status",
         };
 
@@ -287,11 +271,9 @@ public class ShopifyExport {
                 }
             }
 
-
             ProductDetail productDetail = product.getProductDetail();
             if (productDetail == null) productDetail = new ProductDetail();
             productPrice = productService.calculateEWFDirectPriceGround(product, new ArrayList<>());
-
 
 //            if (product.getPrice() != null) {
 //                if (product.getPrice().getAmazonPrice() != 0) {
@@ -311,6 +293,23 @@ public class ShopifyExport {
             if (productDetail.getPieces() != null) tags.append(productDetail.getPieces()).append(",");
             if (productDetail.getChairType() != null) tags.append(productDetail.getChairType()).append(",");
             if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+
+            Price price = product.getPrice();
+            if (price != null) {
+                if (productPrice < product.getPrice().getAmazonPrice() || price.getPromotion() > 0 ) {
+                    tags.append("Clearance,");
+                }
+                if (price.getAmazonPrice() != null) {
+                    if (productPrice < price.getAmazonPrice()) {
+                        comparePrice = price.getAmazonPrice() * 1.1;
+                    }
+                }
+
+                if (price.getPromotion() > 0) {
+                    comparePrice = productPrice * (1 + (double) (price.getPromotion() - 10) / 100);
+                }
+            }
+
 
             row = new String[]{
                     product.getSku().toLowerCase(),
@@ -347,7 +346,6 @@ public class ShopifyExport {
                     productDetail.getFinish() != null ? productDetail.getFinish() : "",
                     "lb",
                     "TRUE",
-                    "",
                     "active"
             };
 

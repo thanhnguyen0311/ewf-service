@@ -37,18 +37,12 @@ public class CsvWriter {
         }
     }
 
-    public Set<String> skuListFromCsv(String csvFilePath){
-        Set<String> skuSet = new HashSet<>();
+    public List<String> skuListFromCsv(String csvFilePath){
+        List<String> skuSet = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
             String line;
-            boolean isFirstRow = true;
 
             while ((line = reader.readLine()) != null) {
-
-                if (isFirstRow) {
-                    isFirstRow = false;
-                    continue;
-                }
 
                 String[] columns = line.split(",");
                 if (columns.length > 0) {

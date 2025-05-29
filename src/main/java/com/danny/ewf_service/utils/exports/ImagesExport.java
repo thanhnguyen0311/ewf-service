@@ -91,7 +91,7 @@ public class ImagesExport {
         List<Product> products = productRepository.findAll();
         String[] header = {"Handle", "Title", "Image Src", "Image Position"};
         String skuExportListPath = "src/main/resources/data/report.csv";
-        Set<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
+        List<String> skus = csvWriter.skuListFromCsv(skuExportListPath);
         List<String[]> rows = new ArrayList<>();
         ImageUrls productImages;
         ImageUrls componentImages;
