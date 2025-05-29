@@ -42,4 +42,7 @@ public class Dimension {
 
     @Column(name = "length")
     private Double length;
+
+    @Column(name = "l_w_h")
+    private String lwh;
 }

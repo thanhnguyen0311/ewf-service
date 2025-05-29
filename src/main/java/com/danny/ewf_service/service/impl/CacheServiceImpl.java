@@ -15,6 +15,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,7 +33,14 @@ public class CacheServiceImpl implements CacheService {
     @Cacheable(value = "productsCache", key = "'allProducts'")
     public List<Product> getAllProducts() {
         System.out.println("Cache miss - loading all products from database");
-        return productRepository.findAllProducts();
+        List<Product> products;
+        try {
+            products = productRepository.findAllProducts();
+        } catch (Exception e) {
+            System.err.println("Error while fetching all products: " + e.getMessage());
+            throw new RuntimeException("Failed to fetch products from the database", e);
+        }
+        return products;
     }
 
 

@@ -1,5 +1,6 @@
 package com.danny.ewf_service.payload.response;
 
+import com.danny.ewf_service.entity.Dimension;
 import lombok.*;
 
 @Data
@@ -14,4 +15,5 @@ public class ComponentProductDetailResponseDto{
     private String sku;
     private Long quantity;
     private Long pos;
+    private Dimension dimension;
 }

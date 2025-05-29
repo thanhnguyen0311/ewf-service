@@ -1,5 +1,6 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.utils.CsvWriter;
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
 import com.danny.ewf_service.utils.imports.ComponentsImport;
@@ -11,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 @RequestMapping("/import")
@@ -27,6 +31,9 @@ public class ImportController {
     private final ProductsImport productsImport;
 
     @Autowired
+    private final CsvWriter csvWriter;
+
+    @Autowired
     private final ComponentsImport componentsImport;
 
     @Autowired
@@ -36,7 +43,9 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-
+            String filepath1 = "ewfdirect_listing.csv";
+            String filepath2 = "ewfdirect_prices.csv";
+            shopifyExport.exportShopifyProductsPrice(filepath2);
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

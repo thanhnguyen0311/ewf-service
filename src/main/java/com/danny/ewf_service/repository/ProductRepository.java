@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -18,6 +19,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p " +
            "LEFT JOIN FETCH p.components " +
            "LEFT JOIN FETCH p.wholesales " +
+           "LEFT JOIN FETCH p.dimension " +
            "LEFT JOIN FETCH p.productDetail " +
            "WHERE p.isDeleted = false "+
            "ORDER BY p.createdAt DESC"
@@ -34,8 +36,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "ORDER BY p.createdAt DESC")
     List<Product> findAllByIds(@Param("ids") List<Long> ids);
 
+    @Query("SELECT p FROM Product p " +
+           "LEFT JOIN FETCH p.components " +
+           "LEFT JOIN FETCH p.wholesales " +
+           "LEFT JOIN FETCH p.price " +
+           "LEFT JOIN FETCH p.productDetail " +
+           "WHERE p.isDeleted = false " +
+           "AND UPPER(p.sku) IN :skus ")
+    List<Product> findAllBySkus(@Param("skus") List<String> skus);
 
-    @Query("SELECT p FROM Product p JOIN p.wholesales w WHERE w.ewfdirect = true")
+    @Query("SELECT p FROM Product p " +
+           "LEFT JOIN FETCH p.components " +
+           "LEFT JOIN FETCH p.wholesales " +
+           "LEFT JOIN FETCH p.dimension " +
+           "LEFT JOIN FETCH p.productDetail " +
+           "WHERE p.wholesales.ewfdirect = true " +
+           "AND p.isDeleted = false")
     List<Product> findProductsByWholesalesEwfdirect();
 
     Optional<Product> findBySku(String sku);

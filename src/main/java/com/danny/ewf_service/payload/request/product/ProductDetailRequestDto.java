@@ -1,5 +1,6 @@
 package com.danny.ewf_service.payload.request.product;
 
+import com.danny.ewf_service.entity.ImageUrls;
 import lombok.*;
 
 import java.util.List;
@@ -36,4 +37,5 @@ public class ProductDetailRequestDto {
     private Boolean ewfmain;
     private String sizeShape;
     private List<ProductComponentRequestDto> components;
+    private ImageUrls images;
 }

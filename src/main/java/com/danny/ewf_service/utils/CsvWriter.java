@@ -4,6 +4,7 @@ import com.opencsv.CSVWriter;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -21,10 +22,12 @@ public class CsvWriter {
         }
 
         System.out.println("Start Exporting CSV file");
-        try (CSVWriter writer = new CSVWriter(new FileWriter(csvFilePath))) {
+        try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+                new FileOutputStream(csvFilePath), StandardCharsets.UTF_8))) { // Use UTF-8 encoding
             for (String[] row : rows) {
                 writer.writeNext(row);
             }
+
 
             System.out.println("CSV file successfully exported to: " + csvFilePath);
 
@@ -34,23 +37,17 @@ public class CsvWriter {
         }
     }
 
-    public Set<String> skuListFromCsv(String csvFilePath){
-        Set<String> skuSet = new HashSet<>();
+    public List<String> skuListFromCsv(String csvFilePath){
+        List<String> skuSet = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
             String line;
-            boolean isFirstRow = true;
 
             while ((line = reader.readLine()) != null) {
-
-                if (isFirstRow) {
-                    isFirstRow = false;
-                    continue;
-                }
 
                 String[] columns = line.split(",");
                 if (columns.length > 0) {
                     if (columns[0].trim().isEmpty()) continue;
-                    skuSet.add(columns[0].trim().toLowerCase());
+                    skuSet.add(columns[0].trim().toUpperCase());
                 }
             }
             System.out.println("Product count: " + skuSet.size());
