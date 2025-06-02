@@ -1,0 +1,31 @@
+package com.danny.ewf_service.controller;
+
+import com.danny.ewf_service.payload.request.LpnRequestDto;
+import com.danny.ewf_service.payload.response.BayLocationResponseDto;
+import com.danny.ewf_service.service.LpnService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RequestMapping("/api/v1/lpn")
+@RestController
+@AllArgsConstructor
+public class LPNController {
+
+    private final LpnService lpnService;
+
+    @PostMapping("/new")
+    public ResponseEntity<?> createNewLpn(@RequestBody LpnRequestDto lpn) {
+        try {
+            lpnService.newLpn(lpn);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching location");
+        }
+    }
+
+}

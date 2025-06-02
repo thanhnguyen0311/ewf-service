@@ -1,8 +1,10 @@
 package com.danny.ewf_service.entity;
 
+import com.danny.ewf_service.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,9 +19,6 @@ public class LPN {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "lpn_code")
-    private String lpnCode;
-
     @Column(name = "rfid_tag_id")
     private String tagID;
 
@@ -30,16 +29,17 @@ public class LPN {
     @Column(name = "quantity")
     private Long quantity;
 
+    @Column(name = "container_number")
+    private String containerNumber;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bay_id", referencedColumnName = "id")
     private BayLocation bayLocation;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private Status status;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "date")
+    private LocalDate date;
 }

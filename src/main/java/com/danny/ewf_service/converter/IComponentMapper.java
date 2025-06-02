@@ -3,6 +3,7 @@ package com.danny.ewf_service.converter;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Configuration;
 import com.danny.ewf_service.entity.ImageUrls;
+import com.danny.ewf_service.payload.response.ComponentInboundResponseDto;
 import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.ComponentResponseDto;
 import org.mapstruct.Context;
@@ -14,6 +15,11 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface IComponentMapper {
+
+    @Mapping(target = "sku", source = "component.sku")
+    @Mapping(target = "upc", source = "component.upc")
+    ComponentInboundResponseDto componentToComponentInboundResponseDto(Component component);
+    List<ComponentInboundResponseDto> componentListToComponentInboundResponseDtoList(List<Component> components);
 
     @Mapping(target = "id", source = "component.id")
     @Mapping(target = "sku", source = "component.sku")
