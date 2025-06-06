@@ -40,7 +40,7 @@ public class Component {
     @Column(name = "images")
     private String images;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "report_id", referencedColumnName = "id")
     private Report report = new Report();
 
