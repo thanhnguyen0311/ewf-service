@@ -1,6 +1,7 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
@@ -340,7 +341,7 @@ public class ComponentsImport {
 
     @Transactional
     public void importDimensions() {
-        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/upcs.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             Set<String> componentSkus = new HashSet<>();
@@ -349,11 +350,13 @@ public class ComponentsImport {
             while ((line = reader.readLine()) != null) {
 
                 String[] columns = line.split(",");
-                if (columns.length < 1) {
+                if (columns.length < 2) {
                     continue;
                 }
 
                 String componentSku = columns[0].trim();
+                String lwh = columns[1].trim();
+                if (lwh.isEmpty()) continue;
 
                 if (componentSku.isEmpty() || componentSkus.contains(componentSku)) {
                     continue;
@@ -372,10 +375,15 @@ public class ComponentsImport {
                         component = new Component();
                         component.setSku(componentSku);
                     }
-                    component.setPos(5L);
+                    Dimension dimension = component.getDimension();
+                    if (dimension == null) dimension = new Dimension();
+
+                    dimension.setLwh(lwh);
+                    component.setSubType("Dining Table Top");
+                    component.setDimension(dimension);
                     componentRepository.save(component);
                     componentSkus.add(componentSku);
-                    System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + component.getPos());
+                    System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + lwh);
 
 
                 } catch (RuntimeException e) {

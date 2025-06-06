@@ -224,56 +224,57 @@ public class ShopifyExport {
         String[] row;
         int newArrivalsStartIndex = products.size() - 1500;
         int index = 0;
-        for (Product product : products) {
-            index++;
-            System.out.println("Processing " + product.getSku());
-            if (product.getWholesales() != null){
-                if (!product.getWholesales().getEwfdirect()) continue;
-            }
+        try {
+            for (Product product : products) {
+                index++;
+                System.out.println("Processing " + product.getSku());
+                if (product.getWholesales() != null){
+                    if (!product.getWholesales().getEwfdirect()) continue;
+                }
 
-            if (product.getDiscontinued() == null || product.getDiscontinued()) continue;
-            if (product.getComponents().isEmpty()) continue;
-            if (product.getTitle() == null) continue;
-            if( product.getProductDetail() != null ) {
-                if (product.getProductDetail().getDescription() == null ) continue;
-                if (product.getProductDetail().getSubCategory() == null) continue;
-            } else {
-                continue;
-            }
-            if (product.getUpc() == null ) continue;
+                if (product.getDiscontinued() == null || product.getDiscontinued()) continue;
+                if (product.getComponents().isEmpty()) continue;
+                if (product.getTitle() == null) continue;
+                if( product.getProductDetail() != null ) {
+                    if (product.getProductDetail().getDescription() == null ) continue;
+                    if (product.getProductDetail().getSubCategory() == null) continue;
+                } else {
+                    continue;
+                }
+                if (product.getUpc() == null ) continue;
 
-            List<Product> mergedProducts = productService.findMergedProducts(product);
+                List<Product> mergedProducts = productService.findMergedProducts(product);
 
-            if (isImageExport) {
-                productImages = imageService.parseImageJson(product.getImages());
-                images = new ArrayList<>(imageService.toList(productImages));
-                if (images.isEmpty()) continue;
+                if (isImageExport) {
+                    productImages = imageService.parseImageJson(product.getImages());
+                    images = new ArrayList<>(imageService.toList(productImages));
+                    if (images.isEmpty()) continue;
 
-                if (mergedProducts != null) {
-                    for (Product mergedProduct : mergedProducts) {
-                        if (!Objects.equals(mergedProduct.getSku(), product.getSku())) {
-                            productImages = imageService.parseImageJson(mergedProduct.getImages());
+                    if (mergedProducts != null) {
+                        for (Product mergedProduct : mergedProducts) {
+                            if (!Objects.equals(mergedProduct.getSku(), product.getSku())) {
+                                productImages = imageService.parseImageJson(mergedProduct.getImages());
+                                images.addAll(imageService.toList(productImages));
+                            }
+                        }
+                    }
+
+                    List<String> subSingleSkus = productComponentRepository.findSingleProductsByProductSku(product.getId());
+                    Product subProduct;
+                    for (String subSingleSku : subSingleSkus) {
+                        if (subSingleSku.equals(product.getSku())) continue;
+                        Optional<Product> subProductOptional = productRepository.findProductBySku(subSingleSku);
+                        if (subProductOptional.isPresent()) {
+                            subProduct = subProductOptional.get();
+                            productImages = imageService.parseImageJson(subProduct.getImages());
                             images.addAll(imageService.toList(productImages));
                         }
                     }
                 }
 
-                List<String> subSingleSkus = productComponentRepository.findSingleProductsByProductSku(product.getId());
-                Product subProduct;
-                for (String subSingleSku : subSingleSkus) {
-                    if (subSingleSku.equals(product.getSku())) continue;
-                    Optional<Product> subProductOptional = productRepository.findProductBySku(subSingleSku);
-                    if (subProductOptional.isPresent()) {
-                        subProduct = subProductOptional.get();
-                        productImages = imageService.parseImageJson(subProduct.getImages());
-                        images.addAll(imageService.toList(productImages));
-                    }
-                }
-            }
-
-            ProductDetail productDetail = product.getProductDetail();
-            if (productDetail == null) productDetail = new ProductDetail();
-            productPrice = productService.calculateEWFDirectPriceGround(product, new ArrayList<>());
+                ProductDetail productDetail = product.getProductDetail();
+                if (productDetail == null) productDetail = new ProductDetail();
+                productPrice = productService.calculateEWFDirectPriceGround(product, new ArrayList<>());
 
 //            if (product.getPrice() != null) {
 //                if (product.getPrice().getAmazonPrice() != 0) {
@@ -283,107 +284,108 @@ public class ShopifyExport {
 //                }
 //            }
 
-            tags = new StringBuilder();
-            if (productDetail.getSizeShape() != null) tags.append(productDetail.getSizeShape()).append(",");
-            if (productDetail.getFinish() != null) tags.append(productDetail.getFinish()).append(",");
-            if (productDetail.getMainCategory() != null) tags.append(productDetail.getMainCategory()).append(",");
-            if (productDetail.getSubCategory() != null) tags.append(productDetail.getSubCategory()).append(",");
-            if (productDetail.getCollection() != null) tags.append(productDetail.getCollection()).append(",");
-            if (productDetail.getStyle() != null) tags.append(productDetail.getStyle()).append(",");
-            if (productDetail.getPieces() != null) tags.append(productDetail.getPieces()).append(",");
-            if (productDetail.getChairType() != null) tags.append(productDetail.getChairType()).append(",");
-            if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+                tags = new StringBuilder();
+                if (productDetail.getSizeShape() != null) tags.append(productDetail.getSizeShape()).append(",");
+                if (productDetail.getFinish() != null) tags.append(productDetail.getFinish()).append(",");
+                if (productDetail.getMainCategory() != null) tags.append(productDetail.getMainCategory()).append(",");
+                if (productDetail.getSubCategory() != null) tags.append(productDetail.getSubCategory()).append(",");
+                if (productDetail.getCollection() != null) tags.append(productDetail.getCollection()).append(",");
+                if (productDetail.getStyle() != null) tags.append(productDetail.getStyle()).append(",");
+                if (productDetail.getPieces() != null) tags.append(productDetail.getPieces()).append(",");
+                if (productDetail.getChairType() != null) tags.append(productDetail.getChairType()).append(",");
+                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
 
-            Price price = product.getPrice();
-            if (price != null) {
-                if (productPrice < product.getPrice().getAmazonPrice() || price.getPromotion() > 0 ) {
-                    tags.append("Clearance,");
-                }
-                if (price.getAmazonPrice() != null) {
-                    if (productPrice < price.getAmazonPrice()) {
-                        comparePrice = price.getAmazonPrice() * 1.1;
+                Price price = product.getPrice();
+                if (price != null) {
+                    if (price.getPromotion() > 0 ) {
+                        tags.append("Clearance,");
+                    }
+                    if (price.getAmazonPrice() != null) {
+                        if (productPrice < price.getAmazonPrice()) {
+                            comparePrice = price.getAmazonPrice() * 1.1;
+                        }
+                    }
+
+                    if (price.getPromotion() > 0) {
+                        comparePrice = productPrice * (1 + (double) (price.getPromotion() - 10) / 100);
                     }
                 }
 
-                if (price.getPromotion() > 0) {
-                    comparePrice = productPrice * (1 + (double) (price.getPromotion() - 10) / 100);
-                }
-            }
 
-
-            row = new String[]{
-                    product.getSku().toLowerCase(),
-                    product.getTitle() != null ? product.getTitle() : product.getName(),
-                    productDetail.getHtmlDescription() != null ? productDetail.getHtmlDescription() : "",
-                    "East West Furniture",
-                    Objects.equals(productDetail.getSubCategory(), "Dining Room Set") ? "Furniture > Furniture Sets > Kitchen & Dining Furniture Sets" : "",
-                    productDetail.getSubCategory(),
-                    commaRemoval(tags.toString()),
-                    "TRUE",
-                    "Title",
-                    "Default Title",
-                    product.getSku(),
-                    Objects.equals(product.getShippingMethod(), "LTL") ? "22679.6185" : "0.00",
-                    "shopify",
-                    inventoryService.getInventoryProductCountById(product.getId()) + "",
-                    "deny",
-                    "manual",
-                    productPrice + "",                                              // Variant Price
-                    comparePrice != 0 ? comparePrice + "" : "",                     // Variant Compare At Price
-                    "TRUE",
-                    "TRUE",
-                    product.getUpc(),
-//                    images.get(0).replace("\"", ""),
-                    "",
-                    "1",                                                            // img position
-                    "FALSE",
-                    product.getTitle() != null ? product.getTitle() : product.getName(),
-                    productDetail.getDescription() != null ? productDetail.getDescription() : "",
-                    "6347",
-                    "Unisex",
-                    "Adult",
-                    product.getSku(),
-                    productDetail.getFinish() != null ? productDetail.getFinish() : "",
-                    "lb",
-                    "TRUE",
-                    "active"
-            };
-
-
-            rows.add(row);
-            skuRows.add(new String[]{product.getSku()});
-            for (int i = 1; i < images.size(); i++) {
-                rows.add(new String[]{
+                row = new String[]{
                         product.getSku().toLowerCase(),
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        images.get(i).replace("\"", ""),
-                        String.valueOf(i + 1),
-                });
-            }
+                        product.getTitle() != null ? product.getTitle() : product.getName(),
+                        productDetail.getHtmlDescription() != null ? productDetail.getHtmlDescription() : "",
+                        "East West Furniture",
+                        Objects.equals(productDetail.getSubCategory(), "Dining Room Set") ? "Furniture > Furniture Sets > Kitchen & Dining Furniture Sets" : "",
+                        productDetail.getSubCategory(),
+                        commaRemoval(tags.toString()),
+                        "TRUE",
+                        "Title",
+                        "Default Title",
+                        product.getSku(),
+                        Objects.equals(product.getShippingMethod(), "LTL") ? "22679.6185" : "0.00",
+                        "shopify",
+                        inventoryService.getInventoryProductCountById(product.getId()) + "",
+                        "deny",
+                        "manual",
+                        productPrice + "",                                              // Variant Price
+                        comparePrice != 0 ? comparePrice + "" : "",                     // Variant Compare At Price
+                        "TRUE",
+                        "TRUE",
+                        product.getUpc(),
+                        images.get(0).replace("\"", ""),
+                        "1",                                                            // img position
+                        "FALSE",
+                        product.getTitle() != null ? product.getTitle() : product.getName(),
+                        productDetail.getDescription() != null ? productDetail.getDescription() : "",
+                        "6347",
+                        "Unisex",
+                        "Adult",
+                        product.getSku(),
+                        productDetail.getFinish() != null ? productDetail.getFinish() : "",
+                        "lb",
+                        "TRUE",
+                        "active"
+                };
 
-            System.out.println("Exported " + product.getSku() + " | " + images);
-            product.getWholesales().setEwfdirect(true);
+
+                rows.add(row);
+                skuRows.add(new String[]{product.getSku()});
+                for (int i = 1; i < images.size(); i++) {
+                    rows.add(new String[]{
+                            product.getSku().toLowerCase(),
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            images.get(i).replace("\"", ""),
+                            String.valueOf(i + 1),
+                    });
+                }
+
+                System.out.println("Exported " + product.getSku() + " | " + images);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        csvWriter.exportToCsv(skuRows, "sku_list.csv");
+
         csvWriter.exportToCsv(rows, filePath);
     }
 
@@ -448,6 +450,7 @@ public class ShopifyExport {
 
         for (Product product : products) {
             System.out.println("Processing " + product.getSku());
+//            if (!Objects.equals(product.getSku(), "CNDA5-07-T12")) continue;
             if (product.getDiscontinued() == null || product.getDiscontinued()) continue;
             if (product.getComponents().isEmpty()) continue;
             if (product.getProductDetail() == null) continue;
@@ -469,12 +472,29 @@ public class ShopifyExport {
 
             if (mergedProducts != null) {
                 for (Product mergedProduct : mergedProducts) {
+                    String lwh = "";
+                    if (mergedProduct.getDimension() != null){
+                        if (mergedProduct.getDimension().getLwh() != null){
+                            lwh = mergedProduct.getDimension().getLwh();
+                        }
+                    }
+                    for (ProductComponent productComponent : mergedProduct.getComponents()) {
+                        if (productComponent.getComponent().getSubType() != null) {
+                            if (productComponent.getComponent().getSubType().equals("Dining Table Top") || productComponent.getComponent().getSubType().equals("Dining Table") ) {
+                                if (productComponent.getComponent().getDimension().getLwh() != null) {
+                                    lwh = productComponent.getComponent().getDimension().getLwh();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     boxQty = mergedProduct.getComponents().size();
                     skuTable.add(new String[]{
                             mergedProduct.getSku(),
                             1 + "",
                             mergedProduct.getProductDetail().getSubCategory() != null ? mergedProduct.getProductDetail().getSubCategory() : "",
-                            mergedProduct.getDimension() != null && mergedProduct.getDimension().getLwh() != null ? mergedProduct.getDimension().getLwh() : "",
+                            lwh,
                             boxQty == 0 ? "" : boxQty + "",
                             ""
                     });
@@ -483,36 +503,87 @@ public class ShopifyExport {
                 skuTable.forEach(rowEntry -> System.out.println(Arrays.toString(rowEntry)));
             }
 
-            List<String> subSingleSkus = productComponentRepository.findSingleProductsByProductSku(product.getId());
-            List<Product> subSingleProducts = productRepository.findAllBySkus(subSingleSkus);
-
             for (ProductComponent productComponent : product.getComponents()) {
                 Component component = productComponent.getComponent();
-                Dimension dimension = component.getDimension();
                 if (Objects.equals(component.getType(), "Single")) {
-                        skuTable.add(new String []{
-                                component.getSku(),
-                                productComponent.getQuantity()/dimension.getQuantityBox() + "",
-                                component.getSubType() != null ? component.getSubType() : "",
-                                dimension.getLength() != null ? lwhToString(dimension.getLength(), dimension.getWidth(), dimension.getHeight()): "",
-                                1 + "",
-                                dimension.getBoxLength() != null ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : "",
+                    Dimension dimension = component.getDimension();
+                    if (dimension == null) dimension = new Dimension();
+                    String lwh = "";
+                    if (dimension.getLength() != null){
+                        lwh = lwhToString(dimension.getLength(), dimension.getWidth(), dimension.getHeight());
+                    }
+                    if (component.getSubType() != null) {
+                        if (component.getSubType().equals("Dining Table Top") || component.getSubType().equals("Dining Table") ) {
+                            if (dimension.getLwh() != null) lwh = dimension.getLwh();
+                        }
+                    }
+                    skuTable.add(new String []{
+                            component.getSku(),
+                            productComponent.getQuantity() + "",
+                            component.getSubType() != null ? component.getSubType() : "",
+                            lwh,
+                            dimension.getQuantityBox() != null ? productComponent.getQuantity() / dimension.getQuantityBox() + "" : "",
+                            dimension.getBoxLength() != null
+                                        ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : "",
                         });
-
                 }
             }
+
+            List<String> subSingleSkus = productComponentRepository.findSingleProductsByProductSku(product.getId());
+            List<Product> subSingleProducts = productRepository.findAllBySkus(subSingleSkus);
+//
+//            for (Product subSingleProduct : subSingleProducts) {
+//                Dimension dimension = subSingleProduct.getDimension();
+//                for (ProductComponent productComponent : product.getComponents()) {
+//                    if (productComponent.getComponent().getSku().equals(subSingleProduct.getSku())) {
+//
+//                        String lwh = "";
+//                        if (productComponent.getComponent().getDimension().getLength() != null){
+//                            lwh = lwhToString(
+//                                    productComponent.getComponent().getDimension().getLength(),
+//                                    productComponent.getComponent().getDimension().getWidth(),
+//                                    productComponent.getComponent().getDimension().getHeight());
+//                        }
+//                        if (productComponent.getComponent().getSubType().equals("Dining Table Top") || productComponent.getComponent().getSubType().equals("Dining Table") ) {
+//                            if (productComponent.getComponent().getDimension().getLwh() != null) lwh = productComponent.getComponent().getDimension().getLwh();
+//                        }
+//
+//                        skuTable.add(new String []{
+//                                productComponent.getComponent().getSku(),
+//                                productComponent.getQuantity() + "",
+//                                productComponent.getComponent().getSubType() != null ? productComponent.getComponent().getSubType() : "",
+//                                lwh,
+//                                productComponent.getComponent().getDimension() != null ? productComponent.getQuantity() / productComponent.getComponent().getDimension().getQuantityBox() + "" : "",
+//                                productComponent.getComponent().getDimension() != null && productComponent.getComponent().getDimension().getBoxLength() != null
+//                                        ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : "",
+//                        });
+//                        break;
+//                    }
+//                }
+//
+//            }
 
             if (skuTable.isEmpty()) {
                 for (ProductComponent productComponent : product.getComponents()) {
                     Component component = productComponent.getComponent();
                     Dimension dimension = component.getDimension();
+                    String lwh = "";
+                    if (dimension.getLength() != null){
+                        lwh = lwhToString(dimension.getLength(), dimension.getWidth(), dimension.getHeight());
+                    }
+                    if (component.getSubType() != null) {
+                        if (component.getSubType().equals("Dining Table Top") || component.getSubType().equals("Dining Table") ) {
+                            if (dimension.getLwh() != null) lwh = dimension.getLwh();
+                        }
+                    }
+
                     skuTable.add(new String[]{
                             component.getSku(),
                             productComponent.getQuantity() + "",
                             component.getSubType() != null ? component.getSubType() : "",
-                            dimension != null ? lwhToString(dimension.getLength(), dimension.getWidth(), dimension.getHeight()) : "",
-                            productComponent.getQuantity()/dimension.getQuantityBox() + "",
-                            dimension != null ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : ""
+                            lwh,
+                            dimension.getQuantityBox() != null ? productComponent.getQuantity()/dimension.getQuantityBox() + "" : "",
+                            dimension.getBoxLength() != null ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : ""
                     });
                 }
             }

@@ -1,5 +1,7 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.entity.BayLocation;
+import com.danny.ewf_service.repository.BayLocationRepository;
 import com.danny.ewf_service.utils.CsvWriter;
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
@@ -39,13 +41,19 @@ public class ImportController {
     @Autowired
     private final ImagesImport imagesImport;
 
+    @Autowired
+    private final BayLocationRepository bayLocationRepository;
+
 
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath1 = "ewfdirect_listing.csv";
-            String filepath2 = "ewfdirect_prices.csv";
-            shopifyExport.exportShopifyProductsPrice(filepath2);
+//            String filepath1 = "upcs.csv";
+            String filepath2 = "ewfdirect_listing.csv";
+//            List<String> skus = csvWriter.skuListFromCsv("src/main/resources/data/upcs.csv");
+            shopifyExport.exportProductListing(new ArrayList<>(),filepath2, true);
+
+
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

@@ -22,9 +22,9 @@ public class LPNController {
             lpnService.newLpn(lpn);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error fetching location");
+            return ResponseEntity.internalServerError().body("An unexpected error occurred");
         }
     }
 

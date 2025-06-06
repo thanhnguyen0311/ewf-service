@@ -1,6 +1,9 @@
 package com.danny.ewf_service.enums;
 
 
+import lombok.Getter;
+
+@Getter
 public enum Status {
     ACTIVE("active"),
     IN_TRANSIT("in_transit"),
@@ -13,7 +16,4 @@ public enum Status {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
 }
