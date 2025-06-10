@@ -238,6 +238,7 @@ public class ShopifyExport {
                 if( product.getProductDetail() != null ) {
                     if (product.getProductDetail().getDescription() == null ) continue;
                     if (product.getProductDetail().getSubCategory() == null) continue;
+                    if (!product.getProductDetail().getSubCategory().equals("Dining Chair")) continue;
                 } else {
                     continue;
                 }

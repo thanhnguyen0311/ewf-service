@@ -38,7 +38,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 authorities.add(new SimpleGrantedAuthority(permission.getSlug()));
             }
         }
-        System.out.println(authorities);
 
 
         return new CustomUserDetails(
