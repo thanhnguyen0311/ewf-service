@@ -4,8 +4,8 @@ import com.danny.ewf_service.converter.ILpnMapper;
 import com.danny.ewf_service.entity.BayLocation;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.LPN;
-import com.danny.ewf_service.enums.Status;
 import com.danny.ewf_service.payload.request.LpnRequestDto;
+import com.danny.ewf_service.payload.response.LpnResponseDto;
 import com.danny.ewf_service.repository.BayLocationRepository;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.LpnRepository;
@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -44,8 +45,14 @@ public class LpnServiceImpl implements LpnService {
         if (bayLocation.isPresent()) lpn.setBayLocation(bayLocation.get());
         else throw new RuntimeException("Bay location not found");
 
-        lpn.setStatus(Status.ACTIVE);
+        lpn.setStatus("active");
 
         lpnRepository.save(lpn);
+    }
+
+    @Override
+    public List<LpnResponseDto> getAllLpn() {
+        List<LPN> lpns = lpnRepository.findAllByOrderByCreatedDateDesc();
+        return lpnMapper.lpnListToLpnResponseDtoList(lpns);
     }
 }

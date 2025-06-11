@@ -65,4 +65,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE p.asin IS NOT NULL")
     List<Product> findAllByAsinIsNotNull();
+
+    @Query("SELECT p FROM Product p WHERE p.productDetail.collection = :collection")
+    List<Product> findAllByProductDetailCollection(@Param("collection") String collection);
+
 }

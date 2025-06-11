@@ -41,37 +41,43 @@ public class AmazonDataExport {
     }
 
     public void extractDataFromAmazon(){
+//        List<Product> products = productRepository.findAllByProductDetailCollection("Luxe");
+
         List<Product> products = productRepository.findAllByAsinIsNotNull();
         System.out.println("Found " + products.size() + " products with ASIN");
         String searchApiRequest = "https://www.searchapi.io/api/v1/search?api_key=" + searchApiToken + "&asin=";
         ProductMetadata metadata;
         String apiResponse;
+
+
         for (Product product : products) {
-            if (product.getProductDetail() != null) {
-                if (Objects.equals(product.getProductDetail().getMainCategory(), "Outdoor")) continue;
-            }
+//            if (product.getProductDetail() != null) {
+//                if (Objects.equals(product.getProductDetail().getMainCategory(), "Outdoor")) continue;
+//            }
 
             metadata = product.getMetadata();
             if (metadata == null) metadata = new ProductMetadata();
-            if (metadata.getAmzSearchapi() == null) {
+            if (product.getProductDetail().getCollection().equals("Luxe")){
                 try {
                     apiResponse = restTemplate.getForObject(searchApiRequest + product.getAsin() + "&engine=amazon_product", String.class);
                     metadata.setAmzSearchapi(apiResponse);
                     product.setMetadata(metadata);
+
+                    Price price = product.getPrice();
+                    if (price == null) price = new Price();
+
+                    double amazonPrice = extractPriceValueFromJson(metadata.getAmzSearchapi());
+                    if (amazonPrice != 0.0) {
+                        price.setAmazonPrice(amazonPrice);
+                        System.out.println("Saved Amazon price for " + product.getSku() + " with ASIN " + product.getAsin() + ": " + amazonPrice);
+                    }
+                    product.setPrice(price);
                     productRepository.save(product);
                 } catch (Exception e) {
                     System.err.println("Error fetching data for ASIN " + product.getAsin() + ": " + e.getMessage());
                 }
             }
 
-            Price price = product.getPrice();
-            if (price == null) price = new Price();
-
-            double amazonPrice = extractPriceValueFromJson(metadata.getAmzSearchapi());
-            if (amazonPrice != 0.0) {
-                price.setAmazonPrice(amazonPrice);
-                System.out.println("Saved Amazon price for " + product.getSku() + " with ASIN " + product.getAsin() + ": " + amazonPrice);
-            }
         }
     }
 
