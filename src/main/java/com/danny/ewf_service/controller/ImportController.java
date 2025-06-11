@@ -51,8 +51,8 @@ public class ImportController {
 //            String filepath1 = "upcs.csv";
             String filepath2 = "ewfdirect_listing.csv";
 //            List<String> skus = csvWriter.skuListFromCsv("src/main/resources/data/upcs.csv");
-            shopifyExport.exportProductListing(new ArrayList<>(),filepath2, true);
-
+//            shopifyExport.exportProductListing(new ArrayList<>(),filepath2, true);
+            amazonDataExport.extractDataFromAmazon();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

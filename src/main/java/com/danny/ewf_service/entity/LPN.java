@@ -1,6 +1,5 @@
 package com.danny.ewf_service.entity;
 
-import com.danny.ewf_service.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,10 +35,12 @@ public class LPN {
     @JoinColumn(name = "bay_id", referencedColumnName = "id")
     private BayLocation bayLocation;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private Status status;
+    private String status;
 
     @Column(name = "date")
     private LocalDate date;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdDate;
 }
