@@ -14,5 +14,6 @@ public class BayLocationResponseDto {
     private String bayCode;
     private String zone;
     private Long maxPallets;
-    private Long capacity = 0L;
+    private Long capacity;
+    private Long availableSpace;
 }

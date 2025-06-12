@@ -50,9 +50,26 @@ public class ImportController {
         try {
 //            String filepath1 = "upcs.csv";
             String filepath2 = "ewfdirect_listing.csv";
-//            List<String> skus = csvWriter.skuListFromCsv("src/main/resources/data/upcs.csv");
-//            shopifyExport.exportProductListing(new ArrayList<>(),filepath2, true);
-            amazonDataExport.extractDataFromAmazon();
+
+            List<String> skus = new ArrayList<>();
+            skus.add("KET-ESP-TP");
+            skus.add("KET-WHI-TP");
+            skus.add("KET-BLK-TP");
+            skus.add("LYT-ESP-T");
+            skus.add("LYT-CAP-T");
+            skus.add("CAT-OAK-S");
+            skus.add("CAT-MAH-S");
+            skus.add("CAT-LWH-S");
+            skus.add("CAT-OAK-H");
+            skus.add("CAT-CAP-S");
+            skus.add("BUT-MAH-T");
+            skus.add("JAT-BLK-TP");
+            skus.add("JAT-MAH-TP");
+            skus.add("JAT-OAK-TP");
+            skus.add("JAT-WHI-TP");
+
+            shopifyExport.exportProductListing(skus, filepath2, true);
+//            amazonDataExport.extractDataFromAmazon();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
