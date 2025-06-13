@@ -1,8 +1,6 @@
-package com.danny.ewf_service.payload.request;
+package com.danny.ewf_service.payload.request.user;
 
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor

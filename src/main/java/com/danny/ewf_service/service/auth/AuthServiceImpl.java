@@ -2,7 +2,7 @@ package com.danny.ewf_service.service.auth;
 
 import com.danny.ewf_service.entity.auth.Role;
 import com.danny.ewf_service.entity.auth.User;
-import com.danny.ewf_service.payload.request.RegisterRequest;
+import com.danny.ewf_service.payload.request.user.RegisterRequest;
 import com.danny.ewf_service.payload.response.user.UserResponseDto;
 import com.danny.ewf_service.repository.RoleRepository;
 import com.danny.ewf_service.repository.UserRepository;
@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(role)
-                .isActive(true) // Set true if the user is active by default
+                .isActive(false) // Set true if the user is active by default
                 .createdAt(LocalDateTime.now()) // Set registration date
                 .build();
 

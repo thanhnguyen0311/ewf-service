@@ -2,7 +2,6 @@ package com.danny.ewf_service.converter;
 
 
 import com.danny.ewf_service.entity.auth.User;
-import com.danny.ewf_service.payload.request.UserListRequestDto;
 import com.danny.ewf_service.payload.response.user.UserListResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

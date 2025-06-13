@@ -1,4 +1,4 @@
-package com.danny.ewf_service.payload.request;
+package com.danny.ewf_service.payload.request.user;
 
 
 import lombok.*;
@@ -13,5 +13,6 @@ public class RegisterRequest {
     private String firstName;
     private String lastName;
     private String email;
+    private Boolean status;
     private String password;
 }
