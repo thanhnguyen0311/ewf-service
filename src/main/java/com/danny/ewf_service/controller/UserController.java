@@ -1,6 +1,7 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.payload.request.UserListRequestDto;
+import com.danny.ewf_service.payload.request.user.UserCreateRequestDto;
+import com.danny.ewf_service.payload.request.user.UserListRequestDto;
 import com.danny.ewf_service.payload.response.user.UserListResponseDto;
 import com.danny.ewf_service.service.UserService;
 import lombok.AllArgsConstructor;
@@ -42,6 +43,19 @@ public class UserController {
             return ResponseEntity.status(404).body("Users not found");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error fetching product");
+        }
+    }
+
+    @PostMapping("")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> createUser(@RequestBody UserCreateRequestDto userCreateRequestDto) {
+        try {
+            userService.createUser(userCreateRequestDto);
+            return ResponseEntity.status(200).body("User created successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Cannot create user");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error creating new user");
         }
     }
 }

@@ -52,21 +52,7 @@ public class ImportController {
             String filepath2 = "ewfdirect_listing.csv";
 
             List<String> skus = new ArrayList<>();
-            skus.add("KET-ESP-TP");
-            skus.add("KET-WHI-TP");
-            skus.add("KET-BLK-TP");
-            skus.add("LYT-ESP-T");
-            skus.add("LYT-CAP-T");
-            skus.add("CAT-OAK-S");
-            skus.add("CAT-MAH-S");
-            skus.add("CAT-LWH-S");
-            skus.add("CAT-OAK-H");
-            skus.add("CAT-CAP-S");
-            skus.add("BUT-MAH-T");
-            skus.add("JAT-BLK-TP");
-            skus.add("JAT-MAH-TP");
-            skus.add("JAT-OAK-TP");
-            skus.add("JAT-WHI-TP");
+            skus.add("LYT0BLK");
 
             shopifyExport.exportProductListing(skus, filepath2, true);
 //            amazonDataExport.extractDataFromAmazon();

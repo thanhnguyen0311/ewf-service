@@ -21,6 +21,7 @@ public interface ILpnMapper {
 
     @Mapping(target = "tagID", source = "lpn.tagID")
     @Mapping(target = "quantity", source = "lpn.quantity")
+    @Mapping(target = "sku", source = "lpn.component.sku")
     @Mapping(target = "containerNumber", source = "lpn.containerNumber")
     @Mapping(target = "bayCode", source = "lpn.bayLocation.bayCode")
     @Mapping(target = "zone", source = "lpn.bayLocation.zone")

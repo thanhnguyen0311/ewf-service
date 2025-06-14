@@ -532,37 +532,6 @@ public class ShopifyExport {
 
             List<String> subSingleSkus = productComponentRepository.findSingleProductsByProductSku(product.getId());
             List<Product> subSingleProducts = productRepository.findAllBySkus(subSingleSkus);
-//
-//            for (Product subSingleProduct : subSingleProducts) {
-//                Dimension dimension = subSingleProduct.getDimension();
-//                for (ProductComponent productComponent : product.getComponents()) {
-//                    if (productComponent.getComponent().getSku().equals(subSingleProduct.getSku())) {
-//
-//                        String lwh = "";
-//                        if (productComponent.getComponent().getDimension().getLength() != null){
-//                            lwh = lwhToString(
-//                                    productComponent.getComponent().getDimension().getLength(),
-//                                    productComponent.getComponent().getDimension().getWidth(),
-//                                    productComponent.getComponent().getDimension().getHeight());
-//                        }
-//                        if (productComponent.getComponent().getSubType().equals("Dining Table Top") || productComponent.getComponent().getSubType().equals("Dining Table") ) {
-//                            if (productComponent.getComponent().getDimension().getLwh() != null) lwh = productComponent.getComponent().getDimension().getLwh();
-//                        }
-//
-//                        skuTable.add(new String []{
-//                                productComponent.getComponent().getSku(),
-//                                productComponent.getQuantity() + "",
-//                                productComponent.getComponent().getSubType() != null ? productComponent.getComponent().getSubType() : "",
-//                                lwh,
-//                                productComponent.getComponent().getDimension() != null ? productComponent.getQuantity() / productComponent.getComponent().getDimension().getQuantityBox() + "" : "",
-//                                productComponent.getComponent().getDimension() != null && productComponent.getComponent().getDimension().getBoxLength() != null
-//                                        ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : "",
-//                        });
-//                        break;
-//                    }
-//                }
-//
-//            }
 
             if (skuTable.isEmpty()) {
                 for (ProductComponent productComponent : product.getComponents()) {
