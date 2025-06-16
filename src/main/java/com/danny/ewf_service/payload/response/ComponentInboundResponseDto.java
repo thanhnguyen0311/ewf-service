@@ -12,4 +12,5 @@ import lombok.*;
 public class ComponentInboundResponseDto {
     private String sku;
     private String upc;
+    private Long palletCapacity;
 }

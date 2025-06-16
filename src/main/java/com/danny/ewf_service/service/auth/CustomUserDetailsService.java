@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -61,5 +62,16 @@ public class CustomUserDetailsService implements UserDetailsService {
             return userDetails.getFirstName() + " " + userDetails.getLastName();
         }
         return "";
+    }
+
+    public User getUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            Optional<User> user = userRepository.findByEmail(userDetails.getUsername());
+            if (user.isPresent()) {
+                return user.get();
+            }
+        }
+        return null;
     }
 }

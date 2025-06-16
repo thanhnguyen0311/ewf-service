@@ -12,6 +12,7 @@ import lombok.*;
 @Data
 public class BayLocationResponseDto {
     private String bayCode;
+    private String defaultSku;
     private String zone;
     private Long maxPallets;
     private Long capacity;

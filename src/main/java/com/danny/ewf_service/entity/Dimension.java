@@ -45,4 +45,7 @@ public class Dimension {
 
     @Column(name = "l_w_h")
     private String lwh;
+
+    @Column(name = "pallet_capacity")
+    private Long palletCapacity;
 }
