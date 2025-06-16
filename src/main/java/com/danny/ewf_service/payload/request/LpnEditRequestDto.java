@@ -2,7 +2,6 @@ package com.danny.ewf_service.payload.request;
 
 import lombok.*;
 
-import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -10,12 +9,12 @@ import java.time.LocalDate;
 @Setter
 @Getter
 @ToString
-public class LpnRequestDto {
+public class LpnEditRequestDto {
     private String tagID;
     private String sku;
     private Long quantity;
     private String containerNumber;
     private String bayCode;
-    private LocalDate date;
+    private String status;
+//    private LocalDate date;
 }
-

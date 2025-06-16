@@ -1,6 +1,5 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.payload.response.BayLocationResponseDto;
 import com.danny.ewf_service.service.BayLocationService;
 import lombok.AllArgsConstructor;
@@ -13,6 +12,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 public class BayLocationController {
+
     private final BayLocationService bayLocationService;
 
     @GetMapping("")
@@ -26,5 +26,6 @@ public class BayLocationController {
             return ResponseEntity.internalServerError().body("Error fetching location");
         }
     }
+
 
 }
