@@ -19,17 +19,17 @@ public interface BayLocationRepository extends JpaRepository<BayLocation, Long> 
                                                                                             b.max_pallets AS maxPallets,
                                                                                             COALESCE(COUNT(l.id), 0) AS currentCapacity, -- Current number of assigned LPNs
                                                                                             b.max_pallets - COALESCE(COUNT(l.id), 0) AS availableSpace -- Remaining space
-                                                                                        FROM\s
+                                                                                        FROM
                                                                                             bay_location b
-                                                                                        LEFT JOIN\s
-                                                                                            lpn l\s
-                                                                                        ON\s
+                                                                                        LEFT JOIN
+                                                                                            lpn l
+                                                                                        ON
                                                                                             b.id = l.bay_id
-                                                                                        WHERE\s
+                                                                                        WHERE
                                                                                             b.is_active = true
-                                                                                        GROUP BY\s
+                                                                                        GROUP BY
                                                                                             b.id, b.bay_code, b.zone, b.max_pallets
-                                                                                        ORDER BY\s
+                                                                                        ORDER BY
                                                                                             b.bay_code ASC;
             """,
             nativeQuery = true)

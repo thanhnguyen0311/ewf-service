@@ -2,6 +2,7 @@ package com.danny.ewf_service.converter;
 
 
 import com.danny.ewf_service.entity.LPN;
+import com.danny.ewf_service.payload.request.LpnEditRequestDto;
 import com.danny.ewf_service.payload.request.LpnRequestDto;
 import com.danny.ewf_service.payload.response.LpnResponseDto;
 import org.mapstruct.Mapper;
@@ -17,7 +18,6 @@ public interface ILpnMapper {
     @Mapping(target = "containerNumber", source = "lpnRequestDto.containerNumber")
     @Mapping(target = "date", source = "lpnRequestDto.date")
     LPN lpnRequestDtoToLpn(LpnRequestDto lpnRequestDto);
-
 
     @Mapping(target = "tagID", source = "lpn.tagID")
     @Mapping(target = "quantity", source = "lpn.quantity")

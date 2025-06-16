@@ -1,10 +1,11 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.payload.request.LpnEditRequestDto;
 import com.danny.ewf_service.payload.request.LpnRequestDto;
-import com.danny.ewf_service.payload.response.BayLocationResponseDto;
 import com.danny.ewf_service.payload.response.LpnResponseDto;
 import com.danny.ewf_service.service.LpnService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class LPNController {
 
+    @Autowired
     private final LpnService lpnService;
 
     @PostMapping("/new")
@@ -23,6 +25,19 @@ public class LPNController {
     public ResponseEntity<?> createNewLpn(@RequestBody LpnRequestDto lpn) {
         try {
             lpnService.newLpn(lpn);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred");
+        }
+    }
+
+    @PutMapping("/edit")
+    @PreAuthorize("hasAnyAuthority('ROLE_WORKER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> editLpn(@RequestBody LpnEditRequestDto lpn) {
+        try {
+            lpnService.updateLpn(lpn);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(e.getMessage());
@@ -42,4 +57,6 @@ public class LPNController {
             return ResponseEntity.internalServerError().body("An unexpected error occurred");
         }
     }
+
+
 }
