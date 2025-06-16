@@ -18,6 +18,7 @@ public interface IComponentMapper {
 
     @Mapping(target = "sku", source = "component.sku")
     @Mapping(target = "upc", source = "component.upc")
+    @Mapping(target = "palletCapacity", source = "component.dimension.palletCapacity")
     ComponentInboundResponseDto componentToComponentInboundResponseDto(Component component);
     List<ComponentInboundResponseDto> componentListToComponentInboundResponseDtoList(List<Component> components);
 

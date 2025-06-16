@@ -28,4 +28,5 @@ public class ComponentController {
             return ResponseEntity.internalServerError().body("Error fetching location");
         }
     }
+
 }

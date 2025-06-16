@@ -14,6 +14,7 @@ public interface BayLocationRepository extends JpaRepository<BayLocation, Long> 
     @Query(value = """
             SELECT
                                                                                             b.bay_code AS bayCode,
+                                                                                            b.default_sku AS defaultSku,
                                                                                             b.zone AS zone,
                                                                                             b.max_pallets AS maxPallets,
                                                                                             COALESCE(COUNT(l.id), 0) AS currentCapacity, -- Current number of assigned LPNs

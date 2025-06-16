@@ -26,4 +26,7 @@ public class BayLocation {
 
     @Column(name = "is_active")
     private Boolean isActive;
+
+    @Column(name = "default_sku")
+    private String defaultSku;
 }
