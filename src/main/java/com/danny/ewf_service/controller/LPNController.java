@@ -23,39 +23,21 @@ public class LPNController {
     @PostMapping("/new")
     @PreAuthorize("hasAnyAuthority('ROLE_WORKER', 'ROLE_ADMIN')")
     public ResponseEntity<?> createNewLpn(@RequestBody LpnRequestDto lpn) {
-        try {
-            lpnService.newLpn(lpn);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("An unexpected error occurred");
-        }
+        lpnService.newLpn(lpn);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/edit")
     @PreAuthorize("hasAnyAuthority('ROLE_WORKER', 'ROLE_ADMIN')")
     public ResponseEntity<?> editLpn(@RequestBody LpnEditRequestDto lpn) {
-        try {
-            lpnService.updateLpn(lpn);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("An unexpected error occurred");
-        }
+        lpnService.updateLpn(lpn);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("")
-    public  ResponseEntity<?> getAllLpn() {
-        try {
-            List<LpnResponseDto> lpnResponseDtos = lpnService.getAllLpn();
-            return ResponseEntity.ok(lpnResponseDtos);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("An unexpected error occurred");
-        }
+    public ResponseEntity<?> getAllLpn() {
+        List<LpnResponseDto> lpnResponseDtos = lpnService.getAllLpn();
+        return ResponseEntity.ok(lpnResponseDtos);
     }
 
 

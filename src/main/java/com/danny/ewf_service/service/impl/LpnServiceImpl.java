@@ -6,6 +6,7 @@ import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.LPN;
 import com.danny.ewf_service.entity.auth.User;
+import com.danny.ewf_service.exception.ValidationException;
 import com.danny.ewf_service.payload.request.LpnEditRequestDto;
 import com.danny.ewf_service.payload.request.LpnRequestDto;
 import com.danny.ewf_service.payload.response.LpnResponseDto;
@@ -50,6 +51,10 @@ public class LpnServiceImpl implements LpnService {
     public void newLpn(LpnRequestDto lpnRequestDto) {
         LPN lpn;
 
+        if (lpnRepository.existsLPNByTagID(lpnRequestDto.getTagID())) {
+            throw new ValidationException("tagID", "Lpn with tag ID " + lpnRequestDto.getTagID() + " already exists.");
+        }
+
         Component component;
         lpn = lpnMapper.lpnRequestDtoToLpn(lpnRequestDto);
         Optional<Component> optionalComponent = componentRepository.findBySku(lpnRequestDto.getSku());
@@ -57,7 +62,8 @@ public class LpnServiceImpl implements LpnService {
             component = optionalComponent.get();
             lpn.setComponent(component);
         }
-        else throw new RuntimeException("Product not found");
+        else throw new ValidationException("sku", "Component with SKU " + lpnRequestDto.getSku() + " not found.");
+
 
         if (!lpnRequestDto.getBayCode().isEmpty()){
             Optional<BayLocation> optionalBayLocation = bayLocationRepository.findByBayCode(lpnRequestDto.getBayCode());
@@ -67,7 +73,7 @@ public class LpnServiceImpl implements LpnService {
                 bayLocationRepository.save(bayLocation);
                 lpn.setBayLocation(bayLocation);
             }
-            else throw new RuntimeException("Bay location not found");
+            else throw new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
         }
 
         lpn.setStatus("active");
@@ -101,37 +107,37 @@ public class LpnServiceImpl implements LpnService {
         Optional<LPN> optionalLpn = lpnRepository.findByTagID(lpnRequestDto.getTagID());
         Optional<Component> optionalComponent = componentRepository.findBySku(lpnRequestDto.getSku());
         Optional<BayLocation> optionalBayLocation = bayLocationRepository.findByBayCode(lpnRequestDto.getBayCode());
-        BayLocation previousBay;
+        BayLocation previousBay = null;
         long previousQuantity;
         String previousStatus;
 
         if (optionalLpn.isPresent()) {
             lpn = optionalLpn.get();
-            previousBay = lpn.getBayLocation();
+            if (lpn.getBayLocation() != null)  previousBay = lpn.getBayLocation();
             previousQuantity = lpn.getQuantity();
             previousStatus = lpn.getStatus();
 
             lpn.setStatus(lpnRequestDto.getStatus());
             lpn.setContainerNumber(lpnRequestDto.getContainerNumber());
             lpn.setQuantity(lpnRequestDto.getQuantity());
-        } else throw new RuntimeException("Lpn not found");
+        } else throw new ValidationException("lpn", "LPN with tag ID " + lpnRequestDto.getTagID() + " not found");
 
         if (optionalComponent.isPresent()) {
             component = optionalComponent.get();
             lpn.setComponent(component);
-        } else throw new RuntimeException("Product not found");
+        } else throw new ValidationException("sku", "Component with SKU " + lpnRequestDto.getSku() + " not found.");
 
         if (optionalBayLocation.isPresent()) {
             bayLocation = optionalBayLocation.get();
             lpn.setBayLocation(bayLocation);
-        } else throw new RuntimeException("Bay location not found");
+        } else throw  new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
 
         lpnRepository.save(lpn);
 
         User user = customUserDetailsService.getUser();
         logService.createLpnLog(
                 lpn, "EDIT",
-                previousBay.getBayCode(),
+                previousBay != null ? previousBay.getBayCode() : "",
                 lpnRequestDto.getBayCode(),
                 lpnRequestDto.getQuantity(),
                 previousQuantity,

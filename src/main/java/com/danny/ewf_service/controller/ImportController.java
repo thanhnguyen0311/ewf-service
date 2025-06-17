@@ -50,10 +50,9 @@ public class ImportController {
         try {
 //            String filepath1 = "upcs.csv";
             String filepath2 = "ewfdirect_listing.csv";
-
+//
             List<String> skus = new ArrayList<>();
-            skus.add("LYT0BLK");
-
+//
             shopifyExport.exportProductListing(skus, filepath2, true);
 //            amazonDataExport.extractDataFromAmazon();
             return ResponseEntity.ok().body("SUCCESS");
