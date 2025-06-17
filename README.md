@@ -185,14 +185,6 @@ To run this application:
 3. Build using Maven: `mvn clean install`
 4. Run the application: `java -jar target/ewf-service.jar`
 
-## Contributing
-
-When contributing to this project:
-1. Follow the existing code structure and naming conventions
-2. Write unit tests for new functionality
-3. Update documentation for any modified services
-4. Submit pull requests for review
-
 ## Contact
 
 For questions or support, please contact the development team at: **nct031194@icloud.com**
