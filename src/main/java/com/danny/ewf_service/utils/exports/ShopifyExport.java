@@ -294,7 +294,7 @@ public class ShopifyExport {
                 if (productDetail.getStyle() != null) tags.append(productDetail.getStyle()).append(",");
                 if (productDetail.getPieces() != null) tags.append(productDetail.getPieces()).append(",");
                 if (productDetail.getChairType() != null) tags.append(productDetail.getChairType()).append(",");
-                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+//                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
 
                 Price price = product.getPrice();
                 if (price != null) {
