@@ -137,6 +137,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public double calculateEWFDirectPriceGround(Product product, List<String[]> rows) {
+        System.out.println("Processing " + product.getSku());
         double productWeight = 0;
         double productPrice;
         double totalShipCost = 0;
@@ -216,7 +217,6 @@ public class ProductServiceImpl implements ProductService {
                 totalShipCost = totalShipCost + shippingCost;
                 totalQuantity = totalQuantity + productComponent.getQuantity();
 
-                System.out.println(productComponent.getComponent().getSku() + " | " + shippingCost);
                 rows.add(new String[]{
                         String.valueOf(stt),
                         product.getSku(),
@@ -234,12 +234,16 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
+
         Price price = product.getPrice();
         if (price == null) price = new Price();
-        if (price.getPromotion() > 0) {
-            comparePrice = totalQB1 + totalShipCost;
-            totalQB1 = totalQB1 * (1 - (double) price.getPromotion() / 100);
+        if (price.getPromotion() != null) {
+            if (price.getPromotion() > 0) {
+                comparePrice = totalQB1 + totalShipCost;
+                totalQB1 = totalQB1 * (1 - (double) price.getPromotion() / 100);
+            }
         }
+
 
 
         productPrice = totalQB1 + totalShipCost;
@@ -251,12 +255,11 @@ public class ProductServiceImpl implements ProductService {
 
         if (product.getPrice() != null) {
             if (product.getPrice().getAmazonPrice() != null) {
-                if (productPrice < product.getPrice().getAmazonPrice()) {
+                if (productPrice < product.getPrice().getAmazonPrice() && comparePrice == 0) {
                     comparePrice = product.getPrice().getAmazonPrice() * 1.1;
                 }
             }
         }
-        System.out.println("Product :" + product.getSku() + " | " + totalShipCost);
         rows.add(new String[]{
                 String.valueOf(stt),
                 product.getSku(),
@@ -268,9 +271,9 @@ public class ProductServiceImpl implements ProductService {
                 String.valueOf(totalQB1),
                 String.valueOf(totalShipCost),
                 String.valueOf(productPrice),
-                String.valueOf(product.getPrice().getAmazonPrice()),
+                price.getAmazonPrice() != null ? String.valueOf(price.getAmazonPrice()) : "",
+                String.valueOf(comparePrice),
                 "http://www.amazon.com/dp/" + product.getAsin(),
-                comparePrice == 0 ? "" : String.valueOf(comparePrice),
         });
 
         return productPrice;

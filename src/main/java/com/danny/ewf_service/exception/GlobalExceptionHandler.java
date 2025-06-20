@@ -28,13 +28,23 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    // Handle Generic Exceptions
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGenericException(Exception ex) {
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<?> handleUnauthorizedException(UnauthorizedException ex) {
         Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("message", "An unexpected error occurred");
-        errorResponse.put("details", ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        errorResponse.put("status", "unauthorized");
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("code", "NOT_AUTHENTICATED");
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
+    // Handle ForbiddenException (when user doesn't have required role)
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<?> handleForbiddenException(ForbiddenException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("status", "forbidden");
+        errorResponse.put("message", ex.getMessage());
+        errorResponse.put("requiredRole", ex.getRequiredRole());
+        errorResponse.put("code", "INSUFFICIENT_PERMISSIONS");
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
 }

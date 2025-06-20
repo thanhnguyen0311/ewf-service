@@ -2,14 +2,15 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IComponentMapper;
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.LPN;
+import com.danny.ewf_service.entity.LooseInventory;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductWithQuantity;
+import com.danny.ewf_service.exception.ValidationException;
 import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
 import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
-import com.danny.ewf_service.repository.ComponentRepository;
-import com.danny.ewf_service.repository.ConfigurationRepository;
-import com.danny.ewf_service.repository.ProductComponentRepository;
+import com.danny.ewf_service.repository.*;
 import com.danny.ewf_service.service.ComponentService;
 import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.auth.CustomUserDetailsService;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -42,6 +44,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Autowired
     private final ComponentService componentService;
+
+    @Autowired
+    private final LpnRepository lpnRepository;
 
     @Override
     public List<ProductInventoryResponseDto> inventoryProductListByQuantityASC() {
@@ -119,6 +124,28 @@ public class InventoryServiceImpl implements InventoryService {
         ComponentInventoryResponseDto componentInventoryResponseDto = componentMapper.componentToComponentInventoryResponseDto(component);
         componentInventoryResponseDto.setToBeShipped(calculateToBeShipped(componentInventoryResponseDto, toBeShippedRate));
         return componentInventoryResponseDto;
+    }
+
+    @Override
+    public Long getLooseInventoryByTagID(String tagID) {
+        Optional<LPN> optionalLPN = lpnRepository.findByTagID(tagID);
+        LPN lpn ;
+        if (optionalLPN.isPresent()) lpn = optionalLPN.get();
+        else throw new ValidationException("lpn", "LPN with tag ID " + tagID + " not found");
+        LooseInventory looseInventory = findLooseInventoryByLpn(lpn);
+        if (looseInventory != null) return looseInventory.getQuantity();
+        return 0L;
+    }
+
+    @Override
+    public LooseInventory findLooseInventoryByLpn(LPN lpn) {
+        List<LooseInventory> looseInventories = lpn.getBayLocation().getLooseInventories();
+        for (LooseInventory looseInventory : looseInventories) {
+            if (looseInventory.getComponent().getSku().equals(lpn.getComponent().getSku())) {
+                return looseInventory;
+            }
+        }
+        return null;
     }
 
     private Long parseObjectToLong(Object object) {
