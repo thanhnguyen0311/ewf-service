@@ -51,7 +51,7 @@ public class ShopifyExport {
         List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
         List<String[]> rows = new ArrayList<>();
 
-        String[] header = {"", "Handle", "Title", "Shipping Method", "Variant Price", "Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price", "Amazon Price"};
+        String[] header = {"", "Handle", "Title", "Shipping Method", "Variant Price", "Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price", "Amazon Price", "Compare Price"};
         rows.add(header);
         products.forEach(product -> {
             if (product.getPrice() == null) return;
@@ -66,44 +66,70 @@ public class ShopifyExport {
         try {
             List<Object[]> rawResult = productComponentRepository.calculateListProductInventoryShopifyEWFDirectByQuantityASC();
             List<String[]> rows = new ArrayList<>();
-            String[] header = {"Handle", "Title", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Option3 Name", "Option3 Value", "SKU", "HS Code", "COO", "Location", "Incoming", "Unavailable","Committed","Available","On hand"};
+            String[] header = {"Handle", "Title", "Option1 Name", "Option1 Value", "Option2 Name", "Option2 Value", "Option3 Name", "Option3 Value", "SKU", "HS Code", "COO", "Location", "Incoming", "Unavailable", "Committed", "Available", "On hand"};
             rows.add(header);
             String title = "";
             System.out.println("Found " + rawResult.size());
+            String inventory;
             for (Object[] result : rawResult) {
                 if (result[0] != "" && result[1] != "" && result[2] != "") {
-                    if (result[1] == null) {
-                        Optional<Product> optionalProduct = productRepository.findBySku(result[0].toString());
-                        if (optionalProduct.isPresent()) {
-                            Product product = optionalProduct.get();
-                            if (product.getTitle() == null) {
-                                title = product.getName();
-                            } else {
-                                title = product.getTitle();
+//                    if (result[1] == null) {
+//                        Optional<Product> optionalProduct = productRepository.findBySku(result[0].toString());
+//                        if (optionalProduct.isPresent()) {
+//                            Product product = optionalProduct.get();
+//                            if (product.getTitle() == null) {
+//                                title = product.getName();
+//                            } else {
+//                                title = product.getTitle();
+//                            }
+//
+//                        }
+//                    }
+                    Optional<Product> optionalProduct = productRepository.findBySku(result[0].toString());
+                    if (optionalProduct.isPresent()) {
+                        Product product = optionalProduct.get();
+                        if (product.getTitle() == null) {
+                            title = product.getName();
+                        } else {
+                            title = product.getTitle();
+                        }
+                        if (product.getProductDetail() != null) {
+                            if (Objects.equals(product.getProductDetail().getSubCategory(), "Dining Table")) {
+                                List<ProductComponent> productComponents = product.getComponents();
+                                for (ProductComponent productComponent : productComponents) {
+                                    Dimension dimension = productComponent.getComponent().getDimension();
+                                    if (dimension != null) {
+                                        System.out.println(result[0].toString() + " " + dimension.getBoxLength());
+                                        if (dimension.getBoxLength() > 40) {
+                                            inventory = String.valueOf(0L);
+                                            rows.add(new String[]{
+                                                    result[0].toString().toLowerCase(),
+                                                    title,
+                                                    "Title",
+                                                    "Default Title",
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    "",
+                                                    result[0].toString(),
+                                                    "",
+                                                    "",
+                                                    "175 Southbelt Industrial Drive",
+                                                    "0",
+                                                    "0",
+                                                    "0",
+                                                    inventory,
+                                                    inventory
+
+                                            });
+                                            System.out.println(result[0].toString());
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
-                    rows.add(new String[]{
-                            result[0].toString().toLowerCase(),
-                            title,
-                            "Title",
-                            "Default Title",
-                            "",
-                            "",
-                            "",
-                            "",
-                            result[0].toString(),
-                            "",
-                            "",
-                            "175 Southbelt Industrial Drive",
-                            "0",
-                            "0",
-                            "0",
-                            result[2].toString(),
-                            result[2].toString()
-
-                    });
-                    System.out.println(result[0].toString());
                 }
             }
             csvWriter.exportToCsv(rows, filePath);
@@ -218,7 +244,7 @@ public class ShopifyExport {
         double productPrice;
         double comparePrice = 0;
 
-        List<String>  images = new ArrayList<>();
+        List<String> images = new ArrayList<>();
         ImageUrls productImages;
         StringBuilder tags;
         String[] row;
@@ -228,21 +254,21 @@ public class ShopifyExport {
             for (Product product : products) {
                 index++;
                 System.out.println("Processing " + product.getSku());
-                if (product.getWholesales() != null){
+                if (product.getWholesales() != null) {
                     if (!product.getWholesales().getEwfdirect()) continue;
                 }
 
                 if (product.getDiscontinued() == null || product.getDiscontinued()) continue;
                 if (product.getComponents().isEmpty()) continue;
                 if (product.getTitle() == null) continue;
-                if( product.getProductDetail() != null ) {
-                    if (product.getProductDetail().getDescription() == null ) continue;
+                if (product.getProductDetail() != null) {
+                    if (product.getProductDetail().getDescription() == null) continue;
                     if (product.getProductDetail().getSubCategory() == null) continue;
 //                    if (!product.getProductDetail().getSubCategory().equals("Dining Chair")) continue;
                 } else {
                     continue;
                 }
-                if (product.getUpc() == null ) continue;
+                if (product.getUpc() == null) continue;
 
                 List<Product> mergedProducts = productService.findMergedProducts(product);
 
@@ -298,7 +324,7 @@ public class ShopifyExport {
 
                 Price price = product.getPrice();
                 if (price != null) {
-                    if (price.getPromotion() > 0 ) {
+                    if (price.getPromotion() > 0) {
                         tags.append("Clearance,");
                     }
                     if (price.getAmazonPrice() != null) {
@@ -474,14 +500,14 @@ public class ShopifyExport {
             if (mergedProducts != null) {
                 for (Product mergedProduct : mergedProducts) {
                     String lwh = "";
-                    if (mergedProduct.getDimension() != null){
-                        if (mergedProduct.getDimension().getLwh() != null){
+                    if (mergedProduct.getDimension() != null) {
+                        if (mergedProduct.getDimension().getLwh() != null) {
                             lwh = mergedProduct.getDimension().getLwh();
                         }
                     }
                     for (ProductComponent productComponent : mergedProduct.getComponents()) {
                         if (productComponent.getComponent().getSubType() != null) {
-                            if (productComponent.getComponent().getSubType().equals("Dining Table Top") || productComponent.getComponent().getSubType().equals("Dining Table") ) {
+                            if (productComponent.getComponent().getSubType().equals("Dining Table Top") || productComponent.getComponent().getSubType().equals("Dining Table")) {
                                 if (productComponent.getComponent().getDimension().getLwh() != null) {
                                     lwh = productComponent.getComponent().getDimension().getLwh();
                                     break;
@@ -510,23 +536,23 @@ public class ShopifyExport {
                     Dimension dimension = component.getDimension();
                     if (dimension == null) dimension = new Dimension();
                     String lwh = "";
-                    if (dimension.getLength() != null){
+                    if (dimension.getLength() != null) {
                         lwh = lwhToString(dimension.getLength(), dimension.getWidth(), dimension.getHeight());
                     }
                     if (component.getSubType() != null) {
-                        if (component.getSubType().equals("Dining Table Top") || component.getSubType().equals("Dining Table") ) {
+                        if (component.getSubType().equals("Dining Table Top") || component.getSubType().equals("Dining Table")) {
                             if (dimension.getLwh() != null) lwh = dimension.getLwh();
                         }
                     }
-                    skuTable.add(new String []{
+                    skuTable.add(new String[]{
                             component.getSku(),
                             productComponent.getQuantity() + "",
                             component.getSubType() != null ? component.getSubType() : "",
                             lwh,
                             dimension.getQuantityBox() != null ? productComponent.getQuantity() / dimension.getQuantityBox() + "" : "",
                             dimension.getBoxLength() != null
-                                        ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : "",
-                        });
+                                    ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : "",
+                    });
                 }
             }
 
@@ -538,11 +564,11 @@ public class ShopifyExport {
                     Component component = productComponent.getComponent();
                     Dimension dimension = component.getDimension();
                     String lwh = "";
-                    if (dimension.getLength() != null){
+                    if (dimension.getLength() != null) {
                         lwh = lwhToString(dimension.getLength(), dimension.getWidth(), dimension.getHeight());
                     }
                     if (component.getSubType() != null) {
-                        if (component.getSubType().equals("Dining Table Top") || component.getSubType().equals("Dining Table") ) {
+                        if (component.getSubType().equals("Dining Table Top") || component.getSubType().equals("Dining Table")) {
                             if (dimension.getLwh() != null) lwh = dimension.getLwh();
                         }
                     }
@@ -552,7 +578,7 @@ public class ShopifyExport {
                             productComponent.getQuantity() + "",
                             component.getSubType() != null ? component.getSubType() : "",
                             lwh,
-                            dimension.getQuantityBox() != null ? productComponent.getQuantity()/dimension.getQuantityBox() + "" : "",
+                            dimension.getQuantityBox() != null ? productComponent.getQuantity() / dimension.getQuantityBox() + "" : "",
                             dimension.getBoxLength() != null ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : ""
                     });
                 }
@@ -584,7 +610,7 @@ public class ShopifyExport {
                     getRelatedProduct(product, skuList, mergedProducts, subSingleProducts),
                     productDetail.getChairType() != null ? productDetail.getChairType() : "",
                     "https://ewfdirect.com/products/" + product.getSku().toLowerCase(),
-                    "http://www.amazon.com/dp/" + product.getAsin() +"/ref=nosim?tag=eastwest00-20&th=1",
+                    "http://www.amazon.com/dp/" + product.getAsin() + "/ref=nosim?tag=eastwest00-20&th=1",
                     "https://www.google.com/search?q=" + product.getSku() + "&source=lnms&tbm=shop&sa=",
                     "/products/" + product.getSku(),
                     product.getSku(),

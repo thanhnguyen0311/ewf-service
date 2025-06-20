@@ -6,6 +6,7 @@ import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 public class InventoryController {
 
+    @Autowired
     private final InventoryService inventoryService;
 
     @GetMapping("/components")
@@ -70,5 +72,11 @@ public class InventoryController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error fetching product");
         }
+    }
+
+    @GetMapping("/lpn")
+    public ResponseEntity<Long> getLooseInventoryByLPNTagId(@RequestParam String lpnTagId) {
+        Long quantity = inventoryService.getLooseInventoryByTagID(lpnTagId);
+        return ResponseEntity.ok(quantity);
     }
 }

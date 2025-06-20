@@ -1,10 +1,7 @@
 package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.ILpnMapper;
-import com.danny.ewf_service.entity.BayLocation;
-import com.danny.ewf_service.entity.Component;
-import com.danny.ewf_service.entity.Dimension;
-import com.danny.ewf_service.entity.LPN;
+import com.danny.ewf_service.entity.*;
 import com.danny.ewf_service.entity.auth.User;
 import com.danny.ewf_service.exception.ValidationException;
 import com.danny.ewf_service.payload.request.LpnEditRequestDto;
@@ -12,10 +9,13 @@ import com.danny.ewf_service.payload.request.LpnRequestDto;
 import com.danny.ewf_service.payload.response.LpnResponseDto;
 import com.danny.ewf_service.repository.BayLocationRepository;
 import com.danny.ewf_service.repository.ComponentRepository;
+import com.danny.ewf_service.repository.LooseInventoryRepository;
 import com.danny.ewf_service.repository.LpnRepository;
+import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.LogService;
 import com.danny.ewf_service.service.LpnService;
 import com.danny.ewf_service.service.auth.CustomUserDetailsService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +46,12 @@ public class LpnServiceImpl implements LpnService {
 
     @Autowired
     private final LpnRepository lpnRepository;
+
+    @Autowired
+    private final InventoryService inventoryService;
+
+    @Autowired
+    private LooseInventoryRepository looseInventoryRepository;
 
     @Override
     public void newLpn(LpnRequestDto lpnRequestDto) {
@@ -100,6 +106,7 @@ public class LpnServiceImpl implements LpnService {
     }
 
     @Override
+    @Transactional
     public void updateLpn(LpnEditRequestDto lpnRequestDto) {
         LPN lpn;
         Component component;
@@ -134,13 +141,26 @@ public class LpnServiceImpl implements LpnService {
 
         lpnRepository.save(lpn);
 
+        // breakdown pallet
+        if (previousStatus.equals("active") && lpnRequestDto.getStatus().equals("inactive")) {
+            LooseInventory looseInventory = inventoryService.findLooseInventoryByLpn(lpn);
+            if (looseInventory == null) {
+                looseInventory = new LooseInventory();
+                looseInventory.setBayLocation(bayLocation);
+                looseInventory.setComponent(component);
+            }
+            looseInventory.setQuantity(looseInventory.getQuantity() + lpnRequestDto.getQuantity());
+            looseInventoryRepository.save(looseInventory);
+        }
+
+
         User user = customUserDetailsService.getUser();
         logService.createLpnLog(
                 lpn, "EDIT",
                 previousBay != null ? previousBay.getBayCode() : "",
                 lpnRequestDto.getBayCode(),
-                lpnRequestDto.getQuantity(),
                 previousQuantity,
+                lpnRequestDto.getQuantity(),
                 previousStatus,
                 lpnRequestDto.getStatus(),
                 "",
