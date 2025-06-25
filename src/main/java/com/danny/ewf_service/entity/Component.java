@@ -80,7 +80,6 @@ public class Component {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LooseInventory> looseInventories = new ArrayList<>();
 
-
     @Column(name = "pos")
     private Long pos;
 

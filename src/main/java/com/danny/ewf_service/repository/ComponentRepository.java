@@ -19,4 +19,7 @@ public interface ComponentRepository extends JpaRepository<Component, Long> {
 
     @Query("SELECT c FROM Component c JOIN FETCH c.report WHERE c.id = :id")
     Component findComponentById(@Param("id") Long id);
+
+    @Query("SELECT c FROM Component c JOIN FETCH c.dimension WHERE c.discontinue = false")
+    List<Component> findAllByDiscontinueFalse();
 }

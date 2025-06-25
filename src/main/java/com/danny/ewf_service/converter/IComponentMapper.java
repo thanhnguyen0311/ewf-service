@@ -1,12 +1,11 @@
 package com.danny.ewf_service.converter;
 
 import com.danny.ewf_service.entity.Component;
-import com.danny.ewf_service.entity.Configuration;
 import com.danny.ewf_service.entity.ImageUrls;
-import com.danny.ewf_service.payload.response.ComponentInboundResponseDto;
-import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
-import com.danny.ewf_service.payload.response.ComponentResponseDto;
-import org.mapstruct.Context;
+import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
+import com.danny.ewf_service.payload.response.component.ComponentInventoryResponseDto;
+import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
+import com.danny.ewf_service.payload.response.component.ComponentResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -30,6 +29,19 @@ public interface IComponentMapper {
     @Mapping(target = "inventory", source = "component.inventory")
     ComponentResponseDto componentToComponentResponseDto(Component component);
     List<ComponentResponseDto> componentListToComponentResponseDtoList(List<Component> components);
+
+
+    @Mapping(target = "id", source = "component.id")
+    @Mapping(target = "sku", source = "component.sku")
+    @Mapping(target = "upc", source = "component.upc")
+    @Mapping(target = "name", source = "component.name")
+    @Mapping(target = "type", source = "component.subType")
+    @Mapping(target = "images", source = "component.images", qualifiedByName = "extractImagesToList")
+    @Mapping(target = "dimension", source = "component.dimension")
+    @Mapping(target = "manufacturer", source = "component.manufacturer")
+    ComponentListWMSResponse componentToComponentListWMSResponseDto(Component component);
+    List<ComponentListWMSResponse> componentListToComponentListWMSResponseDtoList(List<Component> components);
+
 
     @Mapping(target = "id", source = "component.id")
     @Mapping(target = "sku", source = "component.sku")
@@ -55,9 +67,17 @@ public interface IComponentMapper {
 
     @Named("extractImages")
     default ImageUrls extractImages(String imagesJson) {
-        return new ImageUrls().parseImageJson(imagesJson);
+        ImageUrls imageUrl = new ImageUrls();
+        imageUrl.parseImageJson(imagesJson);
+        return imageUrl;
     }
 
+    @Named("extractImagesToList")
+    default List<String> extractImagesToList(String imagesJson) {
+        ImageUrls imageUrl = new ImageUrls();
+        imageUrl.parseImageJson(imagesJson);
+        return imageUrl.toList();
+    }
 
     @Named("calculate120DaysSale")
     default Long calculate120DaysSale(Long salesReport) {
