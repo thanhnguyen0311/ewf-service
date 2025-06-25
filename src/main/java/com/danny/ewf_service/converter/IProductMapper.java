@@ -3,7 +3,7 @@ package com.danny.ewf_service.converter;
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
-import com.danny.ewf_service.payload.response.*;
+import com.danny.ewf_service.payload.response.component.ComponentProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;

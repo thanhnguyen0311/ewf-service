@@ -3,8 +3,7 @@ package com.danny.ewf_service.service;
 import com.danny.ewf_service.entity.LPN;
 import com.danny.ewf_service.entity.LooseInventory;
 import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
-import com.danny.ewf_service.payload.request.LpnRequestDto;
-import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
+import com.danny.ewf_service.payload.response.component.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
 
 import java.util.List;

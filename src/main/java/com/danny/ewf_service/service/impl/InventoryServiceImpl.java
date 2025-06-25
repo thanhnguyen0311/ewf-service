@@ -8,7 +8,7 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductWithQuantity;
 import com.danny.ewf_service.exception.ValidationException;
 import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
-import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
+import com.danny.ewf_service.payload.response.component.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
 import com.danny.ewf_service.repository.*;
 import com.danny.ewf_service.service.ComponentService;

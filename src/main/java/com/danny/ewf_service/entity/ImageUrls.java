@@ -25,4 +25,12 @@ public class ImageUrls {
             throw new IllegalArgumentException("Invalid JSON for ImageUrls: " + jsonString, e);
         }
     }
+
+    public List<String> toList(){
+        List<String> list = new ArrayList<>();
+        list.addAll(cgi);
+        list.addAll(dim);
+        list.addAll(img);
+        return list;
+    }
 }

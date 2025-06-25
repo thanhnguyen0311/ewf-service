@@ -2,7 +2,7 @@ package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.payload.request.ComponentInventoryRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductInventorySearchRequestDto;
-import com.danny.ewf_service.payload.response.ComponentInventoryResponseDto;
+import com.danny.ewf_service.payload.response.component.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
 import com.danny.ewf_service.service.InventoryService;
 import lombok.AllArgsConstructor;

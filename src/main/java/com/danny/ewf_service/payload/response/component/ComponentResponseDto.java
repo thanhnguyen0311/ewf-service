@@ -1,6 +1,5 @@
-package com.danny.ewf_service.payload.response;
+package com.danny.ewf_service.payload.response.component;
 
-import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.ImageUrls;
 import lombok.*;
 

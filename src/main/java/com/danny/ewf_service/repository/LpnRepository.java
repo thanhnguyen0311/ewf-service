@@ -13,4 +13,6 @@ public interface LpnRepository extends JpaRepository<LPN, Long> {
     Optional<LPN> findByTagID(String tagID);
 
     boolean existsLPNByTagID(String tagID);
+
+    List<LPN> findAllByOrderByUpdatedAtDesc();
 }

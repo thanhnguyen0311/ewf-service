@@ -57,6 +57,8 @@ public class LpnServiceImpl implements LpnService {
     public void newLpn(LpnRequestDto lpnRequestDto) {
         LPN lpn;
 
+        if (lpnRequestDto.getTagID().isEmpty()) throw new ValidationException("tagID", "Tag ID cannot be empty.");
+
         if (lpnRepository.existsLPNByTagID(lpnRequestDto.getTagID())) {
             throw new ValidationException("tagID", "Lpn with tag ID " + lpnRequestDto.getTagID() + " already exists.");
         }
@@ -169,7 +171,8 @@ public class LpnServiceImpl implements LpnService {
 
     @Override
     public List<LpnResponseDto> getAllLpn() {
-        List<LPN> lpns = lpnRepository.findAllByOrderByCreatedDateDesc();
+        List<LPN> lpns = lpnRepository.findAllByOrderByUpdatedAtDesc();
         return lpnMapper.lpnListToLpnResponseDtoList(lpns);
     }
+
 }
