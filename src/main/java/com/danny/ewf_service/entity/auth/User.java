@@ -24,11 +24,11 @@ public class User {
     @ToString.Exclude
     private Role role;
 
-    @Column(name= "first_name",nullable = false, length = 50)
-    private String firstName;
+    @Column(name= "first_name", nullable = false, length = 50)
+    private String firstName = "";
 
-    @Column(name = "last_name",nullable = false, length = 50)
-    private String lastName;
+    @Column(name = "last_name", nullable = false, length = 50)
+    private String lastName = "";
 
     @Column(name = "email",unique = true, nullable = false, length = 100)
     private String email;

@@ -234,17 +234,6 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        Price price = product.getPrice();
-        if (price == null) price = new Price();
-        if (price.getPromotion() != null) {
-            if (price.getPromotion() > 0) {
-                comparePrice = totalQB1 + totalShipCost;
-                totalQB1 = totalQB1 * (1 - (double) price.getPromotion() / 100);
-            }
-        }
-
-
-
         productPrice = totalQB1 + totalShipCost;
         productPrice = productPrice * 1.03;
 
@@ -252,11 +241,19 @@ public class ProductServiceImpl implements ProductService {
         product.getPrice().setEwfdirect(productPrice);
         productRepository.save(product);
 
-        if (product.getPrice() != null) {
-            if (product.getPrice().getAmazonPrice() != null) {
-                if (productPrice < product.getPrice().getAmazonPrice() && comparePrice == 0) {
-                    comparePrice = product.getPrice().getAmazonPrice() * 1.1;
+        Price price = product.getPrice();
+        if (price != null) {
+            if (price.getAmazonPrice() != null) {
+                if (productPrice < price.getAmazonPrice()) {
+                    comparePrice = price.getAmazonPrice() * 1.1;
                 }
+                if (price.getPromotion() != null) {
+                    if (price.getPromotion() > 0) {
+                        comparePrice = totalQB1 + totalShipCost;
+                        totalQB1 = totalQB1 * (1 - (double) price.getPromotion() / 100);
+                    }
+                }
+
             }
         }
         rows.add(new String[]{
