@@ -17,39 +17,39 @@ public class LpnLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lpn_id", nullable = false) // Foreign key to the LPN table.
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "lpn_id", nullable = false)
     private LPN lpn;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id") // Foreign key to the LPN table.
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(name = "method", nullable = false)
-    private String method; // Method or operation that triggered the log (e.g., CREATE, UPDATE).
+    private String method;
 
     @Column(name = "previous_bay_location")
-    private String previousBayLocation; // Previous bay location of the LPN.
+    private String previousBayLocation;
 
     @Column(name = "new_bay_location")
-    private String newBayLocation; // Updated bay location of the LPN.
+    private String newBayLocation;
 
     @Column(name = "previous_quantity")
-    private Long previousQuantity; // Previous quantity of the LPN.
+    private Long previousQuantity;
 
     @Column(name = "new_quantity")
-    private Long newQuantity; // Updated quantity of the LPN.
+    private Long newQuantity;
 
     @Column(name = "previous_status")
-    private String previousStatus; // Previous status of the LPN.
+    private String previousStatus;
 
     @Column(name = "new_status")
-    private String newStatus; // Updated status of the LPN.
+    private String newStatus;
 
     @Column(name = "log_date")
-    private LocalDateTime logDate; // The timestamp for when the log was created.
+    private LocalDateTime logDate;
 
     @Column(name = "remarks")
-    private String remarks; // Optional remarks or comments about the log entry.
+    private String remarks;
 
 }

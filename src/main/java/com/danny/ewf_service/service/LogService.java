@@ -1,7 +1,11 @@
 package com.danny.ewf_service.service;
 
 import com.danny.ewf_service.entity.LPN;
+import com.danny.ewf_service.entity.LpnLog;
 import com.danny.ewf_service.entity.auth.User;
+import com.danny.ewf_service.payload.response.log.LpnLogResponseDto;
+
+import java.util.List;
 
 public interface LogService {
 
@@ -18,5 +22,5 @@ public interface LogService {
             User user
     );
 
-
+    List<LpnLogResponseDto> findAllLpnLogs (int page);
 }
