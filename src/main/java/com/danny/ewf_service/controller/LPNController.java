@@ -34,11 +34,40 @@ public class LPNController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/putaway")
+    @PreAuthorize("hasAnyAuthority('ROLE_WORKER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> putAwayLpn(@RequestBody LpnEditRequestDto lpn) {
+        lpnService.putAway(lpn);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/breakdown")
+    @PreAuthorize("hasAnyAuthority('ROLE_WORKER', 'ROLE_ADMIN')")
+    public ResponseEntity<?> breakDownLpn(@RequestBody LpnEditRequestDto lpn) {
+        lpnService.breakDown(lpn);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/remove")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteLpn(@RequestParam String tagID) {
+        lpnService.delete(tagID);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("")
     public ResponseEntity<?> getAllLpn() {
         List<LpnResponseDto> lpnResponseDtos = lpnService.getAllLpn();
         return ResponseEntity.ok(lpnResponseDtos);
     }
 
-
+    @GetMapping("/tag")
+    public ResponseEntity<?> getLpnByTagId(@RequestParam String tagID) {
+        LpnResponseDto lpnResponseDto = lpnService.getLpnById(tagID);
+        if (lpnResponseDto != null) {
+            return ResponseEntity.ok(lpnResponseDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

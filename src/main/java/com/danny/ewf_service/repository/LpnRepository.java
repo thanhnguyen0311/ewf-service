@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
 
 @Repository
 public interface LpnRepository extends JpaRepository<LPN, Long> {
@@ -14,5 +15,10 @@ public interface LpnRepository extends JpaRepository<LPN, Long> {
 
     boolean existsLPNByTagID(String tagID);
 
+    @Query("SELECT l FROM LPN l " +
+           "LEFT JOIN FETCH l.component c " +
+           "LEFT JOIN FETCH l.bayLocation b " +
+           "WHERE l.isDeleted = false " +
+           "ORDER BY l.updatedAt DESC")
     List<LPN> findAllByOrderByUpdatedAtDesc();
 }

@@ -139,6 +139,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public LooseInventory findLooseInventoryByLpn(LPN lpn) {
+        if (lpn.getBayLocation() == null) return null;
         List<LooseInventory> looseInventories = lpn.getBayLocation().getLooseInventories();
         for (LooseInventory looseInventory : looseInventories) {
             if (looseInventory.getComponent().getSku().equals(lpn.getComponent().getSku())) {

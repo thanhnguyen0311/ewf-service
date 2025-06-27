@@ -50,12 +50,22 @@ public class ShopifyExport {
 
         String[] header = {"", "Handle", "Title", "Shipping Method", "Variant Price", "Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price", "Amazon Price", "Compare Price"};
         rows.add(header);
-        products.forEach(product -> {
-            if (!product.getProductDetail().getSubCategory().equals("Dining Chair")) return;
-            if (product.getPrice() == null) return;
-            double productPrice = productService.calculateEWFDirectPriceGround(product, rows);
-            System.out.println("Exported " + product.getSku() + " price " + productPrice);
-        });
+        try {
+            products.forEach(product -> {
+                if (product.getProductDetail() != null) {
+                    if (product.getProductDetail().getSubCategory() != null) {
+                        if (!product.getProductDetail().getSubCategory().equals("Dining Chair")) return;
+                    }
+                }
+
+                if (product.getPrice() == null) return;
+                double productPrice = productService.calculateEWFDirectPriceGround(product, rows);
+                System.out.println("Exported " + product.getSku() + " price " + productPrice);
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         csvWriter.exportToCsv(rows, filePath);
     }

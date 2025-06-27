@@ -64,30 +64,6 @@ public class LogServiceImpl implements LogService {
                     lpnLogResponseDto.setTagID(lpnLog.getLpn().getTagID());
                     lpnLogResponseDto.setSku(lpnLog.getLpn().getComponent().getSku());
                     lpnLogResponseDto.setMethod(lpnLog.getMethod());
-//                    if (lpnLog.getMethod().equals("CREATE")) {
-//                        lpnLogResponseDto.setMessage(
-//                                String.valueOf(message.append(
-//                                        "created new pallet SKU")
-//                                        .append(lpnLog.getLpn().getComponent().getSku())
-//                                        .append(" (QTY: ")
-//                                        .append(lpnLog.getNewQuantity())
-//                                        .append(")")
-//                                        .append(!lpnLog.getNewBayLocation().isEmpty() ? " at " + lpnLog.getNewBayLocation() : "")));
-//                    }
-//
-//                    if (lpnLog.getMethod().equals("PUTAWAY")) {
-//                        lpnLogResponseDto.setMessage(String.valueOf(message
-//                                .append("put pallet to ")
-//                                .append(lpnLog.getNewBayLocation())));
-//                    }
-//
-//                    if (lpnLog.getMethod().equals("BREAKDOWN")) {
-//                        lpnLogResponseDto.setMessage("breakdown pallet at " + lpnLog.getNewBayLocation() + " (QTY: " + lpnLog.getPreviousQuantity()+ ")");
-//                    }
-//
-//                    if (lpnLog.getMethod().equals("EDIT")) {
-//                        lpnLogResponseDto.setMessage("edited pallet +" );
-//                    }
                     StringBuilder message = new StringBuilder("Edited pallet SKU " + lpnLog.getLpn().getComponent().getSku());
 
                     // Check if quantity was changed

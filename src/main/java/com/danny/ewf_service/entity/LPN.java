@@ -47,6 +47,9 @@ public class LPN {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
     @PrePersist
     protected void onCreate() {
         createdDate = LocalDateTime.now();

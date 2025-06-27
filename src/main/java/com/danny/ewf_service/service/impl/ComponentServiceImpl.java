@@ -87,7 +87,7 @@ public class ComponentServiceImpl implements ComponentService {
 
     @Override
     public List<ComponentListWMSResponse> findAllComponentsWMS() {
-        List<Component> components = componentRepository.findAllComponents();
+        List<Component> components = componentRepository.findAllByDiscontinueFalse();
         return componentMapper.componentListToComponentListWMSResponseDtoList(components);
     }
 }

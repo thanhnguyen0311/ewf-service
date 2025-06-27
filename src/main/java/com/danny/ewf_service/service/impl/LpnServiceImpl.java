@@ -83,7 +83,10 @@ public class LpnServiceImpl implements LpnService {
                 throw new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
         }
 
+
+
         lpn.setStatus("active");
+        lpn.setIsDeleted(false);
         lpnRepository.save(lpn);
 
         Dimension dimension = component.getDimension();
@@ -110,7 +113,6 @@ public class LpnServiceImpl implements LpnService {
     @Transactional
     public void updateLpn(LpnEditRequestDto lpnRequestDto) {
         LPN lpn;
-        String method = "EDIT";
         Component component;
         BayLocation bayLocation;
         Optional<LPN> optionalLpn = lpnRepository.findByTagID(lpnRequestDto.getTagID());
@@ -138,14 +140,87 @@ public class LpnServiceImpl implements LpnService {
         if (optionalBayLocation.isPresent()) {
             bayLocation = optionalBayLocation.get();
             lpn.setBayLocation(bayLocation);
-        } else
-            throw new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
+        } else throw new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
+
 
         lpnRepository.save(lpn);
 
+        User user = customUserDetailsService.getUser();
+        logService.createLpnLog(
+                lpn,
+                "EDIT",
+                previousBay != null ? previousBay.getBayCode() : "",
+                lpnRequestDto.getBayCode(),
+                previousQuantity,
+                lpnRequestDto.getQuantity(),
+                previousStatus,
+                lpnRequestDto.getStatus(),
+                !lpnRequestDto.getContainerNumber().isEmpty() ? "Container : " + lpnRequestDto.getContainerNumber() : "",
+                user
+        );
+    }
 
-        if (previousStatus.equals("inactive") && lpnRequestDto.getStatus().equals("active")) {
-            if (previousBay == null) throw new ValidationException("bayCode", "This LPN does not have a bay location.");
+    @Override
+    public void putAway(LpnEditRequestDto lpnRequestDto) {
+        LPN lpn;
+        BayLocation bayLocation;
+        Optional<LPN> optionalLpn = lpnRepository.findByTagID(lpnRequestDto.getTagID());
+        Optional<BayLocation> optionalBayLocation = bayLocationRepository.findByBayCode(lpnRequestDto.getBayCode());
+        BayLocation previousBay = null;
+        if (optionalLpn.isPresent()) {
+            lpn = optionalLpn.get();
+            if (lpn.getBayLocation() != null) previousBay = lpn.getBayLocation();
+        } else throw new ValidationException("lpn", "LPN with tag ID " + lpnRequestDto.getTagID() + " not found");
+
+        if (optionalBayLocation.isPresent()) {
+            bayLocation = optionalBayLocation.get();
+            lpn.setBayLocation(bayLocation);
+        } else throw new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
+
+        lpnRepository.save(lpn);
+
+        User user = customUserDetailsService.getUser();
+        logService.createLpnLog(
+                lpn,
+                "PUTAWAY",
+                previousBay != null ? previousBay.getBayCode() : "",
+                lpnRequestDto.getBayCode(),
+                lpn.getQuantity(),
+                lpnRequestDto.getQuantity(),
+                lpn.getStatus(),
+                lpnRequestDto.getStatus(),
+                "",
+                user
+        );
+    }
+
+    @Override
+    public void breakDown(LpnEditRequestDto lpnRequestDto) {
+        LPN lpn;
+        Component component;
+        BayLocation bayLocation;
+        Optional<LPN> optionalLpn = lpnRepository.findByTagID(lpnRequestDto.getTagID());
+        Optional<Component> optionalComponent = componentRepository.findBySku(lpnRequestDto.getSku());
+        Optional<BayLocation> optionalBayLocation = bayLocationRepository.findByBayCode(lpnRequestDto.getBayCode());
+        String previousStatus;
+
+        if (optionalLpn.isPresent()) {
+            lpn = optionalLpn.get();
+            previousStatus = lpn.getStatus();
+            lpn.setStatus(lpnRequestDto.getStatus());
+        } else throw new ValidationException("lpn", "LPN with tag ID " + lpnRequestDto.getTagID() + " not found");
+
+        if (optionalComponent.isPresent()) {
+            component = optionalComponent.get();
+        } else throw new ValidationException("sku", "Component with SKU " + lpnRequestDto.getSku() + " not found.");
+
+        if (optionalBayLocation.isPresent()) {
+            bayLocation = optionalBayLocation.get();
+        } else throw new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
+
+        lpnRepository.save(lpn);
+
+        if (previousStatus.equals("active") && lpnRequestDto.getStatus().equals("inactive")) {
             LooseInventory looseInventory = inventoryService.findLooseInventoryByLpn(lpn);
             if (looseInventory == null) {
                 looseInventory = new LooseInventory();
@@ -154,34 +229,61 @@ public class LpnServiceImpl implements LpnService {
             }
             looseInventory.setQuantity(looseInventory.getQuantity() + lpnRequestDto.getQuantity());
             looseInventoryRepository.save(looseInventory);
-            method = "BREAKDOWN";
         }
-
-        if (previousBay == null
-            && !lpnRequestDto.getBayCode().isEmpty()
-            && lpnRequestDto.getStatus().equals("active")) {
-            method = "PUTAWAY";
-        }
-
 
         User user = customUserDetailsService.getUser();
         logService.createLpnLog(
                 lpn,
-                method,
-                previousBay != null ? previousBay.getBayCode() : "",
-                lpnRequestDto.getBayCode(),
-                previousQuantity,
+                "BREAKDOWN",
+                bayLocation.getBayCode(),
+                bayLocation.getBayCode(),
+                lpn.getQuantity(),
                 lpnRequestDto.getQuantity(),
                 previousStatus,
                 lpnRequestDto.getStatus(),
                 "",
-                user);
+                user
+        );
+    }
+
+    @Override
+    public void delete(String tagID) {
+        Optional<LPN> optionalLpn = lpnRepository.findByTagID(tagID);
+        if (optionalLpn.isPresent()) {
+            LPN lpn = optionalLpn.get();
+            lpn.setIsDeleted(true);
+            lpnRepository.save(lpn);
+            String bayCode = lpn.getBayLocation() != null ? lpn.getBayLocation().getBayCode() : "";
+
+            User user = customUserDetailsService.getUser();
+            logService.createLpnLog(
+                    lpn,
+                    "DELETE",
+                    bayCode,
+                    "",
+                    lpn.getQuantity(),
+                    lpn.getQuantity(),
+                    lpn.getStatus(),
+                    "",
+                    "pallet deleted",
+                    user
+            );
+        } else throw new ValidationException("lpn", "LPN with tag ID " + tagID + " not found");
     }
 
     @Override
     public List<LpnResponseDto> getAllLpn() {
         List<LPN> lpns = lpnRepository.findAllByOrderByUpdatedAtDesc();
         return lpnMapper.lpnListToLpnResponseDtoList(lpns);
+    }
+
+    @Override
+    public LpnResponseDto getLpnById(String tagID) {
+        Optional<LPN> optionalLpn = lpnRepository.findByTagID(tagID);
+        if (optionalLpn.isPresent()) {
+            LPN lpn = optionalLpn.get();
+            return lpnMapper.lpnToLpnResponseDto(lpn);
+        } else throw new ValidationException("lpn", "LPN with tag ID " + tagID + " not found");
     }
 
 }
