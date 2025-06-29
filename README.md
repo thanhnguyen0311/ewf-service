@@ -176,15 +176,6 @@ The project utilizes several key technologies:
 - Lombok
 - Java 23
 
-## Getting Started
-
-To run this application:
-
-1. Ensure you have Java 23 installed
-2. Clone the repository
-3. Build using Maven: `mvn clean install`
-4. Run the application: `java -jar target/ewf-service.jar`
-
 ## Contact
 
 For questions or support, please contact the development team at: **nct031194@icloud.com**
