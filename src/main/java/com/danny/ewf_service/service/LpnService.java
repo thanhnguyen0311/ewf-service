@@ -12,5 +12,13 @@ public interface LpnService {
 
     void updateLpn(LpnEditRequestDto lpnRequestDto);
 
+    void putAway(LpnEditRequestDto lpnRequestDto);
+
+    void breakDown(LpnEditRequestDto lpnRequestDto);
+
+    void delete(String tagID);
+
     List<LpnResponseDto> getAllLpn();
+
+    LpnResponseDto getLpnById(String tagID);
 }
