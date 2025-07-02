@@ -64,7 +64,7 @@ public class LogServiceImpl implements LogService {
                     lpnLogResponseDto.setTagID(lpnLog.getLpn().getTagID());
                     lpnLogResponseDto.setSku(lpnLog.getLpn().getComponent().getSku());
                     lpnLogResponseDto.setMethod(lpnLog.getMethod());
-                    StringBuilder message = new StringBuilder("Edited pallet SKU " + lpnLog.getLpn().getComponent().getSku());
+                    StringBuilder message = new StringBuilder(lpnLog.getMethod() + " pallet SKU " + lpnLog.getLpn().getComponent().getSku());
 
                     // Check if quantity was changed
                     if (lpnLog.getPreviousQuantity() != null && lpnLog.getNewQuantity() != null
@@ -78,6 +78,8 @@ public class LogServiceImpl implements LogService {
                         && !lpnLog.getPreviousBayLocation().equals(lpnLog.getNewBayLocation())) {
                         message.append(" - Location: ").append(lpnLog.getPreviousBayLocation())
                                 .append(" → ").append(lpnLog.getNewBayLocation());
+                    } else if (lpnLog.getMethod().equals("BREAKDOWN")) {
+                        message.append(" - Location: ").append(lpnLog.getPreviousBayLocation());
                     }
 
                     // Check if status was changed
