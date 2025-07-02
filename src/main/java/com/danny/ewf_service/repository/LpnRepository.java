@@ -21,4 +21,12 @@ public interface LpnRepository extends JpaRepository<LPN, Long> {
            "WHERE l.isDeleted = false " +
            "ORDER BY l.updatedAt DESC")
     List<LPN> findAllByOrderByUpdatedAtDesc();
+
+    @Query("SELECT l FROM LPN l " +
+           "LEFT JOIN FETCH l.component c " +
+           "LEFT JOIN FETCH l.bayLocation b " +
+           "WHERE l.tagID IN :tagIDs AND c.sku like :sku AND l.isDeleted = false " +
+           "ORDER BY l.updatedAt DESC")
+    List<LPN> findByTagIDsOrderByUpdatedAtDesc(List<String> tagIDs, String sku);
+
 }

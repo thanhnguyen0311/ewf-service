@@ -107,4 +107,31 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
           AND pw.ewfdirect = TRUE
         """, nativeQuery = true)
     String getSizeShapeFilter(@Param("subCategory") String subCategory);
+
+    @Query(value = """
+        SELECT GROUP_CONCAT(DISTINCT pd.chair_type ORDER BY pd.chair_type SEPARATOR ',') AS chairType
+        FROM product_details pd
+        JOIN products p ON p.detail_id = pd.id
+        JOIN product_wholesales pw ON p.wholesales_id = pw.id
+        WHERE pd.sub_category = :subCategory
+          AND pw.ewfdirect = TRUE
+        """, nativeQuery = true)
+    String getChairTypeFilter(@Param("subCategory") String subCategory);
+
+
+    @Query(value = """
+
+        SELECT
+           GROUP_CONCAT(DISTINCT pd.collection ORDER BY pd.collection SEPARATOR ',') AS collections
+       FROM (
+           SELECT *
+           FROM products
+           ORDER BY id DESC
+           LIMIT 1500
+        ) AS p
+           JOIN product_details pd ON p.detail_id = pd.id
+           JOIN product_wholesales pw ON p.wholesales_id = pw.id
+           WHERE pw.ewfdirect = TRUE
+       """, nativeQuery = true)
+    String getCollectionsNewArrivals();
 }

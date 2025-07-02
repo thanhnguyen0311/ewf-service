@@ -48,17 +48,17 @@ public class ShopifyExport {
         List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
         List<String[]> rows = new ArrayList<>();
 
-        String[] header = {"", "Handle", "Title", "Shipping Method", "Variant Price", "Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price", "Amazon Price", "Compare Price"};
+        String[] header = {"", "Handle", "Title", "Shipping Method", "Variant Price", "Component SKU", "Weight", "Girth", "Quantity", "Sale Price", "Shipping cost(Boston)", "Total Price", "Amazon Price", "Variant Compare At Price"};
         rows.add(header);
+
         try {
             products.forEach(product -> {
-                if (product.getProductDetail() != null) {
-                    if (product.getProductDetail().getSubCategory() != null) {
-                        if (!product.getProductDetail().getSubCategory().equals("Dining Chair")) return;
+                if (product.getPrice() == null) return;
+                if (product.getPrice().getPromotion() != null) {
+                    if (product.getPrice().getPromotion() == 0) {
+                        return;
                     }
                 }
-
-                if (product.getPrice() == null) return;
                 double productPrice = productService.calculateEWFDirectPriceGround(product, rows);
                 System.out.println("Exported " + product.getSku() + " price " + productPrice);
             });
@@ -81,18 +81,7 @@ public class ShopifyExport {
             String inventory;
             for (Object[] result : rawResult) {
                 if (result[0] != "" && result[1] != "" && result[2] != "") {
-//                    if (result[1] == null) {
-//                        Optional<Product> optionalProduct = productRepository.findBySku(result[0].toString());
-//                        if (optionalProduct.isPresent()) {
-//                            Product product = optionalProduct.get();
-//                            if (product.getTitle() == null) {
-//                                title = product.getName();
-//                            } else {
-//                                title = product.getTitle();
-//                            }
-//
-//                        }
-//                    }
+
                     Optional<Product> optionalProduct = productRepository.findBySku(result[0].toString());
                     if (optionalProduct.isPresent()) {
                         Product product = optionalProduct.get();
@@ -272,7 +261,6 @@ public class ShopifyExport {
                 if (product.getProductDetail() != null) {
                     if (product.getProductDetail().getDescription() == null) continue;
                     if (product.getProductDetail().getSubCategory() == null) continue;
-//                    if (!product.getProductDetail().getSubCategory().equals("Dining Chair")) continue;
                 } else {
                     continue;
                 }
@@ -678,12 +666,11 @@ public class ShopifyExport {
 
     private String commaRemoval(String text) {
         if (text == null || text.isEmpty()) {
-            return ""; // Handle null or empty input
+            return "";
         }
 
         text = text.replaceAll("^,|,$", "");
 
-        // Replace double commas (",,") with a single comma (",")
         text = text.replaceAll(",{2,}", ",");
 
         return text;
