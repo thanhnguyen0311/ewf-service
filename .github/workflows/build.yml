@@ -1,15 +1,16 @@
 name: Direct Deploy to Production
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
-      - main # Trigger on pushes to the main branch
-  workflow_dispatch: # Allows manual deployment trigger as well
+      - main
 
 jobs:
   test_and_build:
     name: Test and Build
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
 
     steps:
       - name: Checkout repository
@@ -38,6 +39,7 @@ jobs:
     name: Deploy to Production VPS
     runs-on: ubuntu-latest
     needs: test_and_build
+    if: github.event.pull_request.merged == true
 
     steps:
       - name: Download build artifact
