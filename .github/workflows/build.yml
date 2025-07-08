@@ -81,13 +81,12 @@ jobs:
           name: app-build
 
       # Set up SSH key with proper format and permissions
-      - name: Set up SSH key
+      - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.PROD_SSH_KEY }}" | base64 -d > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
-
+          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
       # Transfer JAR file to server
       - name: Transfer JAR file
         run: scp *.jar ${{ secrets.PROD_USERNAME }}@${{ secrets.PROD_HOST }}:~/app.jar
