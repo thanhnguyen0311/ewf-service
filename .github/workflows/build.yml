@@ -80,59 +80,73 @@ jobs:
         with:
           name: app-build
 
-      - name: Deploy application to VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ${{ secrets.PROD_USERNAME }}
-          key: ${{ secrets.PROD_SSH_KEY }}
-          script: |
+      # Set up SSH key with proper format and permissions
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+
+      # Transfer JAR file to server
+      - name: Transfer JAR file
+        run: scp *.jar ${{ secrets.PROD_USERNAME }}@${{ secrets.PROD_HOST }}:~/app.jar
+
+      # Run deployment commands on server
+      - name: Deploy application
+        run: |
+          ssh ${{ secrets.PROD_USERNAME }}@${{ secrets.PROD_HOST }} "
             set -e
-            echo "Starting deployment on Production VPS..."
-            
+            echo 'Starting deployment on Production VPS...'
+          
             # Prepare deployment directory
             mkdir -p ${{ secrets.PROD_DEPLOY_PATH }}
             cd ${{ secrets.PROD_DEPLOY_PATH }}
-            
-            # Upload the JAR file
+          
+            # Move the JAR file
             rm -f app.jar
-            mv ~/download/artifacts/*.jar app.jar
-            
+            mv ~/app.jar app.jar
+          
             # Create production application.properties
             cat > application.properties << EOF
             spring.application.name=ewf-service
             spring.cache.type=simple
-            
+          
             spring.datasource.url=${{ secrets.PROD_DATASOURCE_URL }}
             spring.datasource.username=${{ secrets.PROD_DATASOURCE_USERNAME }}
             spring.datasource.password=${{ secrets.PROD_DATASOURCE_PASSWORD }}
-            
+          
             jwt.secret=${{ secrets.JWT_SECRET }}
             searchapi.token=${{ secrets.SEARCHAPI_TOKEN }}
             spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
             spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-            
+          
             # Hibernate Configuration
             spring.jpa.show-sql=false
             spring.jpa.properties.hibernate.format_sql=true
-            
+          
             # Server Settings for production
             server.port=8080
             server.address=0.0.0.0
             EOF
-            
-            # Stop the running application, if necessary
+          
+            # Stop the running application if it exists
             if [[ -f app.pid ]]; then
-              if ps -p $(cat app.pid) > /dev/null; then
-                echo "Stopping the current running application..."
-                kill -9 $(cat app.pid)
+              if ps -p \$(cat app.pid) > /dev/null; then
+                echo 'Stopping the current running application...'
+                kill -15 \$(cat app.pid)
+                sleep 5
+                if ps -p \$(cat app.pid) > /dev/null; then
+                  kill -9 \$(cat app.pid)
+                fi
               fi
               rm -f app.pid
             fi
-            
+          
             # Start the new application
-            echo "Starting the new application..."
+            echo 'Starting the new application...'
             nohup java -jar app.jar --spring.config.location=file:./application.properties > app.log 2>&1 &
-            echo $! > app.pid
-            
-            echo "Deployment completed successfully!"
+            echo \$! > app.pid
+          
+            echo 'Deployment completed successfully!'
+          "
