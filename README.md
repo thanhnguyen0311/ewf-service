@@ -1,181 +1,121 @@
-# EWF Service Documentation
+# EWF Service - Portal Application
+Welcome to the **EWF Portal** application! This is a modern, production-ready web application accessible via [ewfportal.com](https://ewfportal.com). It is designed and developed using **Jakarta EE**, **Spring Framework**, and other state-of-the-art technologies to provide secure, reliable, and user-friendly services.
+## Features
+1. **User Authentication & Authorization**
+    - Secure login and role-based access using **JWT Tokens**.
 
-## Project Overview
+2. **Database-Driven Functionality**
+    - Uses **MySQL** as the database, integrated with **Spring Data JPA** for robust data management.
 
-This project, `ewf-service`, is a Spring-based service application that provides a range of functionalities for managing different aspects of business operations. The application follows a layered architecture with repositories, services, and controllers to ensure maintainable and scalable code.
+3. **RESTful APIs**
+    - APIs designed using **Spring REST MVC**, enabling clear interaction between front-end and back-end systems.
 
-## Core Services
+4. **Caching**
+    - Simple, fast, and configurable caching with **Spring Cache**.
 
-### 1. LPN Service (License Plate Number)
+5. **Deployment Automation**
+    - Deployment to the production server is automated via **GitHub Actions**, ensuring a seamless CI/CD pipeline.
 
-**Implementation Class:** `LpnServiceImpl`  
-**Package:** `com.danny.ewf_service.service.impl`
+6. **Platform Independent**
+    - Runs on any **Java 17-compatible** platform with no dependency on specific server-side resources.
 
-Manages license plate numbers with the following operations:
-- Creating new LPNs
-- Updating existing LPNs
-- Retrieving all LPNs
+## Technology Stack
+- **Programming Language**: Java 17
+- **Frameworks**:
+    - Jakarta EE (for foundational enterprise support)
+    - Spring Boot, Spring MVC, Spring Data JPA
 
-**Key Methods:**
-- `newLpn(LpnRequestDto)`: Creates a new LPN
-- `updateLpn(LpnEditRequestDto)`: Updates an existing LPN
-- `getAllLpn()`: Retrieves all LPNs as DTOs
+- **Databases**:
+    - MySQL (with Hibernate ORM)
 
-**Dependencies:**
-- `ILpnMapper`
-- `ComponentRepository`
-- `BayLocationRepository`
-- `CustomUserDetailsService`
-- `LogService`
-- `LpnRepository`
+- **API Authentication**: JSON Web Tokens (JWT)
+- **Build Tools**: Maven
+- **Version Control**: Git + GitHub
+- **CI/CD**: GitHub Actions with workflow automation
+- **Deployment**: Ubuntu-based VPS server
+- **Containerization (Optional)**: Docker-compatible
+- **Log Management**: Application-specific logging with configurable verbosity levels
 
----
+## Environment Setup
+1. **Pre-requisites**:
+    - Install **Java 17** or higher.
+    - Install **MySQL** (or configure appropriate database access).
+    - Install **Maven** for package management.
+    - Configure environment variables (as used in deployment):
+        - `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`
+        - `JWT_SECRET`, `SEARCHAPI_TOKEN`
 
-### 2. Inventory Service
+2. **Run Locally**:
+``` bash
+   mvn spring-boot:run
+```
+1. **Default Configuration**:
+    - The application runs on **`localhost:8080`** by default.
+    - Update **`src/main/resources/application.properties`** to match your database and other configurations.
 
-**Implementation Class:** `InventoryServiceImpl`  
-**Package:** `com.danny.ewf_service.service.impl`
+## Deployment Process
+This project uses **GitHub Actions** for automated deployment upon changes applied to the `master` branch.
+- **CI/CD Pipeline Overview**:
+    - **Test job**: Runs all unit tests to ensure code is stable.
+    - **Build job**: Packages the application into a deployable JAR file.
+    - **Copy job**: Transfers the JAR to the production VPS.
+    - **Deploy job**:
+        - Stops the running application (if applicable).
+        - Replaces the JAR file on the server.
+        - Starts the application.
 
-Manages inventory-related operations including:
-- Retrieving product inventory information
-- Managing component inventory
-- Updating component details
+- **Production Deployment Server**:
+    - Hosted on [ewfportal.com](https://ewfportal.com).
+    - Runs on **Ubuntu** (VPS).
+    - Using **SSH** for secure file transfers and command execution.
 
-**Key Methods:**
-- `inventoryProductListByQuantityASC()`: Lists products sorted by quantity
-- `inventoryProductAll()`: Retrieves all product inventories
-- `getInventoryProductCountById(Long)`: Gets inventory count for a specific product
-- `findAllComponentsInventory()`: Finds all component inventories
-- `updateComponent(ComponentInventoryRequestDto)`: Updates component information
+## File Structure
+``` plaintext
+.
+├── src
+│   ├── main
+│   │   ├── java              # Java source files
+│   │   ├── resources         # Configuration files (application.properties, etc.)
+│   └── test                  # Test cases for unit testing
+├── pom.xml                   # Maven build configuration
+├── .github/workflows         # CI/CD workflows
+└── README.md                 # Project documentation
+```
+## Configuration Details
+1. **Application Properties**:
+    - Located in `src/main/resources/application.properties`.
+    - Includes configuration for:
+        - Database
+        - Server (port, address)
+        - JWT and API tokens
+        - Logging levels
 
-**Dependencies:**
-- `ProductComponentRepository`
-- `IComponentMapper`
-- `ConfigurationRepository`
-- `CustomUserDetailsService`
-- `ComponentRepository`
-- `ComponentService`
+2. **Environment Variables**:
+    - Add the following environment variables to your deployment server:
+        - `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`
+        - `JWT_SECRET`, `SEARCHAPI_TOKEN`
 
----
+3. **Secrets**:
+    - Secrets for GitHub Actions are securely stored in the repository settings.
 
-### 3. Order Service
+## Testing
+Run unit tests before deployment to ensure stability:
+``` bash
+mvn test
+```
+## Known Issues & Future Improvements
+1. **Scalability**:
+    - Explore containerized deployment (e.g., Docker, Kubernetes).
 
-**Implementation Class:** `OrderServiceImpl`  
-**Package:** `com.danny.ewf_service.service.impl`
+2. **Monitoring**:
+    - Add monitoring tools like **Prometheus** or **Grafana** for production environments.
 
-Manages order operations with the following functionality:
-- Paginated retrieval of orders with sorting capabilities
+3. **Logging**:
+    - Integrate **centralized log management** for production (e.g., ELK stack).
 
-**Key Methods:**
-- `getOrdersByPageAndSort(int)`: Retrieves paginated orders sorted by order date in descending order
+4. **Documentation**:
+    - Automatically generate API documentation using tools like **Swagger**.
 
-**Dependencies:**
-- `OrderRepository`
-
----
-
-### 4. Product Service
-
-**Implementation Class:** `ProductServiceImpl`  
-**Package:** `com.danny.ewf_service.service.impl`
-
-Handles product-related operations:
-- Finding products by SKU
-- Managing product details
-- Calculating product pricing
-- Handling product images
-
-**Key Methods:**
-- `findBySku(String)`: Finds a product by its SKU
-- `findAllProductsToDtos()`: Converts all products to DTOs
-- `getAllProductsSearch()`: Gets all products for search functionality
-- `updateProductDetailById(Long, ProductDetailRequestDto)`: Updates product details
-- `calculateEWFDirectPriceGround(Product, List<String[]>)`: Calculates ground shipping price
-- `findMergedProducts(Product)`: Finds merged products
-
-**Dependencies:**
-- `SKUGenerator`
-- `IProductMapper`
-- `ProductRepository`
-- `ComponentService`
-- `ProductComponentRepository`
-- `CacheService`
-- `InventoryService`
-- `ImageService`
-
----
-
-### 5. Role Service
-
-**Implementation Class:** `RoleServiceImpl`  
-**Package:** `com.danny.ewf_service.service.impl`
-
-Manages role operations:
-- Retrieving all available roles
-
-**Key Methods:**
-- `findAll()`: Retrieves all roles as DTOs
-
-**Dependencies:**
-- `RoleRepository`
-- `IRoleMapper`
-
----
-
-### 6. Authentication Service
-
-**Implementation Class:** `AuthServiceImpl`  
-**Package:** `com.danny.ewf_service.service.auth`
-
-Handles user authentication and registration:
-- User registration
-- User information retrieval
-
-**Key Methods:**
-- `register(RegisterRequest)`: Registers a new user
-- `getInfo()`: Gets information about the authenticated user
-
-**Dependencies:**
-- `UserRepository`
-- `RoleRepository`
-- `PasswordEncoder`
-
----
-
-### 7. Customer Service
-
-**Implementation Class:** `CustomerServiceImpl`  
-**Package:** `com.danny.ewf_service.service.impl`
-
-Manages customer-related operations:
-- Searching customers by phone number
-
-**Key Methods:**
-- `findCustomersByPartialPhone(String)`: Searches for customers by partial phone number
-
-**Dependencies:**
-- `CustomerRepository`
-- `ICustomerMapper`
-
-## Architecture Overview
-
-The application follows a standard Spring service architecture:
-
-1. **Repositories** - Interface with the database using Spring Data JPA
-2. **Services** - Implement business logic and interface with repositories
-3. **DTOs** - Transfer objects for API communication
-4. **Mappers** - Convert between entities and DTOs
-5. **Controllers** - Handle HTTP requests and responses (not detailed in this README)
-
-## Dependencies
-
-The project utilizes several key technologies:
-- Spring Boot
-- Spring Data JPA
-- Spring Security
-- Lombok
-- Java 23
-
-## Contact
-
-For questions or support, please contact the development team at: **nct031194@icloud.com**
+## Links
+- **Website**: [ewfportal.com](https://ewfportal.com)
+- **Repository**: [GitHub Repository](https://github.com/thanhnguyen0311/ewf-service)
