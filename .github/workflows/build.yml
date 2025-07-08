@@ -7,8 +7,8 @@ on:
       - master
 
 jobs:
-  test_and_build:
-    name: Test and Build
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
 
@@ -59,6 +59,23 @@ jobs:
       - name: Run unit tests
         run: mvn test
 
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: maven
+
       - name: Package the application
         run: mvn -B package -DskipTests
 
@@ -68,10 +85,10 @@ jobs:
           name: app-build
           path: target/*.jar
 
-  deploy_to_production:
-    name: Deploy to Production VPS
+  copy_jar:
+    name: Copy JAR to Server
     runs-on: ubuntu-latest
-    needs: test_and_build
+    needs: build
     if: github.event.pull_request.merged == true
 
     steps:
@@ -91,6 +108,13 @@ jobs:
           target: "${{ secrets.PROD_DEPLOY_PATH }}/app.jar"
           strip_components: 1
 
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: copy_jar
+    if: github.event.pull_request.merged == true
+
+    steps:
       - name: Deploy application
         uses: appleboy/ssh-action@v1.0.0
         with:
