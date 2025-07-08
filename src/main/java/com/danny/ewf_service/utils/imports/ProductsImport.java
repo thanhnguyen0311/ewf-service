@@ -394,42 +394,5 @@ public class ProductsImport {
         }
     }
 
-    public void updateProductPromotion() {
-        try (InputStream file = getClass().getResourceAsStream("/data/discount_sku.csv");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
-
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                String[] columns = line.split(",");
-                if (columns.length < 2) {
-                    continue;
-                }
-
-                String sku = columns[0].trim();
-                Long promotion = Long.parseLong(columns[1].trim());
-
-                if (sku.isEmpty()) {
-                    continue;
-                }
-                Optional<Product> optionalProduct = productRepository.findBySku(sku);
-                if (optionalProduct.isPresent()) {
-                    Product product = optionalProduct.get();
-                    List<ProductComponent> productComponents = product.getComponents();
-                    Price price = product.getPrice();
-                    if (product.getPrice() == null) price = new Price();
-                    price.setPromotion(promotion);
-                    product.setPrice(price);
-                    productRepository.save(product);
-                    System.out.println("Successfully Updated product : " + sku + " VALUES : " + promotion);
-                } else {
-                    System.err.println("Product not found: " + sku);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error reading CSV file", e);
-        }
-    }
 
 }
