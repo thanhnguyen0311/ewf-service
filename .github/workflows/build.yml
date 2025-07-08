@@ -97,6 +97,17 @@ jobs:
         with:
           name: app-build
 
+      - name: Rename JAR file locally
+        run: |
+          JAR_FILE=$(find . -name "*.jar" -type f | head -n1)
+          if [[ -n "$JAR_FILE" ]]; then
+            cp "$JAR_FILE" app.jar
+            echo "Created app.jar from $JAR_FILE"
+          else
+            echo "No JAR file found!"
+            exit 1
+          fi
+
       - name: Copy JAR to server
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -104,9 +115,9 @@ jobs:
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: 22
-          source: "*.jar"
-          target: "${{ secrets.PROD_DEPLOY_PATH }}/app.jar"
-          strip_components: 1
+          source: "app.jar"
+          target: "${{ secrets.PROD_DEPLOY_PATH }}"
+          overwrite: true
 
   deploy:
     name: Deploy Application
