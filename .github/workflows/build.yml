@@ -109,66 +109,88 @@ jobs:
           strip_components: 1
 
   deploy:
-    name: Deploy Application
-    runs-on: ubuntu-latest
-    needs: copy_jar
-    if: github.event.pull_request.merged == true
-
-    steps:
-      - name: Deploy application
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.PROD_HOST }}
-          username: ${{ secrets.PROD_USERNAME }}
-          key: ${{ secrets.PROD_SSH_KEY }}
-          port: 22
-          script: |
-            set -e
-            echo 'Starting deployment on Production VPS...'
-            
-            # Prepare deployment directory
-            mkdir -p ${{ secrets.PROD_DEPLOY_PATH }}
-            cd ${{ secrets.PROD_DEPLOY_PATH }}
-            
-            # Create production application.properties
-            cat > application.properties << 'EOF'
-            spring.application.name=ewf-service
-            spring.cache.type=simple
-            
-            spring.datasource.url=${{ secrets.PROD_DATASOURCE_URL }}
-            spring.datasource.username=${{ secrets.PROD_DATASOURCE_USERNAME }}
-            spring.datasource.password=${{ secrets.PROD_DATASOURCE_PASSWORD }}
-            
-            jwt.secret=${{ secrets.JWT_SECRET }}
-            searchapi.token=${{ secrets.SEARCHAPI_TOKEN }}
-            spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-            spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-            
-            # Hibernate Configuration
-            spring.jpa.show-sql=false
-            spring.jpa.properties.hibernate.format_sql=true
-            
-            # Server Settings for production
-            server.port=8080
-            server.address=0.0.0.0
-            EOF
-            
-            # Stop the running application if it exists
-            if [[ -f app.pid ]]; then
+    - name: Deploy application
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USERNAME }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        port: 22
+        script: |
+          set -e
+          echo 'Starting deployment on Production VPS...'
+          
+          # Prepare deployment directory
+          mkdir -p ${{ secrets.PROD_DEPLOY_PATH }}
+          cd ${{ secrets.PROD_DEPLOY_PATH }}
+          
+          # Check if JAR file exists
+          if [[ ! -f app.jar ]]; then
+            echo "ERROR: app.jar not found in $(pwd)"
+            ls -la
+            exit 1
+          fi
+          
+          echo "JAR file found: $(ls -la app.jar)"
+          
+          # Create production application.properties
+          cat > application.properties << 'EOF'
+          spring.application.name=ewf-service
+          spring.cache.type=simple
+          
+          spring.datasource.url=${{ secrets.PROD_DATASOURCE_URL }}
+          spring.datasource.username=${{ secrets.PROD_DATASOURCE_USERNAME }}
+          spring.datasource.password=${{ secrets.PROD_DATASOURCE_PASSWORD }}
+          
+          jwt.secret=${{ secrets.JWT_SECRET }}
+          searchapi.token=${{ secrets.SEARCHAPI_TOKEN }}
+          spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+          spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+          
+          # Hibernate Configuration
+          spring.jpa.show-sql=false
+          spring.jpa.properties.hibernate.format_sql=true
+          
+          # Server Settings for production
+          server.port=8080
+          server.address=0.0.0.0
+          EOF
+          
+          echo "Application properties created"
+          
+          # Stop the running application if it exists
+          if [[ -f app.pid ]]; then
+            if ps -p $(cat app.pid) > /dev/null; then
+              echo 'Stopping the current running application...'
+              kill -15 $(cat app.pid)
+              sleep 5
               if ps -p $(cat app.pid) > /dev/null; then
-                echo 'Stopping the current running application...'
-                kill -15 $(cat app.pid)
-                sleep 5
-                if ps -p $(cat app.pid) > /dev/null; then
-                  kill -9 $(cat app.pid)
-                fi
+                kill -9 $(cat app.pid)
               fi
-              rm -f app.pid
             fi
-            
-            # Start the new application
-            echo 'Starting the new application...'
-            nohup java -jar app.jar --spring.config.location=file:./application.properties > app.log 2>&1 &
-            echo $! > app.pid
-            
-            echo 'Deployment completed successfully!'
+            rm -f app.pid
+          fi
+          
+          # Check Java version
+          java -version
+          
+          # Start the new application
+          echo 'Starting the new application...'
+          nohup java -jar app.jar --spring.config.location=file:./application.properties > app.log 2>&1 &
+          APP_PID=$!
+          echo $APP_PID > app.pid
+          
+          echo "Application started with PID: $APP_PID"
+          
+          # Wait a moment and check if it's still running
+          sleep 5
+          if ps -p $APP_PID > /dev/null; then
+            echo "Application is running successfully!"
+          else
+            echo "ERROR: Application failed to start"
+            echo "Last 20 lines of log:"
+            tail -20 app.log
+            exit 1
+          fi
+          
+          echo 'Deployment completed successfully!'
