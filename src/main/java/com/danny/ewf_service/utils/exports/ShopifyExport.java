@@ -54,11 +54,6 @@ public class ShopifyExport {
         try {
             products.forEach(product -> {
                 if (product.getPrice() == null) return;
-                if (product.getPrice().getPromotion() != null) {
-                    if (product.getPrice().getPromotion() == 0) {
-                        return;
-                    }
-                }
                 double productPrice = productService.calculateEWFDirectPriceGround(product, rows);
                 System.out.println("Exported " + product.getSku() + " price " + productPrice);
             });
@@ -469,11 +464,10 @@ public class ShopifyExport {
         String title;
         String[] row;
         List<String[]> skuTable;
-        int boxQty = 0;
+        int boxQty;
 
         for (Product product : products) {
             System.out.println("Processing " + product.getSku());
-//            if (!Objects.equals(product.getSku(), "CNDA5-07-T12")) continue;
             if (product.getDiscontinued() == null || product.getDiscontinued()) continue;
             if (product.getComponents().isEmpty()) continue;
             if (product.getProductDetail() == null) continue;
@@ -515,7 +509,7 @@ public class ShopifyExport {
                     boxQty = mergedProduct.getComponents().size();
                     skuTable.add(new String[]{
                             mergedProduct.getSku(),
-                            1 + "",
+                            countMergedProduct(product, mergedProduct) + "",
                             mergedProduct.getProductDetail().getSubCategory() != null ? mergedProduct.getProductDetail().getSubCategory() : "",
                             lwh,
                             boxQty == 0 ? "" : boxQty + "",
@@ -579,7 +573,6 @@ public class ShopifyExport {
                     });
                 }
             }
-
             row = new String[]{
                     product.getSku().toLowerCase(),
                     title,
@@ -660,8 +653,11 @@ public class ShopifyExport {
             }
             relatedProductSku.append(",").append(getGroupHandle(skuList, product.getSku()));
         }
+        String relatedProduct = commaRemoval(relatedProductSku.toString());
+        String[] skuArray = relatedProduct.split(",");
+        int maxElements = Math.min(10, skuArray.length);
 
-        return commaRemoval(relatedProductSku.toString());
+        return String.join(",", Arrays.copyOfRange(skuArray, 0, maxElements));
     }
 
     private String commaRemoval(String text) {
@@ -683,5 +679,16 @@ public class ShopifyExport {
         }
 
         return "L " + (int) Math.floor(length) + " x W " + (int) Math.floor(width) + " x H " + (int) Math.floor(height);
+    }
+
+    private long countMergedProduct(Product product, Product mergedProduct) {
+        for (ProductComponent productComponent : product.getComponents()) {
+            for (ProductComponent mergedProductComponent : mergedProduct.getComponents()) {
+                if (productComponent.getComponent().getSku().equals(mergedProductComponent.getComponent().getSku())) {
+                    return productComponent.getQuantity();
+                }
+            }
+        }
+        return 0;
     }
 }

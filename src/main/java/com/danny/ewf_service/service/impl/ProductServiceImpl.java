@@ -182,7 +182,7 @@ public class ProductServiceImpl implements ProductService {
                 } else if (componentWeight <= 80) {
                     shippingCost = 34;
                 } else {
-                    shippingCost = 35;
+                    shippingCost = 40;
                 }
 
                 if  (productComponent.getComponent().getSku().contains("DSL-")) shippingCost = 0;
@@ -191,11 +191,11 @@ public class ProductServiceImpl implements ProductService {
                 girth = dimension.getBoxLength() + 2 * (dimension.getBoxWidth() + dimension.getBoxHeight());
 
                 if (girth > 160) {
-                    shippingCost = shippingCost + 50;
+                    shippingCost = shippingCost + 55;
                 } else if (girth > 136) {
-                    shippingCost = shippingCost + 30;
+                    shippingCost = shippingCost + 40;
                 } else if (girth > 118) {
-                    shippingCost = shippingCost + 20;
+                    shippingCost = shippingCost + 30;
                 }
 
                 if (components.size() == 1) {
