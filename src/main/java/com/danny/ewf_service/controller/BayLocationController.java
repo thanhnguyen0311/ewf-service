@@ -26,6 +26,4 @@ public class BayLocationController {
             return ResponseEntity.internalServerError().body("Error fetching location");
         }
     }
-
-
 }
