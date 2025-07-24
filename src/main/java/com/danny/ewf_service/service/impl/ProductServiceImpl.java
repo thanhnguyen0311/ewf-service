@@ -170,19 +170,19 @@ public class ProductServiceImpl implements ProductService {
                 productWeight = productWeight + componentWeight;
 
                 if (componentWeight <= 20) {
-                    shippingCost = 18;
+                    shippingCost = 23;
                 } else if (componentWeight <= 40) {
-                    shippingCost = 25;
-                } else if (componentWeight <= 50) {
-                    shippingCost = 27;
-                } else if (componentWeight <= 60) {
                     shippingCost = 30;
-                } else if (componentWeight <= 70) {
+                } else if (componentWeight <= 50) {
                     shippingCost = 32;
+                } else if (componentWeight <= 60) {
+                    shippingCost = 35;
+                } else if (componentWeight <= 70) {
+                    shippingCost = 37;
                 } else if (componentWeight <= 80) {
-                    shippingCost = 34;
+                    shippingCost = 39;
                 } else {
-                    shippingCost = 40;
+                    shippingCost = 45;
                 }
 
                 if  (productComponent.getComponent().getSku().contains("DSL-")) shippingCost = 0;
@@ -191,30 +191,32 @@ public class ProductServiceImpl implements ProductService {
                 girth = dimension.getBoxLength() + 2 * (dimension.getBoxWidth() + dimension.getBoxHeight());
 
                 if (girth > 160) {
-                    shippingCost = shippingCost + 55;
+                    shippingCost = shippingCost + 110;
                 } else if (girth > 136) {
-                    shippingCost = shippingCost + 40;
+                    shippingCost = shippingCost + 90;
                 } else if (girth > 118) {
-                    shippingCost = shippingCost + 30;
+                    shippingCost = shippingCost + 80;
                 }
 
-                if (components.size() == 1) {
-                    if (girth > 118) {
-                        shippingCost = shippingCost + 35;
-                    }
-                    if (girth > 160) {
-                        shippingCost = shippingCost + 35;
-                    }
-                    if (dimension.getBoxLength() >= 44) {
-                        shippingCost = shippingCost + 35;
-                    }
-                }
+//                if (components.size() == 1) {
+//                    if (girth > 118) {
+//                        shippingCost = shippingCost + 35;
+//                    }
+//                    if (girth > 160) {
+//                        shippingCost = shippingCost + 35;
+//                    }
+//                    if (dimension.getBoxLength() >= 44) {
+//                        shippingCost = shippingCost + 35;
+//                    }
+//                }
 
 
                 totalQB1 = totalQB1 + (componentPrice * productComponent.getQuantity());
                 shippingCost = shippingCost * boxCount;
                 totalShipCost = totalShipCost + shippingCost;
                 totalQuantity = totalQuantity + productComponent.getQuantity();
+
+
 
                 rows.add(new String[]{
                         String.valueOf(stt),
@@ -233,6 +235,12 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
+
+        if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
+        if (totalQB1 > 1000) totalShipCost = totalShipCost*0.85;
+        if (totalQB1 > 1500) totalShipCost = totalShipCost*0.80;
+        if (totalQB1 > 2000) totalShipCost = totalShipCost*0.70;
+
 
         productPrice = totalQB1 + totalShipCost;
 //        productPrice = productPrice * 1.03;

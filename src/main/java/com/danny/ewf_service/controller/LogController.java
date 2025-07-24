@@ -27,6 +27,7 @@ public class LogController {
     public ResponseEntity<?> getAllLpn(@RequestParam(defaultValue = "0") int page) {
         try {
             List<LpnLogResponseDto> logs = logService.findAllLpnLogs(page);
+
             if (logs.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
