@@ -64,12 +64,12 @@ public class LogServiceImpl implements LogService {
                     lpnLogResponseDto.setTagID(lpnLog.getLpn().getTagID());
                     lpnLogResponseDto.setSku(lpnLog.getLpn().getComponent().getSku());
                     lpnLogResponseDto.setMethod(lpnLog.getMethod());
-                    StringBuilder message = new StringBuilder(lpnLog.getMethod() + " pallet SKU " + lpnLog.getLpn().getComponent().getSku());
+                    StringBuilder message = new StringBuilder();
 
                     // Check if quantity was changed
                     if (lpnLog.getPreviousQuantity() != null && lpnLog.getNewQuantity() != null
                         && !lpnLog.getPreviousQuantity().equals(lpnLog.getNewQuantity())) {
-                        message.append(" - Quantity: ").append(lpnLog.getPreviousQuantity())
+                        message.append("Quantity: ").append(lpnLog.getPreviousQuantity())
                                 .append(" → ").append(lpnLog.getNewQuantity());
                     }
 

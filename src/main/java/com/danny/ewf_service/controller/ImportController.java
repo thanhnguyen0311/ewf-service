@@ -49,9 +49,9 @@ public class ImportController {
     public ResponseEntity<?> importData() {
         try {
 
-            List<String> skus = new ArrayList<>();
-            String filepath2 = "ewfdirect_prices.csv";
-            shopifyExport.exportShopifyProductsPrice(filepath2);
+//            List<String> skus = new ArrayList<>();
+//            String filepath2 = "ewfdirect_prices_2.csv";
+//            shopifyExport.exportShopifyProductsPrice(filepath2);
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
