@@ -16,5 +16,6 @@ public class LpnEditRequestDto {
     private String containerNumber;
     private String bayCode;
     private String status;
+    private String date;
 
 }
