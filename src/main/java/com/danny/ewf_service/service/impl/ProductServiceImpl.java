@@ -262,8 +262,14 @@ public class ProductServiceImpl implements ProductService {
                     product.getPrice().setEwfdirect(productPrice);
                 }
             }
+
+            if (price.getEwfdirectManualPrice() != null && price.getEwfdirectManualPrice() > 0) {
+                productPrice = price.getEwfdirectManualPrice();
+            }
         }
+
         productRepository.save(product);
+
 
         rows.add(new String[]{
                 String.valueOf(stt),

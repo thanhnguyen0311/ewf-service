@@ -137,10 +137,12 @@ public class LpnServiceImpl implements LpnService {
             lpn.setComponent(component);
         } else throw new ValidationException("sku", "Component with SKU " + lpnRequestDto.getSku() + " not found.");
 
-        if (optionalBayLocation.isPresent()) {
-            bayLocation = optionalBayLocation.get();
-            lpn.setBayLocation(bayLocation);
-        } else throw new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
+        if (!lpnRequestDto.getBayCode().isEmpty()) {
+            if (optionalBayLocation.isPresent()) {
+                bayLocation = optionalBayLocation.get();
+                lpn.setBayLocation(bayLocation);
+            } else throw new ValidationException("bayCode", "Bay location with code " + lpnRequestDto.getBayCode() + " not found.");
+        }
 
 
         lpnRepository.save(lpn);

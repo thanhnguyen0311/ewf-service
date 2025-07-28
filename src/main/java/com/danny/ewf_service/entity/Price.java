@@ -47,6 +47,9 @@ public class Price {
     @Column(name = "ewfdirect")
     private Double ewfdirect;
 
+    @Column(name = "ewfdirect_manual_price")
+    private Double ewfdirectManualPrice;
+
     @Column(name = "promotion")
     private Long promotion;
 
