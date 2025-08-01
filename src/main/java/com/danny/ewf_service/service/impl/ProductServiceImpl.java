@@ -249,11 +249,7 @@ public class ProductServiceImpl implements ProductService {
 
         Price price = product.getPrice();
         if (price != null) {
-            if (price.getAmazonPrice() != null) {
-                if (productPrice < price.getAmazonPrice()) {
-                    comparePrice = price.getAmazonPrice() * 1.1;
-                }
-            }
+
             if (price.getPromotion() != null) {
                 if (price.getPromotion() > 0) {
                     comparePrice = totalQB1 + totalShipCost;
@@ -263,8 +259,20 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
 
+            if (product.getShippingMethod().equals("LTL")) {
+                if (productPrice < 400) {
+                    productPrice = productPrice + 80;
+                }
+            }
+
             if (price.getEwfdirectManualPrice() != null && price.getEwfdirectManualPrice() > 0) {
                 productPrice = price.getEwfdirectManualPrice();
+            }
+
+            if (price.getAmazonPrice() != null) {
+                if (productPrice < price.getAmazonPrice()) {
+                    comparePrice = price.getAmazonPrice() * 1.1;
+                }
             }
         }
 
@@ -293,6 +301,19 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public double calculateEWFDirectPriceLTL(Product product, List<String[]> rows) {
         return 0;
+    }
+
+    @Override
+    public Map<String,Long> getProductInfoSheetGo(String Sku) {
+        Optional<Product> optionalProduct = productRepository.findProductBySku(Sku);
+        Map<String,Long> components = new HashMap<>();
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            for (ProductComponent productComponent : product.getComponents()) {
+                components.put(productComponent.getComponent().getSku(), productComponent.getQuantity());
+            }
+        }
+        return components;
     }
 
 

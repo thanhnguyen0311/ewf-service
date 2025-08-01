@@ -31,7 +31,7 @@ public class ComponentsImport {
     };
 
     private final String[] REQUIRED_HEADERS_INVENTORY = {
-            "", "Item", "Reorder Pt (Min)", "On Hand"
+            "", "Item", "On Hand"
     };
     @Autowired
     private final ProductComponentRepository productComponentRepository;
@@ -218,7 +218,7 @@ public class ComponentsImport {
 
     @Transactional
     public void importComponentsInventory() {
-        try (InputStream file = getClass().getResourceAsStream("/data/item_inventory.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/inventory.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
@@ -231,12 +231,12 @@ public class ComponentsImport {
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
 
-                if (columns.length < 4) {
+                if (columns.length < 3) {
                     continue;
                 }
 
                 String componentSku = columns[1].trim();  // Column 2: Product SKU
-                String quantity = columns[3].trim(); // Column 4: Component SKU
+                String quantity = columns[2].trim(); // Column 4: Component SKU
 
 
                 if (componentSku.isEmpty() || quantity.isEmpty()) {
