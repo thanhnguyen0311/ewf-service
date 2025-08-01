@@ -77,51 +77,76 @@ public class ShopifyExport {
             for (Object[] result : rawResult) {
                 if (result[0] != "" && result[1] != "" && result[2] != "") {
 
-                    Optional<Product> optionalProduct = productRepository.findBySku(result[0].toString());
-                    if (optionalProduct.isPresent()) {
-                        Product product = optionalProduct.get();
-                        if (product.getTitle() == null) {
-                            title = product.getName();
-                        } else {
-                            title = product.getTitle();
-                        }
-                        if (product.getProductDetail() != null) {
-                            if (Objects.equals(product.getProductDetail().getSubCategory(), "Dining Table")) {
-                                List<ProductComponent> productComponents = product.getComponents();
-                                for (ProductComponent productComponent : productComponents) {
-                                    Dimension dimension = productComponent.getComponent().getDimension();
-                                    if (dimension != null) {
-                                        System.out.println(result[0].toString() + " " + dimension.getBoxLength());
-                                        if (dimension.getBoxLength() > 40) {
-                                            inventory = String.valueOf(0L);
-                                            rows.add(new String[]{
-                                                    result[0].toString().toLowerCase(),
-                                                    title,
-                                                    "Title",
-                                                    "Default Title",
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    "",
-                                                    result[0].toString(),
-                                                    "",
-                                                    "",
-                                                    "175 Southbelt Industrial Drive",
-                                                    "0",
-                                                    "0",
-                                                    "0",
-                                                    inventory,
-                                                    inventory
-
-                                            });
-                                            System.out.println(result[0].toString());
-                                            break;
-                                        }
-                                    }
-                                }
+                    inventory = result[2].toString();
+                    if (result[1] == null || result[1].toString().isEmpty()){
+                        Optional<Product> optionalProduct = productRepository.findBySku(result[0].toString());
+                        if (optionalProduct.isPresent()) {
+                            Product product = optionalProduct.get();
+                            if (product.getTitle() == null) {
+                                title = product.getName();
+                            } else {
+                                title = product.getTitle();
                             }
                         }
-                    }
+                    } else title = result[1].toString();
+
+
+
+
+//                        if (product.getProductDetail() != null) {
+//                            List<ProductComponent> productComponents = product.getComponents();
+//                            for (ProductComponent productComponent : productComponents) {
+//                                Dimension dimension = productComponent.getComponent().getDimension();
+//                                if (dimension != null) {
+//                                    System.out.println(result[0].toString() + " " + dimension.getBoxLength());
+//                                    if (dimension.getBoxLength() > 40) {
+//                                        inventory = String.valueOf(0L);
+//                                        rows.add(new String[]{
+//                                                result[0].toString().toLowerCase(),
+//                                                title,
+//                                                "Title",
+//                                                "Default Title",
+//                                                "",
+//                                                "",
+//                                                "",
+//                                                "",
+//                                                result[0].toString(),
+//                                                "",
+//                                                "",
+//                                                "175 Southbelt Industrial Drive",
+//                                                "0",
+//                                                "0",
+//                                                "0",
+//                                                inventory,
+//                                                inventory
+//
+//                                        });
+//                                        System.out.println(result[0].toString());
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                        }
+                    rows.add(new String[]{
+                            result[0].toString().toLowerCase(),
+                            title,
+                            "Title",
+                            "Default Title",
+                            "",
+                            "",
+                            "",
+                            "",
+                            result[0].toString(),
+                            "",
+                            "",
+                            "175 Southbelt Industrial Drive",
+                            "0",
+                            "0",
+                            "0",
+                            inventory,
+                            inventory
+
+                    });
                 }
             }
             csvWriter.exportToCsv(rows, filePath);
@@ -406,6 +431,7 @@ public class ShopifyExport {
 
         csvWriter.exportToCsv(rows, filePath);
     }
+
 
     public void exportProductCustomfields(List<String> skus, String filePath) {
 

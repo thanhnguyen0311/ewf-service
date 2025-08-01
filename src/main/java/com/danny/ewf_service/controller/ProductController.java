@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/product")
@@ -72,6 +73,19 @@ public class ProductController {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.ok(products);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+    @GetMapping("/sheetgo/{sku}")
+    public ResponseEntity<Map<String,Long>> getProductInfoSheetGo(@PathVariable String sku) {
+        try {
+            Map<String,Long> components = productService.getProductInfoSheetGo(sku);
+            return ResponseEntity.ok(components);
 
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
