@@ -1,6 +1,7 @@
 package com.danny.ewf_service.payload.response.product;
 
 import com.danny.ewf_service.entity.ImageUrls;
+import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.payload.response.component.ComponentProductDetailResponseDto;
 import lombok.*;
 
@@ -32,6 +33,7 @@ public class ProductDetailResponseDto {
     private String category;
     private String mainCategory;
     private String subCategory;
+    private Price price;
     private List<ComponentProductDetailResponseDto> components;
     private Boolean amazon = false;
     private Boolean cymax = false;

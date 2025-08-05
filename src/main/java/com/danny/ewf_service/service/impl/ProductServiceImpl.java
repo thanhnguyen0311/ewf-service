@@ -33,6 +33,7 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private final SKUGenerator skuGenerator;
 
+    @Autowired
     private final IProductMapper productMapper;
 
     @Autowired
@@ -49,6 +50,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private InventoryService inventoryService;
+
     @Autowired
     private ImageService imageService;
 
@@ -460,6 +462,7 @@ public class ProductServiceImpl implements ProductService {
             if (product.getShippingMethod() != null) responseDto.setShippingMethod(product.getShippingMethod());
             if (product.getType() != null) responseDto.setType(product.getType());
             if (product.getDiscontinued() != null) responseDto.setDiscontinued(product.getDiscontinued());
+            if (product.getPrice() != null) responseDto.setPrice(product.getPrice());
 
 
             // Wholesale mappings
