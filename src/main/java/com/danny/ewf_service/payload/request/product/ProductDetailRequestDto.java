@@ -38,4 +38,6 @@ public class ProductDetailRequestDto {
     private String sizeShape;
     private List<ProductComponentRequestDto> components;
     private ImageUrls images;
+    private Double ewfdirectManualPrice;
+    private Long promotion;
 }
