@@ -33,7 +33,6 @@ public class ProductDetailResponseDto {
     private String category;
     private String mainCategory;
     private String subCategory;
-    private Price price;
     private List<ComponentProductDetailResponseDto> components;
     private Boolean amazon = false;
     private Boolean cymax = false;
@@ -44,5 +43,8 @@ public class ProductDetailResponseDto {
     private Boolean ewfmain = false;
     private String sizeShape;
     private ImageUrls images;
+    private Double ewfdirectPrice;
+    private Double ewfdirectManualPrice;
+    private Long promotion;
 }
 

@@ -444,6 +444,9 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (dto.getImages() != null) product.setImages(imageService.buildJsonString(dto.getImages()));
+        if (dto.getEwfdirectManualPrice() != null) product.getPrice().setEwfdirectManualPrice(dto.getEwfdirectManualPrice());
+        if (dto.getPromotion() != null) product.getPrice().setPromotion(dto.getPromotion());
+
 
     }
 
@@ -462,7 +465,11 @@ public class ProductServiceImpl implements ProductService {
             if (product.getShippingMethod() != null) responseDto.setShippingMethod(product.getShippingMethod());
             if (product.getType() != null) responseDto.setType(product.getType());
             if (product.getDiscontinued() != null) responseDto.setDiscontinued(product.getDiscontinued());
-            if (product.getPrice() != null) responseDto.setPrice(product.getPrice());
+            if (product.getPrice() != null) {
+                responseDto.setEwfdirectPrice(product.getPrice().getEwfdirect());
+                responseDto.setEwfdirectManualPrice(product.getPrice().getEwfdirectManualPrice());
+                responseDto.setPromotion(product.getPrice().getPromotion());
+            }
 
 
             // Wholesale mappings
