@@ -20,6 +20,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "LEFT JOIN FETCH p.wholesales " +
            "LEFT JOIN FETCH p.dimension " +
            "LEFT JOIN FETCH p.productDetail " +
+           "LEFT JOIN FETCH p.price " +
            "WHERE p.isDeleted = false "+
            "ORDER BY p.createdAt DESC"
     )
