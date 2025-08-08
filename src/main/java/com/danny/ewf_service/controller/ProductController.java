@@ -2,6 +2,7 @@ package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 import com.danny.ewf_service.service.ProductService;
@@ -86,6 +87,19 @@ public class ProductController {
         try {
             Map<String,Long> components = productService.getProductInfoSheetGo(sku);
             return ResponseEntity.ok(components);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+    @GetMapping("/{sku}?price")
+    public ResponseEntity<?> getProductPrice(@PathVariable String sku) {
+        try {
+            ProductPriceResponseDto productPriceResponseDto = productService.getProductPrice(sku);
+            return ResponseEntity.ok(productPriceResponseDto);
 
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

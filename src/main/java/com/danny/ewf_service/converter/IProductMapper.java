@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.response.component.ComponentProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductInventoryResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,7 +55,11 @@ public interface IProductMapper {
 
     List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
 
-
+    @Mapping(target = "sku", source = "product.sku")
+    @Mapping(target = "QB1", source = "product.price.QB1")
+    @Mapping(target = "QB3", source = "product.price.QB3")
+    @Mapping(target = "QB7", source = "product.price.QB7")
+    ProductPriceResponseDto productToProductPriceResponseDto(Product product);
 
     @Named("extractImages")
     default ImageUrls extractImages(String imagesJson) {

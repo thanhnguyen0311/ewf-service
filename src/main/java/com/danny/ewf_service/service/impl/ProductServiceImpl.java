@@ -12,6 +12,7 @@ import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.response.component.ComponentProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 import com.danny.ewf_service.repository.ProductComponentRepository;
@@ -316,6 +317,58 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         return components;
+    }
+
+    @Override
+    public ProductPriceResponseDto getProductPrice(String sku) {
+        Optional<Product> optionalProduct = productRepository.findProductBySku(sku);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            return productMapper.productToProductPriceResponseDto(product);
+        }
+        return null;
+    }
+
+    @Override
+    public void calculateProductPrice() {
+        List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
+        try {
+            for (Product product : products) {
+                double QB1 = 0;
+                double QB2 = 0;
+                double QB3 = 0;
+                double QB4 = 0;
+                double QB5 = 0;
+                double QB6 = 0;
+                double QB7 = 0;
+                if (product.getComponents() != null && !product.getComponents().isEmpty() && product.getPrice() != null && product.getPrice().getEwfdirect() == null) {
+                    for (ProductComponent productComponent : product.getComponents()) {
+                        QB1 = QB1 + (productComponent.getComponent().getPrice().getQB1() * productComponent.getQuantity());
+                        QB2 = QB2 + (productComponent.getComponent().getPrice().getQB2() * productComponent.getQuantity());
+                        QB3 = QB3 + (productComponent.getComponent().getPrice().getQB3() * productComponent.getQuantity());
+                        QB4 = QB4 + (productComponent.getComponent().getPrice().getQB4() * productComponent.getQuantity());
+                        QB5 = QB5 + (productComponent.getComponent().getPrice().getQB5() * productComponent.getQuantity());
+                        QB6 = QB6 + (productComponent.getComponent().getPrice().getQB6() * productComponent.getQuantity());
+                        QB7 = QB7 + (productComponent.getComponent().getPrice().getQB7() * productComponent.getQuantity());
+                    }
+
+                    Price price = product.getPrice();
+                    price.setQB1(QB1);
+                    price.setQB2(QB2);
+                    price.setQB3(QB3);
+                    price.setQB4(QB4);
+                    price.setQB5(QB5);
+                    price.setQB6(QB6);
+                    price.setQB7(QB7);
+                    product.setPrice(price);
+                    productRepository.save(product);
+                    System.out.println("SAVED :  " + product.getSku() + " | " + product.getPrice());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 
