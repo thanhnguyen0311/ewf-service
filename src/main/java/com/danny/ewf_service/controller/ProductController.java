@@ -95,7 +95,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/{sku}?price")
+    @GetMapping("/price/{sku}")
     public ResponseEntity<?> getProductPrice(@PathVariable String sku) {
         try {
             ProductPriceResponseDto productPriceResponseDto = productService.getProductPrice(sku);
