@@ -1,5 +1,6 @@
 package com.danny.ewf_service.service.impl;
 
+import com.danny.ewf_service.converter.IComponentMapper;
 import com.danny.ewf_service.converter.IProductMapper;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.Dimension;
@@ -15,6 +16,7 @@ import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
+import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.*;
@@ -38,6 +40,9 @@ public class ProductServiceImpl implements ProductService {
     private final IProductMapper productMapper;
 
     @Autowired
+    private final IComponentMapper componentMapper;
+
+    @Autowired
     private final ProductRepository productRepository;
 
     @Autowired
@@ -51,6 +56,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private InventoryService inventoryService;
+
+    @Autowired
+    private final ComponentRepository componentRepository;
 
     @Autowired
     private ImageService imageService;
@@ -322,9 +330,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductPriceResponseDto getProductPrice(String sku) {
         Optional<Product> optionalProduct = productRepository.findProductBySku(sku);
+        Optional<Component> optionalComponent = componentRepository.findBySku(sku);
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
             return productMapper.productToProductPriceResponseDto(product);
+        } else if (optionalComponent.isPresent()) {
+            Component component = optionalComponent.get();
+            return componentMapper.componentToProductPriceResponseDto(component);
         }
         return null;
     }
