@@ -2,10 +2,12 @@ package com.danny.ewf_service.converter;
 
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.ImageUrls;
+import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentInventoryResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
 import com.danny.ewf_service.payload.response.component.ComponentResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -29,6 +31,12 @@ public interface IComponentMapper {
     @Mapping(target = "inventory", source = "component.inventory")
     ComponentResponseDto componentToComponentResponseDto(Component component);
     List<ComponentResponseDto> componentListToComponentResponseDtoList(List<Component> components);
+
+    @Mapping(target = "sku", source = "component.sku")
+    @Mapping(target = "QB1", source = "component.price.QB1")
+    @Mapping(target = "QB3", source = "component.price.QB3")
+    @Mapping(target = "QB7", source = "component.price.QB7")
+    ProductPriceResponseDto componentToProductPriceResponseDto(Component component);
 
 
     @Mapping(target = "id", source = "component.id")
