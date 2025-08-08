@@ -331,12 +331,13 @@ public class ProductServiceImpl implements ProductService {
     public ProductPriceResponseDto getProductPrice(String sku) {
         Optional<Product> optionalProduct = productRepository.findProductBySku(sku);
         Optional<Component> optionalComponent = componentRepository.findBySku(sku);
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            return productMapper.productToProductPriceResponseDto(product);
-        } else if (optionalComponent.isPresent()) {
+        if (optionalComponent.isPresent()) {
             Component component = optionalComponent.get();
             return componentMapper.componentToProductPriceResponseDto(component);
+        }
+        else if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            return productMapper.productToProductPriceResponseDto(product);
         }
         return null;
     }
