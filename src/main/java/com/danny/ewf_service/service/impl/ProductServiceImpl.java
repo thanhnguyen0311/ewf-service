@@ -246,11 +246,12 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
-
-        if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
-        if (totalQB1 > 1000) totalShipCost = totalShipCost*0.85;
-        if (totalQB1 > 1500) totalShipCost = totalShipCost*0.80;
         if (totalQB1 > 2000) totalShipCost = totalShipCost*0.70;
+        else if (totalQB1 > 1500) totalShipCost = totalShipCost*0.80;
+        else if (totalQB1 > 1000) totalShipCost = totalShipCost*0.85;
+        else if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
+
+
 
 
         productPrice = totalQB1 + totalShipCost;
@@ -261,11 +262,14 @@ public class ProductServiceImpl implements ProductService {
         Price price = product.getPrice();
         if (price != null) {
 
+
+            boolean isPromoted = false;
             if (price.getPromotion() != null) {
                 if (price.getPromotion() > 0) {
                     comparePrice = totalQB1 + totalShipCost;
                     totalQB1 = totalQB1 * (1 - (double) price.getPromotion() / 100);
                     productPrice = totalQB1 + totalShipCost;
+                    isPromoted = true;
                     product.getPrice().setEwfdirect(productPrice);
                 }
             }
@@ -276,13 +280,19 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
 
+
             if (price.getEwfdirectManualPrice() != null && price.getEwfdirectManualPrice() > 0) {
                 productPrice = price.getEwfdirectManualPrice();
             }
 
-            if (price.getAmazonPrice() != null) {
+
+            if (price.getAmazonPrice() != null && !isPromoted) {
                 if (productPrice < price.getAmazonPrice()) {
                     comparePrice = price.getAmazonPrice() * 1.1;
+                }
+
+                if (productPrice <= price.getAmazonPrice() * 0.9 ) {
+                    productPrice = price.getAmazonPrice() * 0.9;
                 }
             }
         }
@@ -474,6 +484,7 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getCollection() != null) product.getProductDetail().setCollection(dto.getCollection());
         if (dto.getSubCategory() != null) product.getProductDetail().setSubCategory(dto.getSubCategory());
         if (dto.getPieces() != null) product.getProductDetail().setPieces(dto.getPieces());
+        if (dto.getFinish() != null) product.getProductDetail().setFinish(dto.getFinish());
 
         // Initialize wholesales if null
         if (product.getWholesales() == null) {
@@ -564,6 +575,8 @@ public class ProductServiceImpl implements ProductService {
                     responseDto.setCollection(product.getProductDetail().getCollection());
                 if (product.getProductDetail().getPieces() != null)
                     responseDto.setPieces(product.getProductDetail().getPieces());
+                if (product.getProductDetail().getFinish() != null)
+                    responseDto.setFinish(product.getProductDetail().getFinish());
             }
 
             // Dimension mappings

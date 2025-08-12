@@ -21,6 +21,7 @@ public class ProductDetailRequestDto {
     private String htmlDescription;
     private String type;
     private String collection;
+    private String finish;
     private String order;
     private String category;
     private String mainCategory;
