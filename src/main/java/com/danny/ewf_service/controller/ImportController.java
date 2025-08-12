@@ -54,10 +54,10 @@ public class ImportController {
         try {
 
 //            List<String> skus = new ArrayList<>();
-            String filepath2 = "ewfdirect_inventory.csv";
-//            shopifyExport.exportShopifyProductsPrice(filepath2);
+            String filepath2 = "ewfdirect_price.csv";
+            shopifyExport.exportShopifyProductsPrice(filepath2);
 //            shopifyExport.exportShopifyProductsInventory(filepath2);
-            productService.calculateProductPrice();
+//            productService.calculateProductPrice();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

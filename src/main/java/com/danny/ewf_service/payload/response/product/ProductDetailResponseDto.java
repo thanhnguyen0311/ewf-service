@@ -26,6 +26,7 @@ public class ProductDetailResponseDto {
     private String htmlDescription;
     private String type;
     private String collection;
+    private String finish;
     private String shippingMethod;
     private Boolean discontinued = false;
     private String pieces;
