@@ -21,6 +21,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+
 import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -288,4 +294,40 @@ public class LpnServiceImpl implements LpnService {
         } else throw new ValidationException("lpn", "LPN with tag ID " + tagID + " not found");
     }
 
+    @Override
+    public void transferLpn() {
+        String dbHost = "104.236.97.50";       // Example: "104.236.97.51"
+        String dbUser = "nct031194";       // Example: "another-user"
+        String dbPassword = "Thanh@123";        // Example: "Another@123"
+        String dbName = "wms";       // Example: "wms_backup"
+        // JDBC URL for the database
+        String url = "jdbc:mysql://" + dbHost + "/" + dbName;
+        String insertQuery = "INSERT INTO lpnmaster (assigned_location, epc, quantity, sku, status, upc) VALUES ( ?, ?, ?, ?, ?,?)";
+
+        List<LPN> lpns = lpnRepository.findAllByOrderByUpdatedAtDesc();
+        for (LPN lpn : lpns) {
+            // Your insert query
+            try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+
+                // Setting the values for the placeholders
+                preparedStatement.setString(1, lpn.getBayLocation().getBayCode() != null ? lpn.getBayLocation().getBayCode() : "");
+                preparedStatement.setString(2, lpn.getTagID());
+                preparedStatement.setInt(3, Math.toIntExact(lpn.getQuantity()));
+                preparedStatement.setString(4, lpn.getComponent().getSku());
+                preparedStatement.setString(5, "Active");
+                preparedStatement.setString(6, lpn.getComponent().getUpc());
+
+                // Execute the insert
+                int rowsInserted = preparedStatement.executeUpdate();
+                if (rowsInserted > 0) {
+                    System.out.println("Insert successful! " + lpn.getTagID());
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
 }
+

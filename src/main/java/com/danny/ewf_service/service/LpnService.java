@@ -22,4 +22,7 @@ public interface LpnService {
     List<LpnResponseDto> getAllLpn();
 
     LpnResponseDto getLpnById(String tagID);
+
+    void transferLpn();
+
 }

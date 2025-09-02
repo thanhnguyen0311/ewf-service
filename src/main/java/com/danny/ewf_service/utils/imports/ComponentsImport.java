@@ -491,4 +491,48 @@ public class ComponentsImport {
             throw new RuntimeException("Error reading CSV file", e);
         }
     }
+
+    public void importShippingCost() {
+        try (InputStream file = getClass().getResourceAsStream("/data/shipping_cost.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+                if (columns.length < 3) {
+                    continue;
+                }
+
+                String sku = columns[0].trim().toUpperCase();
+                String shippingMethod = columns[1].trim();
+                double shippingCost = Double.parseDouble(columns[2].trim());
+
+                if (sku.isEmpty()) {
+                    continue;
+                }
+
+                try {
+                    if (shippingMethod.equals("GND")) {
+                        Component component;
+                        Optional<Component> optionalComponent = componentRepository.findBySku(sku);
+                        if (optionalComponent.isPresent()) {
+                            component = optionalComponent.get();
+                            Price price = component.getPrice();
+                            if (price == null) price = new Price();
+                            price.setShippingCost(shippingCost);
+                            component.setPrice(price);
+                            componentRepository.save(component);
+                            System.out.println("Successfully Updated product : " + sku + " VALUES : " + shippingCost);
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
 }
