@@ -53,4 +53,7 @@ public class Price {
     @Column(name = "promotion")
     private Long promotion;
 
+    @Column(name = "shipping_cost")
+    private Double shippingCost;
+
 }
