@@ -47,5 +47,6 @@ public class ProductDetailResponseDto {
     private Double ewfdirectPrice;
     private Double ewfdirectManualPrice;
     private Long promotion;
+    private String dimension;
 }
 

@@ -41,4 +41,5 @@ public class ProductDetailRequestDto {
     private ImageUrls images;
     private Double ewfdirectManualPrice;
     private Long promotion;
+    private String dimension;
 }
