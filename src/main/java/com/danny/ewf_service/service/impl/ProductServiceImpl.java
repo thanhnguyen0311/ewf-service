@@ -516,12 +516,11 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getHoustondirect() != null) product.getWholesales().setHoustonDirect(dto.getHoustondirect());
         if (dto.getEwfmain() != null) product.getWholesales().setEwfmain(dto.getEwfmain());
 
-        if (dto.getSizeShape() != null) {
-            Dimension dimension = product.getDimension();
-            if (dimension == null) dimension = new Dimension();
-            dimension.setSizeShape(dto.getSizeShape());
-            product.setDimension(dimension);
-        }
+        Dimension dimension = product.getDimension();
+        if (dimension == null) dimension = new Dimension();
+        dimension.setSizeShape(dto.getSizeShape());
+        dimension.setLwh(dto.getDimension());
+        product.setDimension(dimension);
 
         if (dto.getComponents() != null) {
             List<ProductComponent> components = new ArrayList<>();
@@ -596,7 +595,10 @@ public class ProductServiceImpl implements ProductService {
             }
 
             // Dimension mappings
-            if (product.getDimension() != null) responseDto.setSizeShape(product.getDimension().getSizeShape());
+            if (product.getDimension() != null) {
+                responseDto.setSizeShape(product.getDimension().getSizeShape());
+                responseDto.setDimension(product.getDimension().getLwh());
+            }
 
             List<ComponentProductDetailResponseDto> componentList = new ArrayList<>();
             if (product.getComponents() != null) {
