@@ -307,8 +307,8 @@ public class ProductServiceImpl implements ProductService {
                     comparePrice = price.getAmazonPrice() * 1.1;
                 }
 
-                if (productPrice <= price.getAmazonPrice() * 0.9 ) {
-                    productPrice = price.getAmazonPrice() * 0.9;
+                if (productPrice <= price.getAmazonPrice() * 0.95 ) {
+                    productPrice = price.getAmazonPrice() * 0.95;
                 }
             }
         }
@@ -516,13 +516,19 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getHoustondirect() != null) product.getWholesales().setHoustonDirect(dto.getHoustondirect());
         if (dto.getEwfmain() != null) product.getWholesales().setEwfmain(dto.getEwfmain());
 
-        Dimension dimension = product.getDimension();
-        if (dimension == null) dimension = new Dimension();
-        dimension.setSizeShape(dto.getSizeShape());
-        dimension.setLwh(dto.getDimension());
-        product.setDimension(dimension);
+        if (dto.getDimension() != null) {
+            Dimension dimension = product.getDimension();
+            if (dimension == null) dimension = new Dimension();
+            dimension.setSizeShape(dto.getSizeShape());
+            dimension.setLwh(dto.getDimension());
+            product.setDimension(dimension);
+        }
 
         if (dto.getComponents() != null) {
+
+            if (product.getComponents() != null) {
+
+            }
             List<ProductComponent> components = new ArrayList<>();
             for (ProductComponentRequestDto componentDto : dto.getComponents()) {
                 Component component = componentService.findComponentById(componentDto.getId());

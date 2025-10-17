@@ -516,30 +516,34 @@ public class ShopifyExport {
             if (mergedProducts != null) {
                 for (Product mergedProduct : mergedProducts) {
                     String lwh = "";
+                    String boxDimension = "";
                     if (mergedProduct.getDimension() != null) {
                         if (mergedProduct.getDimension().getLwh() != null) {
                             lwh = mergedProduct.getDimension().getLwh();
                         }
                     }
+                    Double maxLength = null;
                     for (ProductComponent productComponent : mergedProduct.getComponents()) {
-                        if (productComponent.getComponent().getSubType() != null) {
-                            if (productComponent.getComponent().getSubType().equals("Dining Table Top") || productComponent.getComponent().getSubType().equals("Dining Table")) {
-                                if (productComponent.getComponent().getDimension().getLwh() != null) {
-                                    lwh = productComponent.getComponent().getDimension().getLwh();
-                                    break;
-                                }
-                            }
+                        Double length = productComponent.getComponent().getDimension().getBoxLength();
+                        if (maxLength == null || length > maxLength) {
+                            maxLength = length;
+                            boxDimension = lwhToString(
+                                    productComponent.getComponent().getDimension().getBoxLength(),
+                                    productComponent.getComponent().getDimension().getBoxWidth(),
+                                    productComponent.getComponent().getDimension().getBoxHeight()
+                            );
                         }
+
                     }
 
-                    boxQty = mergedProduct.getComponents().size();
+                    boxQty = (int) (mergedProduct.getComponents().size() * countMergedProduct(product, mergedProduct));
                     skuTable.add(new String[]{
                             mergedProduct.getSku(),
                             countMergedProduct(product, mergedProduct) + "",
                             mergedProduct.getProductDetail().getSubCategory() != null ? mergedProduct.getProductDetail().getSubCategory() : "",
                             lwh,
                             boxQty == 0 ? "" : boxQty + "",
-                            ""
+                            boxDimension
                     });
 
                 }

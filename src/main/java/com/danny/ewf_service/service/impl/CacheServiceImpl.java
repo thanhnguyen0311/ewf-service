@@ -3,6 +3,8 @@ package com.danny.ewf_service.service.impl;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.CacheService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,10 @@ public class CacheServiceImpl implements CacheService {
 
     @Autowired
     private final CacheManager cacheManager;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
     @Override
     @Cacheable(value = "productsCache", key = "'allProducts'")
@@ -56,12 +62,23 @@ public class CacheServiceImpl implements CacheService {
     @Transactional
     @CachePut(value = "productsCache", key = "#product.id")
     public Product saveProduct(Product product) {
-        Product savedProduct = productRepository.save(product);
+        try {
+            System.out.println("Saving product " + product.getDimension().toString());
+            Product savedProduct = productRepository.save(product);
 
-        // Update product in the allProducts cache list if it exists
-        updateProductInAllProductsCache(savedProduct);
+            // Force flush to ensure the product is saved to the database
+            entityManager.flush();
 
-        return savedProduct;
+            // Update product in the allProducts cache list if it exists
+            updateProductInAllProductsCache(savedProduct);
+
+            return savedProduct;
+        } catch (Exception e) {
+            System.err.println("Error saving product: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private void updateProductInAllProductsCache(Product updatedProduct) {
