@@ -2,8 +2,6 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.service.SftpService;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.*;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +11,6 @@ import java.nio.file.*;
 import java.util.*;
 
 @Service
-@AllArgsConstructor
 public class SftpServiceImpl implements SftpService {
 
     @Value("${sftp.host}")
@@ -46,7 +43,7 @@ public class SftpServiceImpl implements SftpService {
             config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);
 
-            session.connect(30000); // 30 second timeout
+            session.connect(30000);
             return session;
         } catch (JSchException e) {
             throw new RuntimeException("Failed to create SFTP session", e);
