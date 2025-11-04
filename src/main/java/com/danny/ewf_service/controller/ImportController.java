@@ -56,7 +56,18 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            lpnService.transferLpn();
+
+//            List<String> skus;
+//            skus = csvWriter.skuListFromCsv("src/main/resources/data/exports/import.csv");
+            String filepath2 = "ewfdirect_prices.csv";
+            shopifyExport.exportShopifyProductsPrice(filepath2);
+
+//            List<String> skus = new ArrayList<>();
+//            shopifyExport.exportShopifyProductsInventory(filepath2);
+//            productService.calculateProductPrice();
+
+//            lpnService.transferLpn();
+
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
