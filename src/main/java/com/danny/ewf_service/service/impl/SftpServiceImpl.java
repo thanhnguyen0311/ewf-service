@@ -1,7 +1,6 @@
 package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.service.SftpService;
-import lombok.AllArgsConstructor;
 import com.jcraft.jsch.*;
 
 import org.springframework.beans.factory.annotation.Value;
