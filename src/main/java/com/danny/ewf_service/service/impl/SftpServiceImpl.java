@@ -6,6 +6,7 @@ import com.jcraft.jsch.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.nio.file.*;
 import java.util.*;
 
@@ -21,33 +22,53 @@ public class SftpServiceImpl implements SftpService {
     @Value("${sftp.username}")
     private String sftpUsername;
 
-    @Value("${sftp.private.key.path}")
-    private String privateKeyPath;
+    @Value("${sftp.private.key}")
+    private String privateKeyContent;
+
 
     @Value("${sftp.remote.directory}")
     private String remoteDirectory;
 
     @Value("${sftp.local.directory}")
     private String localDirectory;
+    private Session nulll;
 
     @Override
     public Session createSession() {
         try {
             JSch jsch = new JSch();
-            jsch.addIdentity(privateKeyPath);
 
-            Session session = jsch.getSession(sftpUsername, sftpHost, sftpPort);
+            try {
+                // Create a temporary file for the private key
+                Path tempKeyFile = Files.createTempFile("sftp-key-", ".pem");
+                Files.write(tempKeyFile, privateKeyContent.getBytes());
+                File privateKeyFile = tempKeyFile.toFile();
 
-            Properties config = new Properties();
-            config.put("StrictHostKeyChecking", "no");
-            session.setConfig(config);
+                // Add the identity using the file path
+                jsch.addIdentity(privateKeyFile.getAbsolutePath());
 
-            session.connect(30000);
-            return session;
+                // Set file to delete on JVM exit
+                privateKeyFile.deleteOnExit();
+            } catch (Exception e) {
+                throw new JSchException("Failed to process private key: " + e.getMessage(), e);
+            }
+
+
+//            Session session = jsch.getSession(sftpUsername, sftpHost, sftpPort);
+//
+//            // Disable strict host key checking
+//            Properties config = new Properties();
+//            config.put("StrictHostKeyChecking", "no");
+//            session.setConfig(config);
+//
+//            session.connect();
+            return nulll;
         } catch (JSchException e) {
             throw new RuntimeException("Failed to create SFTP session", e);
         }
     }
+
+
 
     @Override
     public ChannelSftp createChannel(Session session) {
@@ -211,7 +232,7 @@ public class SftpServiceImpl implements SftpService {
             System.out.println("🔄 Testing Basic SFTP Connection...");
             System.out.println("Host: " + sftpHost + ":" + sftpPort);
             System.out.println("Username: " + sftpUsername);
-            System.out.println("Private Key: " + privateKeyPath);
+            System.out.println("Private Key: " + privateKeyContent);
 
             session = createSession();
             System.out.println("✓ Session connected successfully");

@@ -5,11 +5,17 @@ import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.CacheService;
 import com.danny.ewf_service.service.ProductService;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
@@ -26,6 +32,16 @@ import java.util.*;
 @AllArgsConstructor
 public class ComponentsImport {
 
+    /**
+     * Safely gets a value from an array by index, returning an empty string if index is out of bounds.
+     */
+    private String getValueByIndex(String[] array, int index) {
+        if (array == null || index < 0 || index >= array.length) {
+            return "";
+        }
+        return array[index] != null ? array[index].trim() : "";
+    }
+
     private final String[] REQUIRED_HEADERS = {
             "ListID", "Group Name", "Is Active", "Description", "Group Line Item Name", "Group Line Item Qty"
     };
@@ -33,6 +49,7 @@ public class ComponentsImport {
     private final String[] REQUIRED_HEADERS_INVENTORY = {
             "", "Item", "On Hand"
     };
+
     @Autowired
     private final ProductComponentRepository productComponentRepository;
 
@@ -51,75 +68,70 @@ public class ComponentsImport {
 
     @Transactional
     public void importComponentsFromData() {
-        Set<String> columnOneValues = new HashSet<>();
-        Set<String> uniqueGroupLineItemNames = new HashSet<>();
-
-        try (InputStream file = getClass().getResourceAsStream("/data/import_components.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
-            String line;
+            CSVParserBuilder parserBuilder = new CSVParserBuilder()
+                    .withSeparator(',')
+                    .withQuoteChar('"')
+                    .withEscapeChar('\\')
+                    .withStrictQuotes(false)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreQuotations(false)
+                    .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
 
-            // Read the header row
-            String headerRow = reader.readLine();
-            if (headerRow == null || !validateHeaderRow(headerRow, REQUIRED_HEADERS)) {
-                throw new RuntimeException("Invalid CSV format");
-            }
+            CSVParser parser = parserBuilder.build();
 
-            // First, gather all unique values from column 1 (index 0)
-            while ((line = reader.readLine()) != null) {
-                String[] columns = line.split(",");
+            // Create reader with the configured parser
+            CSVReaderBuilder readerBuilder = new CSVReaderBuilder(reader)
+                    .withCSVParser(parser)
+                    .withMultilineLimit(-1); // No limit on multiline fields
 
-                if (columns.length < 6) {
-                    continue;
-                }
+            try (CSVReader csvReader = readerBuilder.build()) {
+                String componentSku;
+                String upc;
+                String name;
+                String[] columns;
 
-                String columnOneValue = columns[0].trim();
-                if (columnOneValue.isEmpty()) continue;
-                columnOneValues.add(columnOneValue);
-            }
+                while ((columns = csvReader.readNext()) != null) {
+                    componentSku = getValueByIndex(columns, 0);
+                    upc = getValueByIndex(columns, 1);
+                    name = getValueByIndex(columns, 2);
 
-            // Reset reader to parse the file again, this time to extract column 4 values
-            try (InputStream fileAgain = getClass().getResourceAsStream("/data/import_components.csv");
-                 BufferedReader readerAgain = new BufferedReader(new InputStreamReader(fileAgain))) {
 
-                // Skip the header
-                readerAgain.readLine();
-
-                // Now check column 4 values
-                while ((line = readerAgain.readLine()) != null) {
-                    String[] columns = line.split(",");
-
-                    if (columns.length < 6) {
+                    if (componentSku.isEmpty()) {
                         continue;
                     }
 
-                    String groupLineItemName = columns[4].trim();
-                    if (groupLineItemName.isEmpty()) continue;
-                    // Check if the groupLineItemName doesn't exist in columnOneValues
-                    if (!columnOneValues.contains(groupLineItemName)) {
-                        uniqueGroupLineItemNames.add(groupLineItemName);
+                    System.out.println("Processing SKU: " + componentSku);
+
+
+                    Optional<Component> optionalComponent = componentRepository.findBySku(componentSku);
+                    Component component;
+
+
+                    if (optionalComponent.isEmpty()) {
+                        component = Component.builder()
+                                .sku(componentSku)
+                                .upc(upc)
+                                .name(name)
+                                .inventory(0L)
+                                .category("BedFF")
+                                .subType("Full Platform Bed")
+                                .pos(1L)
+                                .type("Single")
+                                .manufacturer("TT")
+                                .discontinue(false)
+                                .build();
+                        componentRepository.save(component);
+                        System.out.println("Inserted new SKU: " + componentSku);
                     }
                 }
             }
 
-            // Save unique groupLineItemNames to the database
-            for (String sku : uniqueGroupLineItemNames) {
-                if (componentRepository.existsBySku(sku)) {
-                    System.out.println("Skipped: " + sku + " (Already exists)");
-                    continue; // Skip existing component
-                }
-
-                Component component = Component.builder()
-                        .sku(sku)
-                        .inventory(0L)
-                        .build();
-                componentRepository.save(component);
-                System.out.println("Saved: " + sku);
-            }
-
         } catch (Exception e) {
+            System.err.println("Error importing SKUs: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Error reading CSV file", e);
         }
     }
 
