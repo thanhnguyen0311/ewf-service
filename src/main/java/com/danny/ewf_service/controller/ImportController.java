@@ -4,6 +4,7 @@ import com.danny.ewf_service.entity.BayLocation;
 import com.danny.ewf_service.repository.BayLocationRepository;
 import com.danny.ewf_service.service.LpnService;
 import com.danny.ewf_service.service.ProductService;
+import com.danny.ewf_service.service.SftpService;
 import com.danny.ewf_service.utils.CsvWriter;
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
@@ -53,21 +54,12 @@ public class ImportController {
     private LpnService lpnService;
 
 
+
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-
-//            List<String> skus;
-//            skus = csvWriter.skuListFromCsv("src/main/resources/data/exports/import.csv");
-            String filepath2 = "ewfdirect_prices.csv";
-            shopifyExport.exportShopifyProductsPrice(filepath2);
-
-//            List<String> skus = new ArrayList<>();
-//            shopifyExport.exportShopifyProductsInventory(filepath2);
-//            productService.calculateProductPrice();
-
-//            lpnService.transferLpn();
-
+            String filepath = "inventory_11_28.csv";
+            shopifyExport.exportShopifyProductsInventory(filepath);
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

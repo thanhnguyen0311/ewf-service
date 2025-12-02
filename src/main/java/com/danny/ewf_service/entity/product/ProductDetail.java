@@ -52,6 +52,9 @@ public class ProductDetail {
     @Column(name = "style")
     private String style;
 
+    @Column(name = "material")
+    private String material;
+
     @Column(name = "feature1")
     private String feature1;
 

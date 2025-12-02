@@ -297,19 +297,22 @@ public class ProductServiceImpl implements ProductService {
             }
 
 
+
             if (price.getEwfdirectManualPrice() != null && price.getEwfdirectManualPrice() > 0) {
                 productPrice = price.getEwfdirectManualPrice();
             }
 
+            productPrice = productPrice * 1.05;
 
             if (price.getAmazonPrice() != null && !isPromoted) {
                 if (productPrice < price.getAmazonPrice()) {
                     comparePrice = price.getAmazonPrice() * 1.1;
+                    productPrice = price.getAmazonPrice();
                 }
 
-                if (productPrice <= price.getAmazonPrice() * 0.95 ) {
-                    productPrice = price.getAmazonPrice() * 0.95;
-                }
+//                if (productPrice <= price.getAmazonPrice() * 0.95 ) {
+//                    productPrice = price.getAmazonPrice() * 0.95;
+//                }
             }
         }
 
