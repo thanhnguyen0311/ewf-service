@@ -1,10 +1,9 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.entity.BayLocation;
+import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.repository.BayLocationRepository;
 import com.danny.ewf_service.service.LpnService;
 import com.danny.ewf_service.service.ProductService;
-import com.danny.ewf_service.service.SftpService;
 import com.danny.ewf_service.utils.CsvWriter;
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
@@ -16,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 @RequestMapping("/import")
@@ -53,13 +49,15 @@ public class ImportController {
     @Autowired
     private LpnService lpnService;
 
-
-
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "inventory_11_28.csv";
-            shopifyExport.exportShopifyProductsInventory(filepath);
+            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
+//            shopifyExport.exportProductListing(products, "products.csv", true);
+            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
+//            productsImport.importProductPrice();
+//            componentsImport.importPrices();
+//            componentsImport.importDimensions();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

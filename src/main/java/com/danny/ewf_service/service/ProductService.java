@@ -33,4 +33,6 @@ public interface ProductService {
     ProductPriceResponseDto getProductPrice(String sku);
 
     void calculateProductPrice();
+
+    List<Product> getListProductFromCsvFile(String filePath);
 }
