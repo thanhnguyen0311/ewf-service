@@ -158,20 +158,13 @@ public class ComponentsImport {
             String line;
             String headerRow = reader.readLine();
 
-            if (headerRow == null || !validateHeaderRow(headerRow, REQUIRED_HEADERS)) {
-                throw new RuntimeException("Invalid CSV format");
-            }
-
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
 
-                if (columns.length < 6) {
-                    continue; // Skip invalid rows
-                }
 
-                String productSku = columns[1].trim();  // Column 2: Product SKU
-                String componentSku = columns[4].trim(); // Column 5: Component SKU
-                String quantityStr = columns[5].trim(); // Column 6: Quantity
+                String productSku = columns[0].trim();  // Column 2: Product SKU
+                String componentSku = columns[1].trim(); // Column 5: Component SKU
+                String quantityStr = columns[2].trim(); // Column 6: Quantity
                 if (productSku.isEmpty() || componentSku.isEmpty() || quantityStr.isEmpty()) {
                     continue;
                 }
@@ -193,10 +186,8 @@ public class ComponentsImport {
                     if (optionalProduct.isPresent()) {
                         product = optionalProduct.get();
                     } else {
-                        product = new Product();
-                        product.setSku(productSku);
-                        cacheService.saveProduct(product);
-                        System.out.println("\u001B[32m" + "Successfully created Product SKU : " + productSku + "\u001B[0m");
+                        System.out.println("Can't find product with SKU: " + productSku );
+                        continue;
                     }
 
                     Component component = componentRepository.findBySku(componentSku)
@@ -247,8 +238,8 @@ public class ComponentsImport {
                     continue;
                 }
 
-                String componentSku = columns[1].trim();  // Column 2: Product SKU
-                String quantity = columns[2].trim(); // Column 4: Component SKU
+                String componentSku = columns[1].trim();
+                String quantity = columns[2].trim();
 
 
                 if (componentSku.isEmpty() || quantity.isEmpty()) {
@@ -353,7 +344,7 @@ public class ComponentsImport {
 
     @Transactional
     public void importDimensions() {
-        try (InputStream file = getClass().getResourceAsStream("/data/upcs.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             Set<String> componentSkus = new HashSet<>();
@@ -367,8 +358,13 @@ public class ComponentsImport {
                 }
 
                 String componentSku = columns[0].trim();
-                String lwh = columns[1].trim();
-                if (lwh.isEmpty()) continue;
+                String boxLength = columns[1].trim();
+                String boxWidth = columns[2].trim();
+                String boxHeight = columns[3].trim();
+                String boxWeight = columns[4].trim();
+                String length = columns[5].trim();
+                String width = columns[6].trim();
+                String height = columns[7].trim();
 
                 if (componentSku.isEmpty() || componentSkus.contains(componentSku)) {
                     continue;
@@ -390,12 +386,16 @@ public class ComponentsImport {
                     Dimension dimension = component.getDimension();
                     if (dimension == null) dimension = new Dimension();
 
-                    dimension.setLwh(lwh);
-                    component.setSubType("Dining Table Top");
+                    dimension.setLength(Double.valueOf(length));
+                    dimension.setWidth(Double.valueOf(width));
+                    dimension.setHeight(Double.valueOf(height));
+                    dimension.setBoxWeight(Double.valueOf(boxWeight));
+                    dimension.setBoxLength(Double.valueOf(boxLength));
+                    dimension.setBoxWidth(Double.valueOf(boxWidth));
+                    dimension.setBoxHeight(Double.valueOf(boxHeight));
                     component.setDimension(dimension);
                     componentRepository.save(component);
                     componentSkus.add(componentSku);
-                    System.out.println("Successfully Updated Component SKU : " + componentSku + " VALUES : " + lwh);
 
 
                 } catch (RuntimeException e) {
@@ -409,7 +409,7 @@ public class ComponentsImport {
     }
 
     public void importPrices() {
-        try (InputStream file = getClass().getResourceAsStream("/data/discount_sku.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
@@ -422,11 +422,12 @@ public class ComponentsImport {
                 }
 
                 String sku = columns[0].trim().toUpperCase();
-                double qb2 = Double.parseDouble(columns[1].trim());
-                double qb3 = Double.parseDouble(columns[2].trim());
-                double qb4 = Double.parseDouble(columns[3].trim());
-                double qb5 = Double.parseDouble(columns[4].trim());
-                double qb6 = Double.parseDouble(columns[5].trim());
+                double qb1 = Double.parseDouble(columns[1].trim());
+                double qb2 = Double.parseDouble(columns[2].trim());
+                double qb3 = Double.parseDouble(columns[3].trim());
+                double qb4 = Double.parseDouble(columns[4].trim());
+                double qb5 = Double.parseDouble(columns[5].trim());
+                double qb6 = Double.parseDouble(columns[6].trim());
 
                 if (sku.isEmpty()) {
                     continue;
@@ -447,6 +448,7 @@ public class ComponentsImport {
                     Price price = component.getPrice();
                     if (price == null) price = new Price();
 
+                    price.setQB1(qb1);
                     price.setQB2(qb2);
                     price.setQB3(qb3);
                     price.setQB4(qb4);

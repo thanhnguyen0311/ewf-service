@@ -37,8 +37,12 @@ public class ImagesImport {
     private final ImageService imageService;
 
 
-    public void updateProductImages() {
-        List<Product> products = productRepository.findAll();
+    public void updateProductImages(List<Product> products) {
+
+        if (products.isEmpty()){
+            products = productRepository.findAll();
+        }
+
         ImageUrls imageUrls;
         for (Product product : products) {
             imageUrls = new ImageUrls();

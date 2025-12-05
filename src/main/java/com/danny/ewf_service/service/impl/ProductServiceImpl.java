@@ -20,6 +20,7 @@ import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.*;
+import com.danny.ewf_service.utils.CsvWriter;
 import com.danny.ewf_service.utils.imports.SKUGenerator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +65,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ImageService imageService;
+
+    @Autowired
+    private CsvWriter csvWriter;
 
     public interface ProductMergedProjection {
         Long getId();
@@ -185,7 +189,7 @@ public class ProductServiceImpl implements ProductService {
 
                 girth = dimension.getBoxLength() + 2 * (dimension.getBoxWidth() + dimension.getBoxHeight());
 
-                if (productComponent.getComponent().getPrice().getShippingCost() > 0.0) {
+                if (productComponent.getComponent().getPrice().getShippingCost() != null && productComponent.getComponent().getPrice().getShippingCost() > 0.0) {
                     shippingCost = productComponent.getComponent().getPrice().getShippingCost();
 
                 } else {
@@ -411,6 +415,12 @@ public class ProductServiceImpl implements ProductService {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public List<Product> getListProductFromCsvFile(String filePath) {
+        List<String> skus = csvWriter.skuListFromCsv(filePath);
+        return productRepository.findAllBySkus(skus);
     }
 
 

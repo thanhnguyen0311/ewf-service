@@ -75,9 +75,7 @@ public class ProductsImport {
                 String sizeShape;
                 String collection;
                 String lwh;
-                String style;
-                String pieces;
-                String productType;
+                String material;
                 String[] columns;
 
                 while ((columns = csvReader.readNext()) != null) {
@@ -92,6 +90,9 @@ public class ProductsImport {
                     sizeShape = getValueByIndex(columns, 6);
                     collection = getValueByIndex(columns, 7);
                     lwh = getValueByIndex(columns, 8);
+                    material = getValueByIndex(columns, 9);
+
+
 //                    name = getValueByIndex(columns, 2);
 //                    mainCategory = getValueByIndex(columns, 4);
 //                    subCategory = getValueByIndex(columns, 5);
@@ -137,6 +138,9 @@ public class ProductsImport {
                         productDetail.setFinish(finish);
                         productDetail.setSizeShape(sizeShape);
                         productDetail.setCollection(collection);
+                        productDetail.setMaterial(material);
+                        productDetail.setStyle("Bedroom Sets");
+
 
                         product.setProductDetail(productDetail);
 
@@ -156,37 +160,6 @@ public class ProductsImport {
                         productRepository.save(product);
                         System.out.println("Inserted new SKU: " + productSku);
                     }
-
-                    ProductDetail productDetail = product.getProductDetail();
-                    if (productDetail == null) productDetail = new ProductDetail();
-                    if (description.length() > 200) productDetail.setDescription(description);
-                    if (htmlDescription.length() > 200) productDetail.setHtmlDescription(description);
-//                    if(!upc.isEmpty()) product.setUpc(upc);
-//                    if(!name.isEmpty()) product.setName(name);
-//                    if(!description.isEmpty()) productDetail.setDescription(description);
-//                    if(!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
-//                    if(!subCategory.isEmpty()) productDetail.setSubCategory(subCategory);
-//                    if (!chairType.isEmpty()) productDetail.setChairType(chairType);
-//                    if (!finish.isEmpty()) productDetail.setFinish(finish);
-//                    if (!style.isEmpty()) productDetail.setStyle(style);
-//                    if (!collection.isEmpty()) productDetail.setCollection(collection);
-//                    if (!pieces.isEmpty()) productDetail.setPieces(pieces);
-//                    if (!productType.isEmpty()) productDetail.setProductType(productType);
-
-//                    if (!sizeShape.isEmpty()) {
-//                        Dimension dimension = product.getDimension();
-//                        if (dimension == null) {
-//                            dimension = new Dimension();
-//                        }
-//                        dimension.setSizeShape(sizeShape);
-//                        product.setDimension(dimension);
-//                    }
-
-
-                    product.setProductDetail(productDetail);
-                    productRepository.save(product);
-                    System.out.println("Saved product " + productSku);
-
                 }
             }
 
@@ -296,7 +269,7 @@ public class ProductsImport {
     }
 
     public void importProductPrice() {
-        try (InputStream file = getClass().getResourceAsStream("/data/new_price.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
@@ -309,7 +282,13 @@ public class ProductsImport {
                 }
 
                 String sku = columns[0].trim().toUpperCase();
-                double qb2025 = Double.parseDouble(columns[1].trim());
+                double qb1 = Double.parseDouble(columns[1].trim());
+                double qb2 = Double.parseDouble(columns[2].trim());
+                double qb3 = Double.parseDouble(columns[3].trim());
+                double qb4 = Double.parseDouble(columns[4].trim());
+                double qb5 = Double.parseDouble(columns[5].trim());
+                double qb6 = Double.parseDouble(columns[6].trim());
+
 
                 if (sku.isEmpty()) {
                     continue;
@@ -322,12 +301,16 @@ public class ProductsImport {
                         product = optionalProduct.get();
                         Price price = product.getPrice();
                         if (price == null) price = new Price();
-                        price.setQB2025(qb2025);
+                        price.setQB1(qb1);
+                        price.setQB2(qb2);
+                        price.setQB3(qb3);
+                        price.setQB4(qb4);
+                        price.setQB5(qb5);
+                        price.setQB6(qb6);
                         product.setPrice(price);
                         productRepository.save(product);
                         System.out.println("Successfully Updated product : " + sku + " VALUES : " + price);
                     }
-
 
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
@@ -368,7 +351,6 @@ public class ProductsImport {
                         productRepository.save(product);
                         System.out.println("Successfully Updated product : " + sku + " VALUES : " + method);
                     }
-
 
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + sku + ": " + e.getMessage());

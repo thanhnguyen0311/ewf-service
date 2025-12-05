@@ -90,9 +90,6 @@ public class ShopifyExport {
                         }
                     } else title = result[1].toString();
 
-
-
-
 //                        if (product.getProductDetail() != null) {
 //                            List<ProductComponent> productComponents = product.getComponents();
 //                            for (ProductComponent productComponent : productComponents) {
@@ -207,7 +204,7 @@ public class ShopifyExport {
         csvWriter.exportToCsv(rows, "amazon_reviews.csv");
     }
 
-    public void exportProductListing(List<String> skus, String filePath, boolean isImageExport) {
+    public void exportProductListing(List<Product> products, String filePath, boolean isImageExport) {
 
         String[] header = {
                 "Handle",
@@ -252,11 +249,8 @@ public class ShopifyExport {
         List<String[]> skuRows = new ArrayList<>();
 
 
-        List<Product> products;
-        if (skus.isEmpty()) products = productRepository.findProductsByWholesalesEwfdirect();
-        else {
-            products = productRepository.findAllBySkus(skus);
-        }
+        if (products.isEmpty()) products = productRepository.findAll();
+
 
         double productPrice;
         double comparePrice = 0;
@@ -269,6 +263,9 @@ public class ShopifyExport {
         int index = 0;
         try {
             for (Product product : products) {
+                if (product.getWholesales() != null) {
+                    if (!product.getWholesales().getEwfdirect()) continue;
+                }
                 index++;
                 System.out.println("Processing " + product.getSku());
                 if (product.getWholesales() != null) {
@@ -280,7 +277,12 @@ public class ShopifyExport {
                 if (product.getTitle() == null) continue;
                 if (product.getProductDetail() != null) {
                     if (product.getProductDetail().getDescription() == null) continue;
-                    if (product.getProductDetail().getSubCategory() == null) continue;
+                    if (product.getProductDetail().getSubCategory() == null) {
+                        ProductDetail productDetail = product.getProductDetail();
+                        productDetail.setSubCategory("Bedroom Sets");
+                        product.setProductDetail(productDetail);
+                        productRepository.save(product);
+                    };
                 } else {
                     continue;
                 }
@@ -336,21 +338,17 @@ public class ShopifyExport {
                 if (productDetail.getStyle() != null) tags.append(productDetail.getStyle()).append(",");
                 if (productDetail.getPieces() != null) tags.append(productDetail.getPieces()).append(",");
                 if (productDetail.getChairType() != null) tags.append(productDetail.getChairType()).append(",");
-//                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
 
                 Price price = product.getPrice();
-                if (price != null) {
-                    if (price.getPromotion() > 0) {
-                        tags.append("Clearance,");
-                    }
-                    if (price.getAmazonPrice() != null) {
-                        if (productPrice < price.getAmazonPrice()) {
-                            comparePrice = price.getAmazonPrice() * 1.1;
+                if (price != null ) {
+                    if (price.getPromotion() != null) {
+                        if (price.getPromotion() > 0) {
+                            tags.append("Clearance,");
                         }
-                    }
-
-                    if (price.getPromotion() > 0) {
-                        comparePrice = productPrice * (1 + (double) (price.getPromotion() - 10) / 100);
+                        if (price.getPromotion() > 0) {
+                            comparePrice = productPrice * (1 + (double) (price.getPromotion() - 10) / 100);
+                        }
                     }
                 }
 
@@ -433,7 +431,7 @@ public class ShopifyExport {
     }
 
 
-    public void exportProductCustomfields(List<String> skus, String filePath) {
+    public void exportProductCustomfields(List<Product> products, String filePath) {
 
         String[] header = {
                 "Handle",
@@ -474,12 +472,6 @@ public class ShopifyExport {
 
         List<String[]> rows = new ArrayList<>();
         rows.add(header);
-
-        List<Product> products;
-        if (skus.isEmpty()) products = productRepository.findProductsByWholesalesEwfdirect();
-        else {
-            products = productRepository.findAllBySkus(skus);
-        }
 
         List<String> skuList = products.stream()
                 .map(Product::getSku)               // Extract the `sku` of each product

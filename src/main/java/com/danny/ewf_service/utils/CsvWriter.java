@@ -47,6 +47,7 @@ public class CsvWriter {
                 String[] columns = line.split(",");
                 if (columns.length > 0) {
                     if (columns[0].trim().isEmpty()) continue;
+                    if (skuSet.contains(columns[0].trim())) continue;
                     skuSet.add(columns[0].trim().toUpperCase());
                 }
             }
