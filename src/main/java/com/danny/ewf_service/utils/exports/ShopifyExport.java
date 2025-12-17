@@ -193,6 +193,7 @@ public class ShopifyExport {
         List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
         rows.add(header);
         for (Product product : products) {
+            System.out.println("Processing " + product.getSku());
             if (product.getTitle() != null && product.getAsin() != null) {
                 rows.add(new String[]{
                         product.getTitle(),
@@ -467,7 +468,8 @@ public class ShopifyExport {
                 "mm-google-shopping[\"age_group\"]:string",
                 "global[\"description_tag\"]:string",
                 "custom_fields[\"shape\"]:string",
-                "custom_fields[\"pieces\"]:string"
+                "custom_fields[\"pieces\"]:string",
+                "custom_fields[\"material\"]:string"
         };
 
         List<String[]> rows = new ArrayList<>();
@@ -625,11 +627,12 @@ public class ShopifyExport {
                     "https://www.google.com/search?q=" + product.getSku() + "&source=lnms&tbm=shop&sa=",
                     "/products/" + product.getSku(),
                     product.getSku(),
-                    "Unisex",
-                    "Adult",
+                    "unisex",
+                    "adult",
                     productDetail.getDescription() != null ? productDetail.getDescription() : "",
                     productDetail.getSizeShape() != null ? productDetail.getSizeShape() : "",
-                    productDetail.getPieces() != null ? productDetail.getPieces() : ""
+                    productDetail.getPieces() != null ? productDetail.getPieces() : "",
+                    productDetail.getMaterial() != null ? productDetail.getMaterial() : ""
             };
             rows.add(row);
         }

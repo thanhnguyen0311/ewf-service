@@ -194,19 +194,19 @@ public class ProductServiceImpl implements ProductService {
 
                 } else {
                     if (componentWeight <= 20) {
-                        shippingCost = 23;
+                        shippingCost = 20;
                     } else if (componentWeight <= 40) {
-                        shippingCost = 26;
+                        shippingCost = 23;
                     } else if (componentWeight <= 50) {
-                        shippingCost = 30;
+                        shippingCost = 27;
                     } else if (componentWeight <= 60) {
-                        shippingCost = 32;
+                        shippingCost = 30;
                     } else if (componentWeight <= 70) {
-                        shippingCost = 34;
+                        shippingCost = 32;
                     } else if (componentWeight <= 80) {
-                        shippingCost = 35;
+                        shippingCost = 33;
                     } else {
-                        shippingCost = 42;
+                        shippingCost = 40;
                     }
 
                     if (girth > 160) {
@@ -219,14 +219,7 @@ public class ProductServiceImpl implements ProductService {
                 }
 
 
-
                 if  (productComponent.getComponent().getSku().contains("DSL-")) shippingCost = 0;
-
-
-
-
-
-
 
 
 //                if (components.size() == 1) {
@@ -266,9 +259,9 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
-        if (totalQB1 > 2000) totalShipCost = totalShipCost*0.75;
-        else if (totalQB1 > 1500) totalShipCost = totalShipCost*0.80;
-        else if (totalQB1 > 1000) totalShipCost = totalShipCost*0.85;
+        if (totalQB1 > 2000) totalShipCost = totalShipCost*0.70;
+        else if (totalQB1 > 1500) totalShipCost = totalShipCost*0.75;
+        else if (totalQB1 > 1000) totalShipCost = totalShipCost*0.80;
         else if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
 
 
@@ -300,8 +293,6 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
 
-
-
             if (price.getEwfdirectManualPrice() != null && price.getEwfdirectManualPrice() > 0) {
                 productPrice = price.getEwfdirectManualPrice();
             }
@@ -310,7 +301,7 @@ public class ProductServiceImpl implements ProductService {
 
             if (price.getAmazonPrice() != null && !isPromoted) {
                 if (productPrice < price.getAmazonPrice()) {
-                    comparePrice = price.getAmazonPrice() * 1.1;
+                    comparePrice = price.getAmazonPrice() * 1.2;
                     productPrice = price.getAmazonPrice();
                 }
 
