@@ -29,7 +29,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
 
     @Override
     public List<WayfairCampaignParentSku> findAllActiveCampaignsWithParentSkus() {
-        return wayfairCampaignParentSkuRepository.findAllByCampaignIsActiveIsTrue();
+        return wayfairCampaignParentSkuRepository.findAllCampaign();
     }
 
     @Override
