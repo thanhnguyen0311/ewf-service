@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAdsReportDay, Long> {
@@ -15,15 +16,19 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
             LocalDate reportDate, String campaignId, String parentSku
     );
 
-    @Query("SELECT COALESCE(SUM(w.clicks), 0) FROM WayfairAdsReportDay w " +
+    @Query("SELECT " +
+           "w.campaignId, w.parentSku, " +
+           "COALESCE(SUM(w.clicks), 0), " +
+           "COALESCE(SUM(w.impressions), 0), " +
+           "COALESCE(SUM(w.spend), 0), " +
+           "COALESCE(SUM(w.totalSale), 0) " +
+           "FROM WayfairAdsReportDay w " +
            "WHERE w.reportDate BETWEEN :fromDate AND :toDate " +
-           "AND w.parentSku = :parentSku " +
-           "AND w.campaignId = :campaignId")
-    Long sumClicksByDateRangeAndParentSkuAndCampaignId(
+           "GROUP BY w.campaignId, w.parentSku " +
+           "ORDER BY w.campaignId, w.parentSku")
+    List<Object[]> getAggregatedReportsByDateRange(
             @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
-            @Param("parentSku") String parentSku,
-            @Param("campaignId") String campaignId
+            @Param("toDate") LocalDate toDate
     );
 
 }
