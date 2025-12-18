@@ -54,14 +54,7 @@ jobs:
           # Server Settings
           server.port=8080
           server.address=127.0.0.1
-          
-          # AMZ SFTP Connection
-          sftp.host=na-sftp.amazonsedi.com
-          sftp.port=22
-          sftp.username=3IWDXE2PXV9JZ
-          sftp.remote.directory=download
-          sftp.local.directory=/tmp/edi/incoming
-          sftp.private.key.path=D:/amz_receive_key.pem
+        
           
           EOF
 
@@ -181,13 +174,7 @@ jobs:
           server.port=8080
           server.address=0.0.0.0
           
-          # AMZ SFTP Connection
-          sftp.host=na-sftp.amazonsedi.com
-          sftp.port=22
-          sftp.username=3IWDXE2PXV9JZ
-          sftp.remote.directory=download
-          sftp.local.directory=/tmp/edi/incoming
-          sftp.private.key.path=D:/amz_receive_key.pem
+  
           
           
           EOF
