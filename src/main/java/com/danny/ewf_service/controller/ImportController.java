@@ -7,9 +7,11 @@ import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.utils.CsvWriter;
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ShopifyExport;
+import com.danny.ewf_service.utils.exports.WMSExport;
 import com.danny.ewf_service.utils.imports.ComponentsImport;
 import com.danny.ewf_service.utils.imports.ImagesImport;
 import com.danny.ewf_service.utils.imports.ProductsImport;
+import com.danny.ewf_service.utils.imports.WayfairReportImport;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,15 +51,25 @@ public class ImportController {
     @Autowired
     private LpnService lpnService;
 
+    @Autowired
+    private WayfairReportImport wayfairReportImport;
+
+    @Autowired
+    private WMSExport wmsExport;
+
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
+//            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing(products, "products.csv", true);
-            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
+//            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
 //            productsImport.importProductPrice();
 //            componentsImport.importPrices();
 //            componentsImport.importDimensions();
+//            shopifyExport.exportShopifyProductsPrice("product_prices_12-09.csv");
+        wayfairReportImport.importWayfairReportDaily();
+//                shopifyExport.exportAmazonReviews();
+//            wmsExport.exportSKU("wms.csv");
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

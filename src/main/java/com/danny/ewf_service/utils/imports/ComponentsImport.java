@@ -438,25 +438,20 @@ public class ComponentsImport {
                     Optional<Component> optionalComponent = componentRepository.findBySku(sku);
                     if (optionalComponent.isPresent()) {
                         component = optionalComponent.get();
-                    } else {
-                        component = new Component();
-                        component.setSku(sku);
+                        Price price = component.getPrice();
+                        if (price == null) price = new Price();
 
-                        System.out.println("Successfully create component: " + sku);
+                        price.setQB1(qb1);
+                        price.setQB2(qb2);
+                        price.setQB3(qb3);
+                        price.setQB4(qb4);
+                        price.setQB5(qb5);
+                        price.setQB6(qb6);
+                        component.setPrice(price);
+                        componentRepository.save(component);
+                        System.out.println("Successfully Updated product : " + sku + " VALUES : " + price);
                     }
 
-                    Price price = component.getPrice();
-                    if (price == null) price = new Price();
-
-                    price.setQB1(qb1);
-                    price.setQB2(qb2);
-                    price.setQB3(qb3);
-                    price.setQB4(qb4);
-                    price.setQB5(qb5);
-                    price.setQB6(qb6);
-                    component.setPrice(price);
-                    componentRepository.save(component);
-                    System.out.println("Successfully Updated product : " + sku + " VALUES : " + price);
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + sku + ": " + e.getMessage());
                 }
