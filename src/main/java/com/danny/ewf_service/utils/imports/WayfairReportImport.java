@@ -89,6 +89,9 @@ public class WayfairReportImport {
                     if (dateStr.isEmpty() || !isValidDate(dateStr)) continue;
                     LocalDate reportDate = LocalDate.parse(dateStr, formatter);
 
+                    boolean isReportExist = wayfairAdsReportDayRepository.existsByReportDateAndCampaignIdAndParentSku(reportDate, campaignId, parentSku);
+                    if (isReportExist) continue;
+
                     WayfairCampaign wayfairCampaign;
                     Optional<WayfairCampaign> optionalWayfairCampaign = wayfairCampaignRepository.findByCampaignId(campaignId);
                     if (optionalWayfairCampaign.isPresent()) {
