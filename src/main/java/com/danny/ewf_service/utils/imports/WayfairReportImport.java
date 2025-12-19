@@ -44,7 +44,7 @@ public class WayfairReportImport {
     private final WayfairAdsReportDayRepository wayfairAdsReportDayRepository;
 
     public void importWayfairReportDaily() {
-        try (InputStream file = getClass().getResourceAsStream("/data/product_report_day.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/product_report_day_11.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
             CSVParserBuilder parserBuilder = new CSVParserBuilder()
                     .withSeparator(',')
@@ -84,6 +84,7 @@ public class WayfairReportImport {
                     String impressions = getValueByIndex(columns, 20);
                     String spend = getValueByIndex(columns, 21);
                     String totalSale = getValueByIndex(columns, 25);
+                    String orderQty = getValueByIndex(columns, 26);
 
 
                     if (dateStr.isEmpty() || !isValidDate(dateStr)) continue;
@@ -133,6 +134,7 @@ public class WayfairReportImport {
                     wayfairAdsReportDay.setImpressions(Integer.valueOf(impressions));
                     wayfairAdsReportDay.setSpend(Double.valueOf(spend));
                     wayfairAdsReportDay.setTotalSale(Double.valueOf(totalSale));
+                    wayfairAdsReportDay.setOrderQuantity(Long.valueOf(orderQty));
                     wayfairAdsReportDay.setCampaignId(campaignId);
                     wayfairAdsReportDay.setParentSku(parentSku);
                     wayfairAdsReportDayRepository.save(wayfairAdsReportDay);
