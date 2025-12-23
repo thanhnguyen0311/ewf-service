@@ -1,15 +1,18 @@
 package com.danny.ewf_service.entity.wayfair;
+
+
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 @Entity
 @Table(
-        name = "wayfair_ads_report_daily",
+        name = "wayfair_keyword_report_daily",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        columnNames = {"report_date", "campaign_id", "parent_sku"}
+                        columnNames = {"report_date", "campaign_id", "parent_sku","keyword_id"}
                 )
         }
 )
@@ -19,7 +22,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-public class WayfairAdsReportDay {
+public class WayfairKeywordReportDaily {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,6 +36,10 @@ public class WayfairAdsReportDay {
 
     @Column(name = "parent_sku", length = 80, nullable = false)
     private String parentSku;
+
+    @Column(name = "keyword_id", nullable = false)
+    private Long keywordId;
+
 
     @Column(name = "clicks")
     private Integer clicks = 0;
@@ -64,6 +72,17 @@ public class WayfairAdsReportDay {
             )
     })
     private WayfairCampaignParentSku campaignParentSku;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "keyword_id",
+            referencedColumnName = "keyword_id",
+            insertable = false,
+            updatable = false
+    )
+    private WayfairKeyword keyword;
+
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
