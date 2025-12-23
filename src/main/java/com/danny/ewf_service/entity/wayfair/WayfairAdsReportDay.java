@@ -46,6 +46,9 @@ public class WayfairAdsReportDay {
     @Column(name = "total_sale")
     private Double totalSale;
 
+    @Column(name = "order_quantity")
+    private Long orderQuantity = 0L;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(

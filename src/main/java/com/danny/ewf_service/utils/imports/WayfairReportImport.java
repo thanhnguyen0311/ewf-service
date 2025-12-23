@@ -44,7 +44,7 @@ public class WayfairReportImport {
     private final WayfairAdsReportDayRepository wayfairAdsReportDayRepository;
 
     public void importWayfairReportDaily() {
-        try (InputStream file = getClass().getResourceAsStream("/data/product_report_day.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/product_report_day_10.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
             CSVParserBuilder parserBuilder = new CSVParserBuilder()
                     .withSeparator(',')
@@ -62,7 +62,10 @@ public class WayfairReportImport {
                     .withSkipLines(1)
                     .withMultilineLimit(-1); // No limit on multiline fields
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+            // Support multiple date formats
+            DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+            DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 
             try (CSVReader csvReader = readerBuilder.build()) {
                 String[] columns;
@@ -84,13 +87,22 @@ public class WayfairReportImport {
                     String impressions = getValueByIndex(columns, 20);
                     String spend = getValueByIndex(columns, 21);
                     String totalSale = getValueByIndex(columns, 25);
+                    String orderQty = getValueByIndex(columns, 26);
 
 
-                    if (dateStr.isEmpty() || !isValidDate(dateStr)) continue;
-                    LocalDate reportDate = LocalDate.parse(dateStr, formatter);
+                    if (dateStr.isEmpty()) continue;
+                    LocalDate reportDate;
+                    if (dateStr.contains("/")) {
+                        reportDate = LocalDate.parse(dateStr, slashFormatter);
+                    } else {
+                        reportDate = LocalDate.parse(dateStr, hyphenFormatter);
+                    }
 
                     boolean isReportExist = wayfairAdsReportDayRepository.existsByReportDateAndCampaignIdAndParentSku(reportDate, campaignId, parentSku);
-                    if (isReportExist) continue;
+                    if (isReportExist) {
+                        System.out.println("Report already exist for date: " + reportDate + " and sku: " + parentSku);
+                        continue;
+                    }
 
                     WayfairCampaign wayfairCampaign;
                     Optional<WayfairCampaign> optionalWayfairCampaign = wayfairCampaignRepository.findByCampaignId(campaignId);
@@ -101,16 +113,17 @@ public class WayfairReportImport {
                         wayfairCampaign.setCampaignId(campaignId);
                         wayfairCampaign.setCampaignName(campaignName);
                         wayfairCampaign.setDailyCap(Integer.valueOf(dailyCap));
-                        if (!startDate.isEmpty()) wayfairCampaign.setStartDate(LocalDate.parse(startDate, formatter));
+                        if (!startDate.isEmpty()) wayfairCampaign.setStartDate(reportDate);
                         wayfairCampaign.setIsActive(isActive);
                         wayfairCampaign.setIsB2b(b2b);
                         wayfairCampaignRepository.save(wayfairCampaign);
-                        System.out.println("Campaign not exist in database . Creating campaign ID : " + campaignId);
                     }
                     WayfairParentSku wayfairParentSku;
                     Optional<WayfairParentSku> optionalWayfairParentSku = wayfairParentSkuRepository.findByParentSku(parentSku);
                     if (optionalWayfairParentSku.isPresent()) {
                         wayfairParentSku = optionalWayfairParentSku.get();
+                        wayfairParentSku.setDefaultBid(Float.valueOf(defaultBid));
+                        wayfairParentSkuRepository.save(wayfairParentSku);
                     } else {
                         wayfairParentSku = new WayfairParentSku();
                         wayfairParentSku.setParentSku(parentSku);
@@ -119,8 +132,6 @@ public class WayfairReportImport {
                         wayfairParentSku.setDefaultBid(Float.valueOf(defaultBid));
                         wayfairParentSku.setProducts(products);
                         wayfairParentSkuRepository.save(wayfairParentSku);
-                        System.out.println("Parent Sku not exist in database . Creating Parent Sku : " + parentSku);
-
                         WayfairCampaignParentSku wayfairCampaignParentSku = new WayfairCampaignParentSku();
                         wayfairCampaignParentSku.setCampaign(wayfairCampaign);
                         wayfairCampaignParentSku.setParentSku(wayfairParentSku);
@@ -133,28 +144,16 @@ public class WayfairReportImport {
                     wayfairAdsReportDay.setImpressions(Integer.valueOf(impressions));
                     wayfairAdsReportDay.setSpend(Double.valueOf(spend));
                     wayfairAdsReportDay.setTotalSale(Double.valueOf(totalSale));
+                    wayfairAdsReportDay.setOrderQuantity(Long.valueOf(orderQty));
                     wayfairAdsReportDay.setCampaignId(campaignId);
                     wayfairAdsReportDay.setParentSku(parentSku);
                     wayfairAdsReportDayRepository.save(wayfairAdsReportDay);
-                    System.out.println("Creating Report Day : " + reportDate + " for Parent Sku : " + parentSku + " Campaign ID : " + campaignId);
-
+                    System.out.println("Inserted new report for date: " + reportDate + " and sku: " + parentSku);
                 }
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading CSV file", e);
-        }
-    }
-
-    private boolean isValidDate(String dateStr) {
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
-            LocalDate.parse(dateStr, formatter);
-            return true;
-        } catch (Exception e) {
-            return false;
         }
     }
 

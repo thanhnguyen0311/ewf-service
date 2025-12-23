@@ -21,7 +21,8 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
            "COALESCE(SUM(w.clicks), 0), " +
            "COALESCE(SUM(w.impressions), 0), " +
            "COALESCE(SUM(w.spend), 0), " +
-           "COALESCE(SUM(w.totalSale), 0) " +
+           "COALESCE(SUM(w.totalSale), 0), " +
+           "COALESCE(SUM(w.orderQuantity), 0) " +
            "FROM WayfairAdsReportDay w " +
            "WHERE w.reportDate BETWEEN :fromDate AND :toDate " +
            "GROUP BY w.campaignId, w.parentSku " +

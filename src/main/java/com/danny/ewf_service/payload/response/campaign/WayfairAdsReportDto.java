@@ -15,6 +15,6 @@ public class WayfairAdsReportDto {
     private Long impressions;
     private Double spend;
     private Double totalSale;
-
+    private Long totalOrders;
 
 }
