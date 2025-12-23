@@ -46,6 +46,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
                     .impressions(Long.parseLong(result[3].toString()))
                     .spend(Double.parseDouble(result[4].toString()))
                     .totalSale(Double.parseDouble(result[5].toString()))
+                    .totalOrders(Long.parseLong(result[6].toString()))
                     .build();
             wayfairAdsReportDtos.add(wayfairAdsReportDto);
         }
