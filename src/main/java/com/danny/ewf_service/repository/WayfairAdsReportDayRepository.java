@@ -16,17 +16,21 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
             LocalDate reportDate, String campaignId, String parentSku
     );
 
-    @Query("SELECT " +
-           "w.campaignId, w.parentSku, " +
-           "COALESCE(SUM(w.clicks), 0), " +
-           "COALESCE(SUM(w.impressions), 0), " +
-           "COALESCE(SUM(w.spend), 0), " +
-           "COALESCE(SUM(w.totalSale), 0), " +
-           "COALESCE(SUM(w.orderQuantity), 0) " +
-           "FROM WayfairAdsReportDay w " +
-           "WHERE w.reportDate BETWEEN :fromDate AND :toDate " +
-           "GROUP BY w.campaignId, w.parentSku " +
-           "ORDER BY w.campaignId, w.parentSku")
+    @Query("""
+                SELECT
+                  w.campaignId,
+                  w.parentSku,
+                  COALESCE(SUM(w.clicks), 0),
+                  COALESCE(SUM(w.impressions), 0),
+                  COALESCE(SUM(w.spend), 0),
+                  COALESCE(SUM(w.totalSale), 0),
+                  COALESCE(SUM(w.orderQuantity), 0),
+                  w.campaignParentSku.parentSku.defaultBid
+                FROM WayfairAdsReportDay w
+                WHERE w.reportDate BETWEEN :fromDate AND :toDate
+                GROUP BY w.campaignId, w.parentSku, w.campaignParentSku.parentSku.defaultBid
+                ORDER BY w.campaignId, w.parentSku
+                """)
     List<Object[]> getAggregatedReportsByDateRange(
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate
