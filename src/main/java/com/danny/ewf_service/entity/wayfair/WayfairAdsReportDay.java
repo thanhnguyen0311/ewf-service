@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 @Entity
 @Table(
         name = "wayfair_ads_report_daily",
@@ -47,6 +48,9 @@ public class WayfairAdsReportDay {
 
     @Column(name = "order_quantity")
     private Long orderQuantity = 0L;
+
+    @Column(name = "bid")
+    private Double bid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
