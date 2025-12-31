@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface WayfairParentSkuRepository extends JpaRepository<WayfairParentSku,Long> {
 
     Optional<WayfairParentSku> findByParentSku(String sku);
+
+
 }

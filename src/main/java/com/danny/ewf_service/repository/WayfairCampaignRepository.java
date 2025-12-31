@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface WayfairCampaignRepository extends JpaRepository<WayfairCampaign,Long> {
 
     Optional<WayfairCampaign> findByCampaignId(String id);
+
 }
