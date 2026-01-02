@@ -312,7 +312,84 @@ public class WayfairReportImport {
     }
 
 
-    public void importWayfairParentSkuProduct() {
+    public void importWayfairParentSkuProduct(String filepath) {
+        try (InputStream file = getClass().getResourceAsStream(filepath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+            CSVParserBuilder parserBuilder = new CSVParserBuilder()
+                    .withSeparator(',')
+                    .withQuoteChar('"')
+                    .withEscapeChar('\\')
+                    .withStrictQuotes(false)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreQuotations(false)
+                    .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
 
+            CSVParser parser = parserBuilder.build();
+            // Create reader with the configured parser
+            CSVReaderBuilder readerBuilder = new CSVReaderBuilder(reader)
+                    .withCSVParser(parser)
+                    .withSkipLines(1)
+                    .withMultilineLimit(-1); // No limit on multiline fields
+
+            // Support multiple date formats
+            DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+            DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+
+            try (CSVReader csvReader = readerBuilder.build()) {
+                String[] columns;
+
+                while ((columns = csvReader.readNext()) != null) {
+
+                    String dateStr = getValueByIndex(columns, 0);
+                    String campaignId = getValueByIndex(columns, 1);
+                    Boolean b2b = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 2));
+                    String campaignName = getValueByIndex(columns, 3);
+                    Boolean isActive = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 5));
+                    String dailyCap = getValueByIndex(columns, 6);
+                    String parentSku = getValueByIndex(columns, 12);
+                    String productName = getValueByIndex(columns, 13);
+                    String bid = getValueByIndex(columns, 14);
+                    String products = getValueByIndex(columns, 16);
+                    String className = getValueByIndex(columns, 17);
+
+
+                    WayfairCampaign wayfairCampaign;
+
+                    Optional<WayfairCampaign> optionalWayfairCampaign = wayfairCampaignRepository.findByCampaignId(campaignId);
+
+                    wayfairCampaign = optionalWayfairCampaign.orElseGet(WayfairCampaign::new);
+                    wayfairCampaign.setCampaignName(campaignName);
+                    wayfairCampaign.setDailyCap(Integer.valueOf(dailyCap));
+                    wayfairCampaign.setIsB2b(b2b);
+                    wayfairCampaign.setIsActive(isActive);
+                    wayfairCampaignRepository.save(wayfairCampaign);
+
+                    WayfairParentSku wayfairParentSku;
+                    Optional<WayfairParentSku> optionalWayfairParentSku = wayfairParentSkuRepository.findByParentSku(parentSku);
+                    wayfairParentSku = optionalWayfairParentSku.orElseGet(WayfairParentSku::new);
+                    wayfairParentSku.setDefaultBid(Float.valueOf(bid));
+                    wayfairParentSku.setProductName(productName);
+                    wayfairParentSku.setClassName(className);
+                    wayfairParentSku.setDefaultBid(Float.valueOf(bid));
+                    wayfairParentSku.setProducts(products);
+                    wayfairParentSkuRepository.save(wayfairParentSku);
+
+                    if (!wayfairCampaignParentSkuRepository.existsByCampaignCampaignIdAndParentSkuParentSku(campaignId, parentSku)){
+                        WayfairCampaignParentSku newRelationship = new WayfairCampaignParentSku();
+                        newRelationship.setCampaign(wayfairCampaign);
+                        newRelationship.setParentSku(wayfairParentSku);
+                        List<WayfairCampaignParentSku> wayfairParentSkuParentSku = wayfairCampaign.getParentSkus();
+                        wayfairParentSkuParentSku.add(newRelationship);
+                        wayfairCampaignRepository.save(wayfairCampaign);
+                        System.out.println("Inserted new relationship for campaign: " + campaignId + " and sku: " + parentSku);
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
     }
 }

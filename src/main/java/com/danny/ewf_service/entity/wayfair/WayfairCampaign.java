@@ -1,9 +1,11 @@
 package com.danny.ewf_service.entity.wayfair;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "wayfair_campaign")
@@ -30,6 +32,9 @@ public class WayfairCampaign {
 
     @Column(name = "is_b2b")
     private Boolean isB2b;
+
+    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<WayfairCampaignParentSku> parentSkus;
 
     @Column(name = "daily_cap")
     private Integer dailyCap = 50;
