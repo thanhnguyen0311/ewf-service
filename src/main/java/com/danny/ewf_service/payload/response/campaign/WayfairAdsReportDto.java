@@ -20,4 +20,5 @@ public class WayfairAdsReportDto {
     private String campaignName;
     private String parentSkuName;
     private String products;
+    private String className;
 }
