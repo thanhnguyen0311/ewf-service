@@ -2,6 +2,8 @@ package com.danny.ewf_service.payload.response.campaign;
 
 import lombok.*;
 
+import java.time.LocalDate;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -21,4 +23,6 @@ public class WayfairAdsReportDto {
     private String parentSkuName;
     private String products;
     private String className;
+    private String startDate;
+    private String dailyCap;
 }
