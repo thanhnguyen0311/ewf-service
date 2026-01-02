@@ -60,7 +60,7 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "/data/product_report_day.csv";
+            String filepath = "/data/product_report_daily_15-3.csv";
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing(products, "products.csv", true);
 //            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
@@ -68,10 +68,10 @@ public class ImportController {
 //            componentsImport.importPrices();
 //            componentsImport.importDimensions();
 //            shopifyExport.exportShopifyProductsPrice("product_prices_12-09.csv");
-//            wayfairReportImport.importWayfairReportDaily(filepath, false);
+            wayfairReportImport.importWayfairReportDaily(filepath, false);
 //                shopifyExport.exportAmazonReviews();
 //            wmsExport.exportSKU("wms.csv");
-            wayfairReportImport.importWayfairParentSkuProduct(filepath);
+//            wayfairReportImport.importWayfairParentSkuProduct(filepath);
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
