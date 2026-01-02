@@ -35,15 +35,12 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
               COALESCE(SUM(w.totalSale), 0),
               COALESCE(SUM(w.orderQuantity), 0),
               w.campaignParentSku.parentSku.defaultBid,
-              MAX(
-                 CASE
-                 WHEN w.reportDate = :toDate THEN w.bid
-                 ELSE NULL
-                 END
-              )
+              w.campaignParentSku.campaign.campaignName,
+              w.campaignParentSku.parentSku.productName,
+              w.campaignParentSku.parentSku.products
             FROM WayfairAdsReportDay w
             WHERE w.reportDate BETWEEN :fromDate AND :toDate
-            GROUP BY w.campaignId, w.parentSku, w.campaignParentSku.parentSku.defaultBid
+            GROUP BY w.campaignId, w.parentSku
             ORDER BY w.campaignId, w.parentSku
             """)
     List<Object[]> getAggregatedReportsByDateRange(

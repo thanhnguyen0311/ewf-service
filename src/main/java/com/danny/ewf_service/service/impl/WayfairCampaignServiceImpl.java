@@ -48,6 +48,9 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
                     .totalSale(Double.parseDouble(result[5].toString()))
                     .totalOrders(Long.parseLong(result[6].toString()))
                     .defaultBid(Double.parseDouble(result[7].toString()))
+                    .campaignName(result[8].toString())
+                    .parentSkuName(result[9].toString())
+                    .products(result[10].toString())
                     .build();
             wayfairAdsReportDtos.add(wayfairAdsReportDto);
         }

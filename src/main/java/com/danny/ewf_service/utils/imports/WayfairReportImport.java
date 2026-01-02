@@ -118,11 +118,11 @@ public class WayfairReportImport {
                     processedReportKeys.add(reportKey);
 
 
-                    boolean isReportExist = wayfairAdsReportDayRepository.existsByReportDateAndCampaignIdAndParentSku(reportDate, campaignId, parentSku);
-                    if (isReportExist) {
-                        System.out.println("Report already exist for date: " + reportDate + " and sku: " + parentSku);
-                        continue;
-                    }
+//                    boolean isReportExist = wayfairAdsReportDayRepository.existsByReportDateAndCampaignIdAndParentSku(reportDate, campaignId, parentSku);
+//                    if (isReportExist) {
+//                        System.out.println("Report already exist for date: " + reportDate + " and sku: " + parentSku);
+//                        continue;
+//                    }
 
                     WayfairAdsReportDay wayfairAdsReportDay;
                     WayfairCampaign wayfairCampaign;
@@ -166,25 +166,21 @@ public class WayfairReportImport {
                     Optional<WayfairAdsReportDay> optionalWayfairAdsReportDay = wayfairAdsReportDayRepository.findByReportDateAndCampaignIdAndParentSku(reportDate, campaignId, parentSku);
                     if (optionalWayfairAdsReportDay.isPresent()) {
                         wayfairAdsReportDay = optionalWayfairAdsReportDay.get();
-                        wayfairAdsReportDay.setClicks(Integer.valueOf(clicks));
-                        wayfairAdsReportDay.setImpressions(Integer.valueOf(impressions));
-                        wayfairAdsReportDay.setSpend(Double.valueOf(spend));
-                        wayfairAdsReportDay.setTotalSale(Double.valueOf(totalSale));
-                        wayfairAdsReportDay.setOrderQuantity(Long.valueOf(orderQty));
-                        wayfairAdsReportDay.setBid(Double.valueOf(bid));
                     } else {
                         wayfairAdsReportDay = new WayfairAdsReportDay();
                         wayfairAdsReportDay.setReportDate(reportDate);
-                        wayfairAdsReportDay.setClicks(Integer.valueOf(clicks));
-                        wayfairAdsReportDay.setImpressions(Integer.valueOf(impressions));
-                        wayfairAdsReportDay.setSpend(Double.valueOf(spend));
-                        wayfairAdsReportDay.setTotalSale(Double.valueOf(totalSale));
-                        wayfairAdsReportDay.setOrderQuantity(Long.valueOf(orderQty));
                         wayfairAdsReportDay.setCampaignId(campaignId);
                         wayfairAdsReportDay.setParentSku(parentSku);
-                        wayfairAdsReportDay.setBid(Double.valueOf(bid));
                     }
+
+                    wayfairAdsReportDay.setClicks(Integer.valueOf(clicks));
+                    wayfairAdsReportDay.setImpressions(Integer.valueOf(impressions));
+                    wayfairAdsReportDay.setSpend(Double.valueOf(spend));
+                    wayfairAdsReportDay.setTotalSale(Double.valueOf(totalSale));
+                    wayfairAdsReportDay.setOrderQuantity(Long.valueOf(orderQty));
+                    wayfairAdsReportDay.setBid(Double.valueOf(bid));
                     wayfairAdsReportDayRepository.save(wayfairAdsReportDay);
+                    System.out.println("Inserted new report for date: " + reportDate + " and sku: " + parentSku);
                 }
             }
         } catch (Exception e) {
@@ -313,5 +309,10 @@ public class WayfairReportImport {
             return "";
         }
         return array[index] != null ? array[index].trim() : "";
+    }
+
+
+    public void importWayfairParentSkuProduct() {
+
     }
 }
