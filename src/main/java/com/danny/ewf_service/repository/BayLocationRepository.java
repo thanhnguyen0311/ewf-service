@@ -35,6 +35,7 @@ public interface BayLocationRepository extends JpaRepository<BayLocation, Long> 
             nativeQuery = true)
     List<Object[]> findAllBayByIsActiveTrue();
 
+
     Optional<BayLocation> findByBayCode(String bayCode);
 
 

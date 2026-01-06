@@ -54,6 +54,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
                     .className(result[11].toString())
                     .startDate(result[12].toString())
                     .dailyCap(result[13].toString())
+                    .currentBid(result[14].toString())
                     .build();
             wayfairAdsReportDtos.add(wayfairAdsReportDto);
         }
