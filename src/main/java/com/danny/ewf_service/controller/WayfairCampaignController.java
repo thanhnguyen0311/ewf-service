@@ -30,17 +30,15 @@ public class WayfairCampaignController {
         }
     }
 
-    @GetMapping("/campaigns/reportByDate")
-    public ResponseEntity<?> getClickStats(
-            @RequestParam("startDate") String startDateStr,
-            @RequestParam("endDate") String endDateStr) {
-
+    @GetMapping("/campaigns/last-update")
+    public ResponseEntity<?> getClickStats() {
         try {
-           List<WayfairAdsReportDto> wayfairAdsReportDtos = wayfairCampaignService.sumClicksByDateRangeAndParentSkuAndCampaignId(startDateStr, endDateStr);
-            return ResponseEntity.ok(wayfairAdsReportDtos);
+            return ResponseEntity.ok(wayfairCampaignService.getLastUpdateDate());
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body("Error retrieving click statistics: " + e.getMessage());
         }
     }
+
+
 }
