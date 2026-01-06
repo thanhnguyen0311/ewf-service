@@ -14,4 +14,5 @@ public interface WayfairCampaignParentSkuRepository extends JpaRepository<Wayfai
 
     boolean existsByCampaignCampaignIdAndParentSkuParentSku(String campaignId, String parentSku);
 
+    WayfairCampaignParentSku findByCampaignCampaignIdAndParentSkuParentSku(String campaignId, String parentSku);
 }
