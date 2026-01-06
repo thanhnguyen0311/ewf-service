@@ -54,7 +54,11 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
 
     List<WayfairAdsReportDay> findAllByReportDateIn(Collection<LocalDate> dates);
 
-    @Query("SELECT r.reportDate, r.campaignId, r.parentSku FROM WayfairAdsReportDay r")
+    @Query("SELECT r.reportDate, r.campaignId, r.parentSku, r.isB2b FROM WayfairAdsReportDay r")
     List<Object[]> findAllReportKeys();
+
+    @Query("SELECT MAX(w.reportDate) FROM WayfairAdsReportDay w")
+    LocalDate findNewestReportDate();
+
 
 }

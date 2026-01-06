@@ -75,4 +75,7 @@ public class WayfairAdsReportDay {
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "is_b2b")
+    private Boolean isB2b = false;
+
 }
