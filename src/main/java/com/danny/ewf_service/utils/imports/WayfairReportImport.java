@@ -476,4 +476,64 @@ public class WayfairReportImport {
             throw new RuntimeException("Error reading CSV file", e);
         }
     }
+
+    public void updateCurrentBid(String filepath) {
+        try (InputStream file = getClass().getResourceAsStream(filepath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+            CSVParserBuilder parserBuilder = new CSVParserBuilder()
+                    .withSeparator(',')
+                    .withQuoteChar('"')
+                    .withEscapeChar('\\')
+                    .withStrictQuotes(false)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreQuotations(false)
+                    .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
+
+            CSVParser parser = parserBuilder.build();
+            // Create reader with the configured parser
+            CSVReaderBuilder readerBuilder = new CSVReaderBuilder(reader)
+                    .withCSVParser(parser)
+                    .withSkipLines(1)
+                    .withMultilineLimit(-1); // No limit on multiline fields
+
+            // Support multiple date formats
+            DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+            DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+
+            try (CSVReader csvReader = readerBuilder.build()) {
+                String[] columns;
+                while ((columns = csvReader.readNext()) != null) {
+
+                    String dateStr = getValueByIndex(columns, 0);
+                    String campaignId = getValueByIndex(columns, 1);
+                    Boolean b2b = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 2));
+                    String campaignName = getValueByIndex(columns, 3);
+                    Boolean isActive = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 5));
+                    String dailyCap = getValueByIndex(columns, 6);
+                    String startDate = getValueByIndex(columns, 8);
+                    String parentSku = getValueByIndex(columns, 12);
+                    String productName = getValueByIndex(columns, 13);
+                    String defaultBid = getValueByIndex(columns, 14);
+                    String products = getValueByIndex(columns, 16);
+                    String className = getValueByIndex(columns, 17);
+                    String clicks = getValueByIndex(columns, 19);
+                    String impressions = getValueByIndex(columns, 20);
+                    String spend = getValueByIndex(columns, 21);
+                    String totalSale = getValueByIndex(columns, 25);
+                    String orderQty = getValueByIndex(columns, 26);
+
+                    WayfairCampaignParentSku wayfairCampaignParentSku = wayfairCampaignParentSkuRepository.findByCampaignCampaignIdAndParentSkuParentSku(campaignId,parentSku);
+                    if (wayfairCampaignParentSku == null) continue;
+                    wayfairCampaignParentSku.getParentSku().setDefaultBid(Float.valueOf(defaultBid));
+                    wayfairCampaignParentSkuRepository.save(wayfairCampaignParentSku);
+                    System.out.println("Updated bid for campaign: " + campaignId + " and sku: " + parentSku);
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
 }
