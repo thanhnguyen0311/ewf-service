@@ -25,5 +25,4 @@ public class WayfairAdsReportDto {
     private String className;
     private String startDate;
     private String dailyCap;
-    private String currentBid;
 }
