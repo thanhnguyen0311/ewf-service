@@ -61,5 +61,10 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
         return wayfairAdsReportDtos;
     }
 
+    @Override
+    public LocalDate getLastUpdateDate() {
+        return wayfairAdsReportDayRepository.findNewestReportDate();
+    }
+
 
 }
