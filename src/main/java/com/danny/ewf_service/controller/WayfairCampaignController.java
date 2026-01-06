@@ -33,7 +33,9 @@ public class WayfairCampaignController {
     @GetMapping("/campaigns/last-update")
     public ResponseEntity<?> getClickStats() {
         try {
+            System.out.println("Fetching last update date");
             return ResponseEntity.ok(wayfairCampaignService.getLastUpdateDate());
+
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body("Error retrieving click statistics: " + e.getMessage());
