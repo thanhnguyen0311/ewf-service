@@ -104,7 +104,8 @@ public class WayfairReportImport {
                 LocalDate date = (LocalDate) key[0];
                 String campId = (String) key[1];
                 String pSku = (String) key[2];
-                existingReportKeys.add(date + "_" + campId + "_" + pSku);
+                Boolean isB2b = (Boolean) key[3];
+                existingReportKeys.add(date + "_" + campId + "_" + pSku + "_" + isB2b.toString().toUpperCase());
             }
 
 
@@ -133,7 +134,7 @@ public class WayfairReportImport {
                     String totalSale = getValueByIndex(columns, 25);
                     String orderQty = getValueByIndex(columns, 26);
 
-                    if (b2b || dateStr.isEmpty()) continue;
+                    if (dateStr.isEmpty()) continue;
                     LocalDate reportDate;
                     if (dateStr.contains("/")) {
                         reportDate = LocalDate.parse(dateStr, slashFormatter);
@@ -142,7 +143,7 @@ public class WayfairReportImport {
                     }
 
                     // Create unique key for this report
-                    String reportKey = reportDate + "_" + campaignId + "_" + parentSku;
+                    String reportKey = reportDate + "_" + campaignId + "_" + parentSku + "_" + b2b;
                     // Skip if already processed in current batch or exists in database
                     if (processedReportKeys.contains(reportKey) || existingReportKeys.contains(reportKey)) {
                         continue;
@@ -165,7 +166,6 @@ public class WayfairReportImport {
                         campaign.setDailyCap(Integer.valueOf(dailyCap));
                         if (!startDate.isEmpty()) campaign.setStartDate(reportDate);
                         campaign.setIsActive(isActive);
-                        campaign.setIsB2b(false);
 
                         campaignCache.put(campaignId, campaign);
                         campaignBatch.add(campaign);
@@ -228,6 +228,7 @@ public class WayfairReportImport {
                     report.setReportDate(reportDate);
                     report.setCampaignId(campaignId);
                     report.setParentSku(parentSku);
+                    report.setIsB2b(b2b);
                     report.setClicks(Integer.valueOf(clicks));
                     report.setImpressions(Integer.valueOf(impressions));
                     report.setSpend(Double.valueOf(spend));
