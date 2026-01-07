@@ -60,7 +60,7 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "/data/product_report_day_05-01.csv";
+            String filepath = "/data/keyword_report_12_01.csv";
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing(products, "products.csv", true);
 //            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
@@ -70,7 +70,7 @@ public class ImportController {
 //            shopifyExport.exportShopifyProductsPrice("product_prices_12-09.csv");
 //            wayfairReportImport.importWayfairReportDaily(filepath, false);
 //                shopifyExport.exportAmazonReviews();
-            wayfairReportImport.updateCurrentBid(filepath);
+            wayfairReportImport.importWayfairReportKeywordDaily(filepath);
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
 

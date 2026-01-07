@@ -45,69 +45,82 @@ public class WayfairReportImport {
     private final WayfairKeywordReportDailyRepository wayfairKeywordReportDailyRepository;
 
     public void importWayfairReportDaily(String filepath, boolean isUpdateBid) {
-        try (InputStream file = getClass().getResourceAsStream(filepath);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
-            CSVParserBuilder parserBuilder = new CSVParserBuilder()
-                    .withSeparator(',')
-                    .withQuoteChar('"')
-                    .withEscapeChar('\\')
-                    .withStrictQuotes(false)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .withIgnoreQuotations(false)
-                    .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
+        CSVParserBuilder parserBuilder = new CSVParserBuilder()
+                .withSeparator(',')
+                .withQuoteChar('"')
+                .withEscapeChar('\\')
+                .withStrictQuotes(false)
+                .withIgnoreLeadingWhiteSpace(true)
+                .withIgnoreQuotations(false)
+                .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
 
-            CSVParser parser = parserBuilder.build();
-            // Create reader with the configured parser
-            CSVReaderBuilder readerBuilder = new CSVReaderBuilder(reader)
-                    .withCSVParser(parser)
-                    .withSkipLines(1)
-                    .withMultilineLimit(-1); // No limit on multiline fields
+        CSVParser parser = parserBuilder.build();
 
-            // Support multiple date formats
-            DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
-            DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // Support multiple date formats
+        DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+        DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            // First pass: determine min and max dates in the CSV
-            LocalDate minDate = LocalDate.MAX; // Initialize to furthest future date
-            LocalDate maxDate = LocalDate.MIN; // Initialize to furthest past date
+        // First pass: determine min and max dates in the CSV
+        LocalDate minDate = LocalDate.MAX; // Initialize to furthest future date
+        LocalDate maxDate = LocalDate.MIN; // Initialize to furthest past date
 
-            try (CSVReader csvReader = readerBuilder.build()) {
-                String[] columns;
-                while ((columns = csvReader.readNext()) != null) {
-                    String dateStr = getValueByIndex(columns, 0);
-                    if (dateStr.isEmpty()) continue;
+        // FIRST PASS - Find min and max dates
+        try (InputStream firstPassStream = getClass().getResourceAsStream(filepath);
+             BufferedReader firstPassReader = new BufferedReader(new InputStreamReader(firstPassStream));
+             CSVReader firstPassCsvReader = new CSVReaderBuilder(firstPassReader)
+                     .withCSVParser(parser)
+                     .withSkipLines(1)
+                     .withMultilineLimit(-1)
+                     .build()) {
 
-                    LocalDate reportDate;
-                    if (dateStr.contains("/")) {
-                        reportDate = LocalDate.parse(dateStr, slashFormatter);
-                    } else {
-                        reportDate = LocalDate.parse(dateStr, hyphenFormatter);
-                    }
+            String[] columns;
+            while ((columns = firstPassCsvReader.readNext()) != null) {
+                String dateStr = getValueByIndex(columns, 0);
+                if (dateStr.isEmpty()) continue;
 
-                    // Update min and max dates
-                    if (reportDate.isBefore(minDate)) {
-                        minDate = reportDate;
-                    }
-                    if (reportDate.isAfter(maxDate)) {
-                        maxDate = reportDate;
-                    }
+                LocalDate reportDate;
+                if (dateStr.contains("/")) {
+                    reportDate = LocalDate.parse(dateStr, slashFormatter);
+                } else {
+                    reportDate = LocalDate.parse(dateStr, hyphenFormatter);
+                }
+
+                // Update min and max dates
+                if (reportDate.isBefore(minDate)) {
+                    minDate = reportDate;
+                }
+                if (reportDate.isAfter(maxDate)) {
+                    maxDate = reportDate;
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file for date range detection", e);
+        }
 
 
-            // Only query for report keys within the date range found in the CSV
-            Set<String> existingReportKeys = new HashSet<>();
-            if (!minDate.equals(LocalDate.MAX) && !maxDate.equals(LocalDate.MIN)) {
-                // Only query the database if we found valid dates in the CSV
-                List<Object[]> existingReports = wayfairAdsReportDayRepository.findReportKeysInDateRange(minDate, maxDate);
-                for (Object[] key : existingReports) {
-                    LocalDate date = (LocalDate) key[0];
-                    String campId = (String) key[1];
-                    String pSku = (String) key[2];
-                    Boolean isB2b = (Boolean) key[3];
-                    existingReportKeys.add(date + "_" + campId + "_" + pSku + "_" + isB2b.toString().toUpperCase());
-                }
+        // Only query for report keys within the date range found in the CSV
+        Set<String> existingReportKeys = new HashSet<>();
+        if (!minDate.equals(LocalDate.MAX) && !maxDate.equals(LocalDate.MIN)) {
+            // Only query the database if we found valid dates in the CSV
+            List<Object[]> existingReports = wayfairAdsReportDayRepository.findReportKeysInDateRange(minDate, maxDate);
+            for (Object[] key : existingReports) {
+                LocalDate date = (LocalDate) key[0];
+                String campId = (String) key[1];
+                String pSku = (String) key[2];
+                Boolean isB2b = (Boolean) key[3];
+                existingReportKeys.add(date + "_" + campId + "_" + pSku + "_" + isB2b.toString().toUpperCase());
             }
+        }
+
+        // SECOND PASS - Process the CSV data
+        try (InputStream secondPassStream = getClass().getResourceAsStream(filepath);
+             BufferedReader secondPassReader = new BufferedReader(new InputStreamReader(secondPassStream));
+             CSVReader csvReader = new CSVReaderBuilder(secondPassReader)
+                     .withCSVParser(parser)
+                     .withSkipLines(1)
+                     .withMultilineLimit(-1)
+                     .build()) {
 
 
             // Cache for campaigns and parent SKUs to reduce database lookups
@@ -143,160 +156,158 @@ public class WayfairReportImport {
             }
 
 
-
-            try (CSVReader csvReader = readerBuilder.build()) {
-                String[] columns;
-                int processedRows = 0;
+            String[] columns;
+            int processedRows = 0;
 
 
-                while ((columns = csvReader.readNext()) != null) {
+            while ((columns = csvReader.readNext()) != null) {
 
-                    String dateStr = getValueByIndex(columns, 0);
-                    String campaignId = getValueByIndex(columns, 1);
-                    boolean b2b = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 2));
-                    String campaignName = getValueByIndex(columns, 3);
-                    Boolean isActive = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 5));
-                    String dailyCap = getValueByIndex(columns, 6);
-                    String startDate = getValueByIndex(columns, 8);
-                    String parentSku = getValueByIndex(columns, 12);
-                    String productName = getValueByIndex(columns, 13);
-                    String bid = getValueByIndex(columns, 14);
-                    String products = getValueByIndex(columns, 16);
-                    String className = getValueByIndex(columns, 17);
-                    String clicks = getValueByIndex(columns, 19);
-                    String impressions = getValueByIndex(columns, 20);
-                    String spend = getValueByIndex(columns, 21);
-                    String totalSale = getValueByIndex(columns, 25);
-                    String orderQty = getValueByIndex(columns, 26);
+                String dateStr = getValueByIndex(columns, 0);
+                String campaignId = getValueByIndex(columns, 1);
+                boolean b2b = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 2));
+                String campaignName = getValueByIndex(columns, 3);
+                Boolean isActive = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 5));
+                String dailyCap = getValueByIndex(columns, 6);
+                String startDate = getValueByIndex(columns, 8);
+                String parentSku = getValueByIndex(columns, 12);
+                String productName = getValueByIndex(columns, 13);
+                String bid = getValueByIndex(columns, 14);
+                String products = getValueByIndex(columns, 16);
+                String className = getValueByIndex(columns, 17);
+                String clicks = getValueByIndex(columns, 19);
+                String impressions = getValueByIndex(columns, 20);
+                String spend = getValueByIndex(columns, 21);
+                String totalSale = getValueByIndex(columns, 25);
+                String orderQty = getValueByIndex(columns, 26);
 
-                    if (dateStr.isEmpty()) continue;
-                    LocalDate reportDate;
-                    if (dateStr.contains("/")) {
-                        reportDate = LocalDate.parse(dateStr, slashFormatter);
-                    } else {
-                        reportDate = LocalDate.parse(dateStr, hyphenFormatter);
-                    }
+                if (dateStr.isEmpty()) continue;
+                LocalDate reportDate;
+                if (dateStr.contains("/")) {
+                    reportDate = LocalDate.parse(dateStr, slashFormatter);
+                } else {
+                    reportDate = LocalDate.parse(dateStr, hyphenFormatter);
+                }
 
-                    // Create unique key for this report
-                    String reportKey = reportDate + "_" + campaignId + "_" + parentSku + "_" + b2b;
-                    // Skip if already processed in current batch or exists in database
-                    if (processedReportKeys.contains(reportKey) || existingReportKeys.contains(reportKey)) {
-                        continue;
-                    }
-                    processedReportKeys.add(reportKey);
+                // Create unique key for this report
+                String reportKey = reportDate + "_" + campaignId + "_" + parentSku + "_" + b2b;
+                // Skip if already processed in current batch or exists in database
+                if (processedReportKeys.contains(reportKey) || existingReportKeys.contains(reportKey)) {
+                    continue;
+                }
+                processedReportKeys.add(reportKey);
 
 
-                    // Process Campaign
-                    WayfairCampaign campaign = campaignCache.get(campaignId);
-                    if (campaign == null) {
-                        campaign = new WayfairCampaign();
-                        campaign.setCampaignId(campaignId);
-                        campaign.setCampaignName(campaignName);
-                        campaign.setDailyCap(Integer.valueOf(dailyCap));
-                        if (!startDate.isEmpty()) campaign.setStartDate(reportDate);
-                        campaign.setIsActive(isActive);
-                        campaign.setType("Product");
+                // Process Campaign
+                WayfairCampaign campaign = campaignCache.get(campaignId);
+                if (campaign == null) {
+                    campaign = new WayfairCampaign();
+                    campaign.setCampaignId(campaignId);
+                    campaign.setCampaignName(campaignName);
+                    campaign.setDailyCap(Integer.valueOf(dailyCap));
+                    if (!startDate.isEmpty()) campaign.setStartDate(reportDate);
+                    campaign.setIsActive(isActive);
+                    campaign.setType("Product");
 
-                        campaignCache.put(campaignId, campaign);
-                        campaignBatch.add(campaign);
+                    campaignCache.put(campaignId, campaign);
+                    campaignBatch.add(campaign);
 
-                        // Save batch if needed
-                        if (campaignBatch.size() >= ENTITY_BATCH_SIZE) {
-                            wayfairCampaignRepository.saveAll(campaignBatch);
-                            campaignBatch.clear();
-                        }
-                    }
-
-                    // Process Parent SKU
-                    WayfairParentSku parentSkuEntity = parentSkuCache.get(parentSku);
-                    if (parentSkuEntity == null) {
-                        parentSkuEntity = new WayfairParentSku();
-                        parentSkuEntity.setParentSku(parentSku);
-                        parentSkuEntity.setProductName(productName);
-                        parentSkuEntity.setClassName(className);
-                        parentSkuEntity.setDefaultBid(Float.valueOf(bid));
-                        parentSkuEntity.setProducts(products);
-
-                        parentSkuCache.put(parentSku, parentSkuEntity);
-                        parentSkuBatch.add(parentSkuEntity);
-
-                        // Save batch if needed
-                        if (parentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
-                            wayfairParentSkuRepository.saveAll(parentSkuBatch);
-                            parentSkuBatch.clear();
-                        }
-                    } else if (isUpdateBid) {
-                        parentSkuEntity.setDefaultBid(Float.valueOf(bid));
-                        parentSkuBatch.add(parentSkuEntity);
-
-                        // Save batch if needed
-                        if (parentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
-                            wayfairParentSkuRepository.saveAll(parentSkuBatch);
-                            parentSkuBatch.clear();
-                        }
-                    }
-
-                    // Process Campaign-ParentSKU relationship
-                    String relationshipKey = campaignId + "_" + parentSku;
-                    if (!campaignParentSkuCache.containsKey(relationshipKey)) {
-                        WayfairCampaignParentSku relation = new WayfairCampaignParentSku();
-                        relation.setCampaign(campaign);
-                        relation.setParentSku(parentSkuEntity);
-
-                        campaignParentSkuCache.put(relationshipKey, relation);
-                        campaignParentSkuBatch.add(relation);
-
-                        // Save batch if needed
-                        if (campaignParentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
-                            wayfairCampaignParentSkuRepository.saveAll(campaignParentSkuBatch);
-                            campaignParentSkuBatch.clear();
-                        }
-                    }
-
-                    // Process Report
-                    WayfairAdsReportDay report = new WayfairAdsReportDay();
-                    report.setReportDate(reportDate);
-                    report.setCampaignId(campaignId);
-                    report.setParentSku(parentSku);
-                    report.setIsB2b(b2b);
-                    report.setClicks(Integer.valueOf(clicks));
-                    report.setImpressions(Integer.valueOf(impressions));
-                    report.setSpend(Double.valueOf(spend));
-                    report.setTotalSale(Double.valueOf(totalSale));
-                    report.setOrderQuantity(Long.valueOf(orderQty));
-                    report.setBid(Double.valueOf(bid));
-
-                    reportBatch.add(report);
-
-                    // Save report batch if needed
-                    if (reportBatch.size() >= REPORT_BATCH_SIZE) {
-                        wayfairAdsReportDayRepository.saveAll(reportBatch);
-                        reportBatch.clear();
-                    }
-
-                    processedRows++;
-                    if (processedRows % 1000 == 0) {
-                        System.out.println("Processed " + processedRows + " rows");
+                    // Save batch if needed
+                    if (campaignBatch.size() >= ENTITY_BATCH_SIZE) {
+                        wayfairCampaignRepository.saveAll(campaignBatch);
+                        campaignBatch.clear();
                     }
                 }
 
-                // Save any remaining batches
-                if (!campaignBatch.isEmpty()) {
-                    wayfairCampaignRepository.saveAll(campaignBatch);
+                // Process Parent SKU
+                WayfairParentSku parentSkuEntity = parentSkuCache.get(parentSku);
+                if (parentSkuEntity == null) {
+                    parentSkuEntity = new WayfairParentSku();
+                    parentSkuEntity.setParentSku(parentSku);
+                    parentSkuEntity.setProductName(productName);
+                    parentSkuEntity.setClassName(className);
+                    parentSkuEntity.setDefaultBid(Float.valueOf(bid));
+                    parentSkuEntity.setProducts(products);
+
+                    parentSkuCache.put(parentSku, parentSkuEntity);
+                    parentSkuBatch.add(parentSkuEntity);
+
+                    // Save batch if needed
+                    if (parentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
+                        wayfairParentSkuRepository.saveAll(parentSkuBatch);
+                        parentSkuBatch.clear();
+                    }
+                } else if (isUpdateBid) {
+                    parentSkuEntity.setDefaultBid(Float.valueOf(bid));
+                    parentSkuBatch.add(parentSkuEntity);
+
+                    // Save batch if needed
+                    if (parentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
+                        wayfairParentSkuRepository.saveAll(parentSkuBatch);
+                        parentSkuBatch.clear();
+                    }
                 }
 
-                if (!parentSkuBatch.isEmpty()) {
-                    wayfairParentSkuRepository.saveAll(parentSkuBatch);
+                // Process Campaign-ParentSKU relationship
+                String relationshipKey = campaignId + "_" + parentSku;
+                if (!campaignParentSkuCache.containsKey(relationshipKey)) {
+                    WayfairCampaignParentSku relation = new WayfairCampaignParentSku();
+                    relation.setCampaign(campaign);
+                    relation.setParentSku(parentSkuEntity);
+
+                    campaignParentSkuCache.put(relationshipKey, relation);
+                    campaignParentSkuBatch.add(relation);
+
+                    // Save batch if needed
+                    if (campaignParentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
+                        wayfairCampaignParentSkuRepository.saveAll(campaignParentSkuBatch);
+                        campaignParentSkuBatch.clear();
+                    }
                 }
 
-                if (!campaignParentSkuBatch.isEmpty()) {
-                    wayfairCampaignParentSkuRepository.saveAll(campaignParentSkuBatch);
-                }
+                // Process Report
+                WayfairAdsReportDay report = new WayfairAdsReportDay();
+                report.setReportDate(reportDate);
+                report.setCampaignId(campaignId);
+                report.setParentSku(parentSku);
+                report.setIsB2b(b2b);
+                report.setClicks(Integer.valueOf(clicks));
+                report.setImpressions(Integer.valueOf(impressions));
+                report.setSpend(Double.valueOf(spend));
+                report.setTotalSale(Double.valueOf(totalSale));
+                report.setOrderQuantity(Long.valueOf(orderQty));
+                report.setBid(Double.valueOf(bid));
 
-                if (!reportBatch.isEmpty()) {
+                reportBatch.add(report);
+
+                // Save report batch if needed
+                if (reportBatch.size() >= REPORT_BATCH_SIZE) {
                     wayfairAdsReportDayRepository.saveAll(reportBatch);
+                    reportBatch.clear();
+                }
+
+                processedRows++;
+                if (processedRows % 1000 == 0) {
+                    System.out.println("Processed " + processedRows + " rows");
                 }
             }
+
+            // Save any remaining batches
+            if (!campaignBatch.isEmpty()) {
+                wayfairCampaignRepository.saveAll(campaignBatch);
+            }
+
+            if (!parentSkuBatch.isEmpty()) {
+                wayfairParentSkuRepository.saveAll(parentSkuBatch);
+            }
+
+            if (!campaignParentSkuBatch.isEmpty()) {
+                wayfairCampaignParentSkuRepository.saveAll(campaignParentSkuBatch);
+            }
+
+            if (!reportBatch.isEmpty()) {
+                wayfairAdsReportDayRepository.saveAll(reportBatch);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading CSV file", e);
@@ -305,71 +316,83 @@ public class WayfairReportImport {
 
 
     public void importWayfairReportKeywordDaily(String filepath) {
-        try (InputStream file = getClass().getResourceAsStream(filepath);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
-            CSVParserBuilder parserBuilder = new CSVParserBuilder()
-                    .withSeparator(',')
-                    .withQuoteChar('"')
-                    .withEscapeChar('\\')
-                    .withStrictQuotes(false)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .withIgnoreQuotations(false)
-                    .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
+        CSVParserBuilder parserBuilder = new CSVParserBuilder()
+                .withSeparator(',')
+                .withQuoteChar('"')
+                .withEscapeChar('\\')
+                .withStrictQuotes(false)
+                .withIgnoreLeadingWhiteSpace(true)
+                .withIgnoreQuotations(false)
+                .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
 
-            CSVParser parser = parserBuilder.build();
-            // Create reader with the configured parser
-            CSVReaderBuilder readerBuilder = new CSVReaderBuilder(reader)
-                    .withCSVParser(parser)
-                    .withSkipLines(1)
-                    .withMultilineLimit(-1); // No limit on multiline fields
+        CSVParser parser = parserBuilder.build();
 
-            // Support multiple date formats
-            DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
-            DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // Support multiple date formats
+        DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+        DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
-            // First pass: determine min and max dates in the CSV
-            LocalDate minDate = LocalDate.MAX; // Initialize to furthest future date
-            LocalDate maxDate = LocalDate.MIN; // Initialize to furthest past date
+        // First pass: determine min and max dates in the CSV
+        LocalDate minDate = LocalDate.MAX; // Initialize to furthest future date
+        LocalDate maxDate = LocalDate.MIN; // Initialize to furthest past date
 
-            try (CSVReader csvReader = readerBuilder.build()) {
-                String[] columns;
-                while ((columns = csvReader.readNext()) != null) {
-                    String dateStr = getValueByIndex(columns, 0);
-                    if (dateStr.isEmpty()) continue;
+        // FIRST PASS - Find min and max dates
+        try (InputStream firstPassStream = getClass().getResourceAsStream(filepath);
+             BufferedReader firstPassReader = new BufferedReader(new InputStreamReader(firstPassStream));
+             CSVReader firstPassCsvReader = new CSVReaderBuilder(firstPassReader)
+                     .withCSVParser(parser)
+                     .withSkipLines(1)
+                     .withMultilineLimit(-1)
+                     .build()) {
 
-                    LocalDate reportDate;
-                    if (dateStr.contains("/")) {
-                        reportDate = LocalDate.parse(dateStr, slashFormatter);
-                    } else {
-                        reportDate = LocalDate.parse(dateStr, hyphenFormatter);
-                    }
+            String[] columns;
+            while ((columns = firstPassCsvReader.readNext()) != null) {
+                String dateStr = getValueByIndex(columns, 0);
+                if (dateStr.isEmpty()) continue;
 
-                    // Update min and max dates
-                    if (reportDate.isBefore(minDate)) {
-                        minDate = reportDate;
-                    }
-                    if (reportDate.isAfter(maxDate)) {
-                        maxDate = reportDate;
-                    }
+                LocalDate reportDate;
+                if (dateStr.contains("/")) {
+                    reportDate = LocalDate.parse(dateStr, slashFormatter);
+                } else {
+                    reportDate = LocalDate.parse(dateStr, hyphenFormatter);
+                }
+
+                // Update min and max dates
+                if (reportDate.isBefore(minDate)) {
+                    minDate = reportDate;
+                }
+                if (reportDate.isAfter(maxDate)) {
+                    maxDate = reportDate;
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file for date range detection", e);
+        }
 
 
-            // Only query for report keys within the date range found in the CSV
-            Set<String> existingReportKeys = new HashSet<>();
-            if (!minDate.equals(LocalDate.MAX) && !maxDate.equals(LocalDate.MIN)) {
-                // Only query the database if we found valid dates in the CSV
-                List<Object[]> existingReports = wayfairKeywordReportDailyRepository.findReportKeysInDateRange(minDate, maxDate);
-                for (Object[] key : existingReports) {
-                    LocalDate date = (LocalDate) key[0];
-                    String campId = (String) key[1];
-                    String keywordId = (String) key[2];
-                    String searchTerm = (String) key[3];
-                    existingReportKeys.add(date + "_" + campId + "_" + keywordId + "_" + searchTerm);
-                }
+        // Only query for report keys within the date range found in the CSV
+        Set<String> existingReportKeys = new HashSet<>();
+        if (!minDate.equals(LocalDate.MAX) && !maxDate.equals(LocalDate.MIN)) {
+            // Only query the database if we found valid dates in the CSV
+            List<Object[]> existingReports = wayfairKeywordReportDailyRepository.findReportKeysInDateRange(minDate, maxDate);
+            for (Object[] key : existingReports) {
+                LocalDate date = (LocalDate) key[0];
+                String campId = (String) key[1];
+                String keywordId = (String) key[2];
+                String searchTerm = (String) key[3];
+                existingReportKeys.add(date + "_" + campId + "_" + keywordId + "_" + searchTerm);
             }
+        }
 
+        // SECOND PASS - Process the CSV data
+        try (InputStream secondPassStream = getClass().getResourceAsStream(filepath);
+             BufferedReader secondPassReader = new BufferedReader(new InputStreamReader(secondPassStream));
+             CSVReader csvReader = new CSVReaderBuilder(secondPassReader)
+                     .withCSVParser(parser)
+                     .withSkipLines(1)
+                     .withMultilineLimit(-1)
+                     .build()) {
 
             // Cache for campaigns and parent SKUs to reduce database lookups
             Map<String, WayfairCampaign> campaignCache = new HashMap<>();
@@ -396,127 +419,127 @@ public class WayfairReportImport {
             }
 
 
-            try (CSVReader csvReader = readerBuilder.build()) {
-                String[] columns;
-                int processedRows = 0;
+            // Main processing loop
+            String[] columns;
+            int processedRows = 0;
 
 
-                while ((columns = csvReader.readNext()) != null) {
+            while ((columns = csvReader.readNext()) != null) {
 
-                    String dateStr = getValueByIndex(columns, 0);
-                    String campaignId = getValueByIndex(columns, 1);
-                    String campaignName = getValueByIndex(columns, 2);
-                    Boolean isActive = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 4));
-                    String dailyCap = getValueByIndex(columns, 5);
-                    String startDate = getValueByIndex(columns, 7);
-                    Long keywordId = Long.valueOf(getValueByIndex(columns, 9));
-                    String keywordValue = getValueByIndex(columns, 10);
-                    String matchType = getValueByIndex(columns, 11);
-                    Double bid = Double.valueOf(getValueByIndex(columns, 12));
-                    String clicks = getValueByIndex(columns, 14);
-                    String impressions = getValueByIndex(columns, 15);
-                    String spend = getValueByIndex(columns, 16);
-                    String totalSale = getValueByIndex(columns, 21);
-                    String orderQty = getValueByIndex(columns, 23);
-                    String searchTerm = getValueByIndex(columns, 27);
+                String dateStr = getValueByIndex(columns, 0);
+                String campaignId = getValueByIndex(columns, 1);
+                String campaignName = getValueByIndex(columns, 2);
+                Boolean isActive = "TRUE".equalsIgnoreCase(getValueByIndex(columns, 4));
+                String dailyCap = getValueByIndex(columns, 5);
+                String startDate = getValueByIndex(columns, 7);
+                Long keywordId = Long.valueOf(getValueByIndex(columns, 9));
+                String keywordValue = getValueByIndex(columns, 10);
+                String matchType = getValueByIndex(columns, 11);
+                Double bid = Double.valueOf(getValueByIndex(columns, 12));
+                String clicks = getValueByIndex(columns, 14);
+                String impressions = getValueByIndex(columns, 15);
+                String spend = getValueByIndex(columns, 16);
+                String totalSale = getValueByIndex(columns, 21);
+                String orderQty = getValueByIndex(columns, 23);
+                String searchTerm = getValueByIndex(columns, 27);
 
-                    if (dateStr.isEmpty()) continue;
-                    LocalDate reportDate;
-                    if (dateStr.contains("/")) {
-                        reportDate = LocalDate.parse(dateStr, slashFormatter);
-                    } else {
-                        reportDate = LocalDate.parse(dateStr, hyphenFormatter);
-                    }
+                if (dateStr.isEmpty()) continue;
+                LocalDate reportDate;
+                if (dateStr.contains("/")) {
+                    reportDate = LocalDate.parse(dateStr, slashFormatter);
+                } else {
+                    reportDate = LocalDate.parse(dateStr, hyphenFormatter);
+                }
 
-                    // Create unique key for this report
-                    String reportKey = reportDate + "_" + campaignId + "_" + keywordId + "_" + searchTerm;
-                    // Skip if already processed in current batch or exists in database
-                    if (processedReportKeys.contains(reportKey) || existingReportKeys.contains(reportKey)) {
-                        continue;
-                    }
-                    processedReportKeys.add(reportKey);
+                // Create unique key for this report
+                String reportKey = reportDate + "_" + campaignId + "_" + keywordId + "_" + searchTerm;
+                // Skip if already processed in current batch or exists in database
+                if (processedReportKeys.contains(reportKey) || existingReportKeys.contains(reportKey)) {
+                    continue;
+                }
+                processedReportKeys.add(reportKey);
 
 
-                    // Process Campaign
-                    WayfairCampaign campaign = campaignCache.get(campaignId);
-                    if (campaign == null) {
-                        campaign = new WayfairCampaign();
-                        campaign.setCampaignId(campaignId);
-                        campaign.setCampaignName(campaignName);
-                        campaign.setDailyCap(Integer.valueOf(dailyCap));
-                        if (!startDate.isEmpty()) campaign.setStartDate(reportDate);
-                        campaign.setIsActive(isActive);
-                        campaign.setType("Keyword");
+                // Process Campaign
+                WayfairCampaign campaign = campaignCache.get(campaignId);
+                if (campaign == null) {
+                    campaign = new WayfairCampaign();
+                    campaign.setCampaignId(campaignId);
+                    campaign.setCampaignName(campaignName);
+                    campaign.setDailyCap(Integer.valueOf(dailyCap));
+                    if (!startDate.isEmpty()) campaign.setStartDate(reportDate);
+                    campaign.setIsActive(isActive);
+                    campaign.setType("Keyword");
 
-                        campaignCache.put(campaignId, campaign);
-                        campaignBatch.add(campaign);
+                    campaignCache.put(campaignId, campaign);
+                    campaignBatch.add(campaign);
 
-                        // Save batch if needed
-                        if (campaignBatch.size() >= ENTITY_BATCH_SIZE) {
-                            wayfairCampaignRepository.saveAll(campaignBatch);
-                            campaignBatch.clear();
-                        }
-                    }
-
-                    // Process Parent SKU
-                    WayfairKeyword keywordEntity = keywordCache.get(keywordId);
-                    if (keywordEntity == null) {
-                        keywordEntity = new WayfairKeyword();
-                        keywordEntity.setKeywordId(keywordId);
-                        keywordEntity.setKeywordValue(keywordValue);
-                        keywordEntity.setDefaultBid(bid);
-                        keywordEntity.setType(matchType);
-
-                        keywordCache.put(keywordId, keywordEntity);
-                        keywordBatch.add(keywordEntity);
-
-                        // Save batch if needed
-                        if (keywordBatch.size() >= ENTITY_BATCH_SIZE) {
-                            wayfairKeywordRepository.saveAll(keywordBatch);
-                            keywordBatch.clear();
-                        }
-                    }
-
-                    // Process Report
-                    WayfairKeywordReportDaily report = new WayfairKeywordReportDaily();
-                    report.setReportDate(reportDate);
-                    report.setCampaignId(campaignId);
-                    report.setKeywordId(keywordId);
-                    report.setSearchTerm(searchTerm);
-                    report.setClicks(Integer.valueOf(clicks));
-                    report.setImpressions(Integer.valueOf(impressions));
-                    report.setSpend(Double.valueOf(spend));
-                    report.setTotalSale(Double.valueOf(totalSale));
-                    report.setOrderQuantity(Long.valueOf(orderQty));
-                    report.setBid(bid);
-
-                    reportBatch.add(report);
-
-                    // Save report batch if needed
-                    if (reportBatch.size() >= REPORT_BATCH_SIZE) {
-                        wayfairKeywordReportDailyRepository.saveAll(reportBatch);
-                        reportBatch.clear();
-                    }
-
-                    processedRows++;
-                    if (processedRows % 1000 == 0) {
-                        System.out.println("Processed " + processedRows + " rows");
+                    // Save batch if needed
+                    if (campaignBatch.size() >= ENTITY_BATCH_SIZE) {
+                        wayfairCampaignRepository.saveAll(campaignBatch);
+                        campaignBatch.clear();
                     }
                 }
 
-                // Save any remaining batches
-                if (!campaignBatch.isEmpty()) {
-                    wayfairCampaignRepository.saveAll(campaignBatch);
+                // Process Parent SKU
+                WayfairKeyword keywordEntity = keywordCache.get(keywordId);
+                if (keywordEntity == null) {
+                    keywordEntity = new WayfairKeyword();
+                    keywordEntity.setKeywordId(keywordId);
+                    keywordEntity.setKeywordValue(keywordValue);
+                    keywordEntity.setDefaultBid(bid);
+                    keywordEntity.setType(matchType);
+
+                    keywordCache.put(keywordId, keywordEntity);
+                    keywordBatch.add(keywordEntity);
+
+                    // Save batch if needed
+                    if (keywordBatch.size() >= ENTITY_BATCH_SIZE) {
+                        wayfairKeywordRepository.saveAll(keywordBatch);
+                        keywordBatch.clear();
+                    }
                 }
 
-                if (!keywordBatch.isEmpty()) {
-                    wayfairKeywordRepository.saveAll(keywordBatch);
-                }
+                // Process Report
+                WayfairKeywordReportDaily report = new WayfairKeywordReportDaily();
+                report.setReportDate(reportDate);
+                report.setCampaignId(campaignId);
+                report.setKeywordId(keywordId);
+                report.setSearchTerm(searchTerm);
+                report.setClicks(Integer.valueOf(clicks));
+                report.setImpressions(Integer.valueOf(impressions));
+                report.setSpend(Double.valueOf(spend));
+                report.setTotalSale(Double.valueOf(totalSale));
+                report.setOrderQuantity(Long.valueOf(orderQty));
+                report.setBid(bid);
 
-                if (!reportBatch.isEmpty()) {
+                reportBatch.add(report);
+
+                // Save report batch if needed
+                if (reportBatch.size() >= REPORT_BATCH_SIZE) {
                     wayfairKeywordReportDailyRepository.saveAll(reportBatch);
+                    reportBatch.clear();
+                }
+
+                processedRows++;
+                if (processedRows % 1000 == 0) {
+                    System.out.println("Processed " + processedRows + " rows");
                 }
             }
+
+            // Save any remaining batches
+            if (!campaignBatch.isEmpty()) {
+                wayfairCampaignRepository.saveAll(campaignBatch);
+            }
+
+            if (!keywordBatch.isEmpty()) {
+                wayfairKeywordRepository.saveAll(keywordBatch);
+            }
+
+            if (!reportBatch.isEmpty()) {
+                wayfairKeywordReportDailyRepository.saveAll(reportBatch);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading CSV file", e);
@@ -594,7 +617,7 @@ public class WayfairReportImport {
                     wayfairParentSku.setProducts(products);
                     wayfairParentSkuRepository.save(wayfairParentSku);
 
-                    if (!wayfairCampaignParentSkuRepository.existsByCampaignCampaignIdAndParentSkuParentSku(campaignId, parentSku)){
+                    if (!wayfairCampaignParentSkuRepository.existsByCampaignCampaignIdAndParentSkuParentSku(campaignId, parentSku)) {
                         WayfairCampaignParentSku newRelationship = new WayfairCampaignParentSku();
                         newRelationship.setCampaign(wayfairCampaign);
                         newRelationship.setParentSku(wayfairParentSku);
@@ -658,7 +681,7 @@ public class WayfairReportImport {
                     String totalSale = getValueByIndex(columns, 25);
                     String orderQty = getValueByIndex(columns, 26);
 
-                    WayfairCampaignParentSku wayfairCampaignParentSku = wayfairCampaignParentSkuRepository.findByCampaignCampaignIdAndParentSkuParentSku(campaignId,parentSku);
+                    WayfairCampaignParentSku wayfairCampaignParentSku = wayfairCampaignParentSkuRepository.findByCampaignCampaignIdAndParentSkuParentSku(campaignId, parentSku);
                     if (wayfairCampaignParentSku == null) continue;
                     if (b2b) continue;
                     wayfairCampaignParentSku.getParentSku().setDefaultBid(Float.valueOf(defaultBid));
