@@ -57,21 +57,32 @@ public class ImportController {
     @Autowired
     private WMSExport wmsExport;
 
+    public enum RequestType {
+
+        PRODUCT(Constants.PRODUCT),
+        KEYWORD(Constants.KEYWORD);
+
+        RequestType(String requestTypeString) {
+        }
+
+        public static class Constants {
+            public static final String PRODUCT = "product";
+            public static final String KEYWORD = "keyword";
+        }
+    };
+
     @GetMapping("/data")
-    public ResponseEntity<?> importData() {
+    public ResponseEntity<?> importData(@RequestParam(defaultValue = RequestType.Constants.PRODUCT) String reportType) {
         try {
             String filepath = "/data/product_report_day_22_05.csv";
-//            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
-//            shopifyExport.exportProductListing(products, "products.csv", true);
-//            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
-//            productsImport.importProductPrice();
-//            componentsImport.importPrices();
-//            componentsImport.importDimensions();
-//            shopifyExport.exportShopifyProductsPrice("product_prices_12-09.csv");
-            wayfairReportImport.importWayfairReportDaily(filepath, false);
-//                shopifyExport.exportAmazonReviews();
-//            wmsExport.exportSKU("wms.csv");
-//            wayfairReportImport.importWayfairParentSkuProduct(filepath);
+
+            if (reportType.equalsIgnoreCase(RequestType.Constants.PRODUCT)) {
+                wayfairReportImport.importWayfairReportDaily(filepath, false);
+            }
+
+
+
+
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
