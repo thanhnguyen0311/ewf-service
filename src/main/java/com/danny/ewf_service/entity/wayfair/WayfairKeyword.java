@@ -28,9 +28,12 @@ public class WayfairKeyword {
     private String keywordValue;
 
     @Column(name = "default_bid", nullable = false)
-    private BigDecimal defaultBid = BigDecimal.ZERO;
+    private Double defaultBid = 0.0;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "type")
+    private String type;
 
 }

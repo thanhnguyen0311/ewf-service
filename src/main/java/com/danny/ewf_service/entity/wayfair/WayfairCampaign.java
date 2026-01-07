@@ -45,4 +45,7 @@ public class WayfairCampaign {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "type")
+    private String type;
+
 }
