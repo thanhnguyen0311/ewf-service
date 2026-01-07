@@ -36,5 +36,4 @@ public class WayfairParentSku {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // getters/setters
 }

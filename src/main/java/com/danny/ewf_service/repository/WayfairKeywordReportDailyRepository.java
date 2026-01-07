@@ -12,19 +12,7 @@ import java.util.List;
 @Repository
 public interface WayfairKeywordReportDailyRepository extends JpaRepository<WayfairKeywordReportDaily, Long> {
 
-    @Query("SELECT " +
-           "w.campaignId, w.parentSku, " +
-           "COALESCE(SUM(w.clicks), 0), " +
-           "COALESCE(SUM(w.impressions), 0), " +
-           "COALESCE(SUM(w.spend), 0), " +
-           "COALESCE(SUM(w.totalSale), 0), " +
-           "COALESCE(SUM(w.orderQuantity), 0) " +
-           "FROM WayfairKeywordReportDaily w " +
-           "WHERE w.reportDate BETWEEN :fromDate AND :toDate " +
-           "GROUP BY w.campaignId, w.parentSku, w.keywordId " +
-           "ORDER BY w.campaignId, w.parentSku, w.keywordId")
-    List<Object[]> getAggregatedReportsByDateRange(
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );
+    @Query("SELECT r.reportDate, r.campaignId, r.keywordId, r.searchTerm FROM WayfairKeywordReportDaily r WHERE r.reportDate BETWEEN :fromDate AND :toDate")
+    List<Object[]> findReportKeysInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
 }

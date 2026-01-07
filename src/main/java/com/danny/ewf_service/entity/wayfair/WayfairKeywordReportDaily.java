@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
         name = "wayfair_keyword_report_daily",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        columnNames = {"report_date", "campaign_id", "parent_sku","keyword_id"}
+                        columnNames = {"report_date", "campaign_id", "search_term","keyword_id"}
                 )
         }
 )
@@ -34,12 +34,14 @@ public class WayfairKeywordReportDaily {
     @Column(name = "campaign_id", length = 50, nullable = false)
     private String campaignId;
 
-    @Column(name = "parent_sku", length = 80, nullable = false)
-    private String parentSku;
-
     @Column(name = "keyword_id", nullable = false)
     private Long keywordId;
 
+    @Column(name = "bid", nullable = false)
+    private Double bid;
+
+    @Column(name = "search_term")
+    private String searchTerm;
 
     @Column(name = "clicks")
     private Integer clicks = 0;
@@ -48,31 +50,13 @@ public class WayfairKeywordReportDaily {
     private Integer impressions = 0;
 
     @Column(name = "spend")
-    private Double spend;
+    private Double spend = 0.00;
 
     @Column(name = "total_sale")
-    private Double totalSale;
+    private Double totalSale = 0.0;
 
     @Column(name = "order_quantity")
     private Long orderQuantity = 0L;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(
-                    name = "campaign_id",
-                    referencedColumnName = "campaign_id",
-                    insertable = false,
-                    updatable = false
-            ),
-            @JoinColumn(
-                    name = "parent_sku",
-                    referencedColumnName = "parent_sku",
-                    insertable = false,
-                    updatable = false
-            )
-    })
-    private WayfairCampaignParentSku campaignParentSku;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -89,5 +73,7 @@ public class WayfairKeywordReportDaily {
 
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
+
+
 
 }
