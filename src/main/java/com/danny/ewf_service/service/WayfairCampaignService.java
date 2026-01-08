@@ -19,5 +19,5 @@ public interface WayfairCampaignService {
     List<WayfairKeywordReportDto> sumClicksByDateRangeKeyword(String startDate , String endDate);
     LocalDate getLastUpdateDate();
 
-    void updateCategoryCampaign(WayfairCampaignCategoryDto wayfairCampaignCategoryDto);
+    void updateCategoryCampaign(List<WayfairCampaignCategoryDto> wayfairCampaignCategoryDto);
 }

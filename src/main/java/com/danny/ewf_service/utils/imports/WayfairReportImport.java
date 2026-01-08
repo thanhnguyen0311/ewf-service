@@ -444,6 +444,11 @@ public class WayfairReportImport {
                     searchTerm = searchTerm.substring(0, 255);
                 }
 
+                if (Long.parseLong(clicks) == 0) {
+                    totalSale = String.valueOf(0);
+                    orderQty = String.valueOf(0);
+                }
+
                 if (dateStr.isEmpty()) continue;
                 LocalDate reportDate;
                 if (dateStr.contains("/")) {

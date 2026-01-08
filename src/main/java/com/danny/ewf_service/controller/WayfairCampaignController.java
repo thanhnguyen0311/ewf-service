@@ -75,9 +75,9 @@ public class WayfairCampaignController {
 
 
     @PostMapping("/campaigns/category")
-    public ResponseEntity<?> updateCategory(@RequestBody WayfairCampaignCategoryDto wayfairCampaignCategoryDto) {
+    public ResponseEntity<?> updateCategory(@RequestBody List<WayfairCampaignCategoryDto> wayfairCampaignCategoryDtos) {
         try {
-            wayfairCampaignService.updateCategoryCampaign(wayfairCampaignCategoryDto);
+            wayfairCampaignService.updateCategoryCampaign(wayfairCampaignCategoryDtos);
             return ResponseEntity.status(200).body("Category updated successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Cannot create user");
