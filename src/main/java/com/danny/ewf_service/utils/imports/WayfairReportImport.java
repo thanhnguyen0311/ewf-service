@@ -402,8 +402,6 @@ public class WayfairReportImport {
 
             // Batch collections
             List<WayfairKeywordReportDaily> reportBatch = new ArrayList<>(1000);
-            List<WayfairCampaign> campaignBatch = new ArrayList<>(100);
-            List<WayfairKeyword> keywordBatch = new ArrayList<>(100);
 
             // Batch size constants
             final int REPORT_BATCH_SIZE = 1000;
@@ -442,6 +440,9 @@ public class WayfairReportImport {
                 String totalSale = getValueByIndex(columns, 21);
                 String orderQty = getValueByIndex(columns, 23);
                 String searchTerm = getValueByIndex(columns, 27);
+                if (searchTerm.length() > 255) {
+                    searchTerm = searchTerm.substring(0, 255);
+                }
 
                 if (dateStr.isEmpty()) continue;
                 LocalDate reportDate;
@@ -472,13 +473,9 @@ public class WayfairReportImport {
                     campaign.setType("Keyword");
 
                     campaignCache.put(campaignId, campaign);
-                    campaignBatch.add(campaign);
+                    wayfairCampaignRepository.save(campaign);
 
-                    // Save batch if needed
-                    if (campaignBatch.size() >= ENTITY_BATCH_SIZE) {
-                        wayfairCampaignRepository.saveAll(campaignBatch);
-                        campaignBatch.clear();
-                    }
+
                 }
 
                 // Process Parent SKU
@@ -491,13 +488,8 @@ public class WayfairReportImport {
                     keywordEntity.setType(matchType);
 
                     keywordCache.put(keywordId, keywordEntity);
-                    keywordBatch.add(keywordEntity);
 
-                    // Save batch if needed
-                    if (keywordBatch.size() >= ENTITY_BATCH_SIZE) {
-                        wayfairKeywordRepository.saveAll(keywordBatch);
-                        keywordBatch.clear();
-                    }
+                    wayfairKeywordRepository.save(keywordEntity);
                 }
 
                 // Process Report
@@ -515,26 +507,22 @@ public class WayfairReportImport {
 
                 reportBatch.add(report);
 
-                // Save report batch if needed
                 if (reportBatch.size() >= REPORT_BATCH_SIZE) {
                     wayfairKeywordReportDailyRepository.saveAll(reportBatch);
                     reportBatch.clear();
-                }
 
+                }
                 processedRows++;
                 if (processedRows % 1000 == 0) {
                     System.out.println("Processed " + processedRows + " rows");
                 }
+
+
             }
 
-            // Save any remaining batches
-            if (!campaignBatch.isEmpty()) {
-                wayfairCampaignRepository.saveAll(campaignBatch);
-            }
 
-            if (!keywordBatch.isEmpty()) {
-                wayfairKeywordRepository.saveAll(keywordBatch);
-            }
+
+            System.out.println("Saving " + reportBatch.size() + " new reports");
 
             if (!reportBatch.isEmpty()) {
                 wayfairKeywordReportDailyRepository.saveAll(reportBatch);

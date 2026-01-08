@@ -2,8 +2,10 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
+import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
 import com.danny.ewf_service.repository.WayfairAdsReportDayRepository;
 import com.danny.ewf_service.repository.WayfairCampaignParentSkuRepository;
+import com.danny.ewf_service.repository.WayfairKeywordReportDailyRepository;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import com.danny.ewf_service.utils.DateTimeUtils;
 import lombok.AllArgsConstructor;
@@ -26,6 +28,9 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
 
     @Autowired
     private final DateTimeUtils dateTimeUtils;
+
+    @Autowired
+    private final WayfairKeywordReportDailyRepository wayfairKeywordReportDailyRepository;
 
     @Override
     public List<WayfairCampaignParentSku> findAllActiveCampaignsWithParentSkus() {
@@ -59,6 +64,34 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
         }
 
         return wayfairAdsReportDtos;
+    }
+
+    @Override
+    public List<WayfairKeywordReportDto> sumClicksByDateRangeKeyword(String startDate, String endDate) {
+        List<WayfairKeywordReportDto> wayfairKeywordReportDtos = new ArrayList<>();
+        LocalDate start = dateTimeUtils.parseDate(startDate);
+        LocalDate end = dateTimeUtils.parseDate(endDate);
+        List<Object[]> rawResult = wayfairKeywordReportDailyRepository.getAggregatedReportsByDateRange(start, end);
+        for (Object[] result : rawResult) {
+            WayfairKeywordReportDto wayfairKeywordReportDto = WayfairKeywordReportDto.builder()
+                    .campaignId(result[0].toString())
+                    .keywordId(result[1].toString())
+                    .keywordValue(result[2].toString())
+                    .type(result[3].toString())
+                    .clicks(Long.parseLong(result[4].toString()))
+                    .impressions(Long.parseLong(result[5].toString()))
+                    .spend(Double.parseDouble(result[6].toString()))
+                    .totalSale(Double.parseDouble(result[7].toString()))
+                    .totalOrders(Long.parseLong(result[8].toString()))
+                    .defaultBid(Double.parseDouble(result[9].toString()))
+                    .campaignName(result[10].toString())
+                    .startDate(result[11].toString())
+                    .dailyCap(result[12].toString())
+                    .build();
+            wayfairKeywordReportDtos.add(wayfairKeywordReportDto);
+        }
+
+        return wayfairKeywordReportDtos;
     }
 
     @Override

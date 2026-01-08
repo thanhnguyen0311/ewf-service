@@ -20,7 +20,6 @@ public class WayfairKeyword {
     @Column(name = "id")
     private Long id;
 
-
     @Column(name = "keyword_id",  nullable = false, unique = true)
     private Long KeywordId;
 
