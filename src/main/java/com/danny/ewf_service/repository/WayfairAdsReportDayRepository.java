@@ -40,7 +40,8 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
           w.campaignParentSku.parentSku.products,
           w.campaignParentSku.parentSku.className,
           w.campaignParentSku.campaign.startDate,
-          w.campaignParentSku.campaign.dailyCap
+          w.campaignParentSku.campaign.dailyCap,
+          w.campaignParentSku.campaign.category
         FROM WayfairAdsReportDay w
         WHERE w.reportDate BETWEEN :fromDate AND :toDate
           AND w.campaignParentSku.campaign.type = 'Product'
