@@ -11,11 +11,16 @@ import lombok.*;
 @ToString
 public class WayfairKeywordReportDto {
     private String campaignId;
-    private String parentSku;
     private String keywordId;
+    private String keywordValue;
+    private String type;
     private Long clicks;
     private Long impressions;
     private Double spend;
     private Double totalSale;
     private Long totalOrders;
+    private Double defaultBid;
+    private String campaignName;
+    private String startDate;
+    private String dailyCap;
 }

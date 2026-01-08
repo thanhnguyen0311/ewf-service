@@ -3,6 +3,7 @@ package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
+import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,19 @@ public class WayfairCampaignController {
         }
     }
 
+    @GetMapping("/campaigns/keyword/reportByDate")
+    public ResponseEntity<?> getKeywordReportsByDate(
+            @RequestParam("startDate") String startDateStr,
+            @RequestParam("endDate") String endDateStr) {
 
+        try {
+            List<WayfairKeywordReportDto> wayfairKeywordReportDtos = wayfairCampaignService.sumClicksByDateRangeKeyword(startDateStr, endDateStr);
+            return ResponseEntity.ok(wayfairKeywordReportDtos);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error retrieving click statistics: " + e.getMessage());
+        }
+    }
     @GetMapping("/campaigns/last-update")
     public ResponseEntity<?> getClickStats() {
         try {

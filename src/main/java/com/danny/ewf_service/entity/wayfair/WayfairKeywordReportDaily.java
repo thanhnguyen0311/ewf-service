@@ -34,6 +34,15 @@ public class WayfairKeywordReportDaily {
     @Column(name = "campaign_id", length = 50, nullable = false)
     private String campaignId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "campaign_id",
+            referencedColumnName = "campaign_id",
+            insertable = false,
+            updatable = false
+    )
+    private WayfairCampaign campaign;
+
     @Column(name = "keyword_id", nullable = false)
     private Long keywordId;
 
