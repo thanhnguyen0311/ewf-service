@@ -32,8 +32,7 @@ public interface WayfairKeywordReportDailyRepository extends JpaRepository<Wayfa
           w.campaign.campaignName,
           w.campaign.startDate,
           w.campaign.dailyCap,
-          w.searchTerm,
-          w.campaign.category
+          w.searchTerm
         FROM WayfairKeywordReportDaily w
         WHERE w.reportDate BETWEEN :fromDate AND :toDate
           AND w.campaign.type = 'Keyword'
