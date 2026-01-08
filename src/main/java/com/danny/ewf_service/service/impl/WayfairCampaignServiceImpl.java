@@ -1,10 +1,13 @@
 package com.danny.ewf_service.service.impl;
 
+import com.danny.ewf_service.entity.wayfair.WayfairCampaign;
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
+import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
 import com.danny.ewf_service.repository.WayfairAdsReportDayRepository;
 import com.danny.ewf_service.repository.WayfairCampaignParentSkuRepository;
+import com.danny.ewf_service.repository.WayfairCampaignRepository;
 import com.danny.ewf_service.repository.WayfairKeywordReportDailyRepository;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import com.danny.ewf_service.utils.DateTimeUtils;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -31,6 +35,10 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
 
     @Autowired
     private final WayfairKeywordReportDailyRepository wayfairKeywordReportDailyRepository;
+
+    @Autowired
+    private final WayfairCampaignRepository wayfairCampaignRepository;
+
 
     @Override
     public List<WayfairCampaignParentSku> findAllActiveCampaignsWithParentSkus() {
@@ -59,6 +67,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
                     .className(result[11].toString())
                     .startDate(result[12].toString())
                     .dailyCap(result[13].toString())
+                    .category(result[14].toString())
                     .build();
             wayfairAdsReportDtos.add(wayfairAdsReportDto);
         }
@@ -87,6 +96,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
                     .campaignName(result[10].toString())
                     .startDate(result[11].toString())
                     .dailyCap(result[12].toString())
+                    .searchTerm(result[13].toString())
                     .build();
             wayfairKeywordReportDtos.add(wayfairKeywordReportDto);
         }
@@ -97,6 +107,19 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
     @Override
     public LocalDate getLastUpdateDate() {
         return wayfairAdsReportDayRepository.findNewestReportDate();
+    }
+
+    @Override
+    public void updateCategoryCampaign(WayfairCampaignCategoryDto wayfairCampaignCategoryDto) {
+        WayfairCampaign wayfairCampaign;
+        for (String campaignId : wayfairCampaignCategoryDto.getCampaignIds()) {
+            Optional<WayfairCampaign> optionalWayfairCampaign = wayfairCampaignRepository.findByCampaignId(campaignId);
+            if (optionalWayfairCampaign.isPresent()) {
+                wayfairCampaign = optionalWayfairCampaign.get();
+                wayfairCampaign.setCategory(wayfairCampaignCategoryDto.getCategory());
+                wayfairCampaignRepository.save(wayfairCampaign);
+            }
+        }
     }
 
 
