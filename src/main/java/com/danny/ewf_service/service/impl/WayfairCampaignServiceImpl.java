@@ -110,16 +110,19 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
     }
 
     @Override
-    public void updateCategoryCampaign(WayfairCampaignCategoryDto wayfairCampaignCategoryDto) {
+    public void updateCategoryCampaign(List<WayfairCampaignCategoryDto> wayfairCampaignCategoryDto) {
         WayfairCampaign wayfairCampaign;
-        for (String campaignId : wayfairCampaignCategoryDto.getCampaignIds()) {
-            Optional<WayfairCampaign> optionalWayfairCampaign = wayfairCampaignRepository.findByCampaignId(campaignId);
-            if (optionalWayfairCampaign.isPresent()) {
-                wayfairCampaign = optionalWayfairCampaign.get();
-                wayfairCampaign.setCategory(wayfairCampaignCategoryDto.getCategory());
-                wayfairCampaignRepository.save(wayfairCampaign);
+        for (WayfairCampaignCategoryDto dto : wayfairCampaignCategoryDto) {
+            for (String campaignId : dto.getCampaignIds()) {
+                Optional<WayfairCampaign> optionalWayfairCampaign = wayfairCampaignRepository.findByCampaignId(campaignId);
+                if (optionalWayfairCampaign.isPresent()) {
+                    wayfairCampaign = optionalWayfairCampaign.get();
+                    wayfairCampaign.setCategory(dto.getCategory());
+                    wayfairCampaignRepository.save(wayfairCampaign);
+                }
             }
         }
+
     }
 
 
