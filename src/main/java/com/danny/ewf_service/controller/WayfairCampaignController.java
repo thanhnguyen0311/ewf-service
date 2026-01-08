@@ -72,7 +72,7 @@ public class WayfairCampaignController {
     }
 
 
-    @PostMapping("")
+    @PostMapping("/campaigns/category")
     public ResponseEntity<?> updateCategory(@RequestBody WayfairCampaignCategoryDto wayfairCampaignCategoryDto) {
         try {
             wayfairCampaignService.updateCategoryCampaign(wayfairCampaignCategoryDto);
