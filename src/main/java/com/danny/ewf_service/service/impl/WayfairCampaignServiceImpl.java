@@ -52,6 +52,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
         LocalDate end = dateTimeUtils.parseDate(endDate);
         List<Object[]> rawResult = wayfairAdsReportDayRepository.getAggregatedReportsByDateRange(start, end);
         for (Object[] result : rawResult) {
+            String category = (result[14] != null) ? result[14].toString() : "";
             WayfairAdsReportDto wayfairAdsReportDto = WayfairAdsReportDto.builder()
                     .campaignId(result[0].toString())
                     .parentSku(result[1].toString())
@@ -67,7 +68,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
                     .className(result[11].toString())
                     .startDate(result[12].toString())
                     .dailyCap(result[13].toString())
-                    .category(result[14].toString())
+                    .category(category)
                     .build();
             wayfairAdsReportDtos.add(wayfairAdsReportDto);
         }
