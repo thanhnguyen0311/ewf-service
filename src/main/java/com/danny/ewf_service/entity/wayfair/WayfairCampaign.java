@@ -27,6 +27,9 @@ public class WayfairCampaign {
     @Column(name = "campaign_name", length = 255)
     private String campaignName;
 
+    @Column(name = "category")
+    private String category;
+
     @Column(name = "is_active")
     private Boolean isActive = true;
 

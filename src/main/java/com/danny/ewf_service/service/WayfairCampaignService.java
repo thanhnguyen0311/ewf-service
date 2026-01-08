@@ -1,6 +1,7 @@
 package com.danny.ewf_service.service;
 
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
+import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCampaignClickRequestDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
@@ -17,4 +18,6 @@ public interface WayfairCampaignService {
 
     List<WayfairKeywordReportDto> sumClicksByDateRangeKeyword(String startDate , String endDate);
     LocalDate getLastUpdateDate();
+
+    void updateCategoryCampaign(WayfairCampaignCategoryDto wayfairCampaignCategoryDto);
 }

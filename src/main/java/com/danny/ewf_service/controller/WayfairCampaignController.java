@@ -2,12 +2,15 @@ package com.danny.ewf_service.controller;
 
 
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
+import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
+import com.danny.ewf_service.payload.request.user.UserCreateRequestDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -70,4 +73,16 @@ public class WayfairCampaignController {
         }
     }
 
+
+    @PostMapping("/campaigns/category")
+    public ResponseEntity<?> updateCategory(@RequestBody WayfairCampaignCategoryDto wayfairCampaignCategoryDto) {
+        try {
+            wayfairCampaignService.updateCategoryCampaign(wayfairCampaignCategoryDto);
+            return ResponseEntity.status(200).body("Category updated successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Cannot create user");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error creating new user");
+        }
+    }
 }
