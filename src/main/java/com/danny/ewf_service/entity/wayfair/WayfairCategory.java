@@ -20,7 +20,4 @@ public class WayfairCategory {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "target_acos")
-    private Double targetAcos;
-
 }
