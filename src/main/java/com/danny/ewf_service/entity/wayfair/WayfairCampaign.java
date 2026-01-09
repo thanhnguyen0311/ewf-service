@@ -1,4 +1,5 @@
 package com.danny.ewf_service.entity.wayfair;
+import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,8 +28,9 @@ public class WayfairCampaign {
     @Column(name = "campaign_name", length = 255)
     private String campaignName;
 
-    @Column(name = "category")
-    private String category;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private WayfairCategory category;
 
     @Column(name = "is_active")
     private Boolean isActive = true;
