@@ -4,6 +4,8 @@ package com.danny.ewf_service.entity.wayfair;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(
         name = "wayfair_category_reports",
@@ -23,4 +25,32 @@ public class WayfairCategoryReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private WayfairCategory category;
+
+    @Column(name = "report_date", nullable = false)
+    private LocalDate reportDate;
+
+    @Column(name = "total_sale")
+    private Double totalSales;
+
+    @Column(name = "ad_spend")
+    private Double adSpend;
+
+    @Column(name = "sale_by_ads")
+    private Double saleByAds;
+
+    @Column(name = "tacos")
+    private Double tacos;
+
+    @Column(name = "acos")
+    private Double acos;
+
+    @Column(name = "target_acos")
+    private Double targetAcos;
+
+    @Column(name = "order_quantity")
+    private Integer orderQuantity;
 }

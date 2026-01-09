@@ -25,7 +25,7 @@ public class WayfairCampaign {
     @Column(name = "campaign_id", length = 50, nullable = false, unique = true)
     private String campaignId;
 
-    @Column(name = "campaign_name", length = 255)
+    @Column(name = "campaign_name")
     private String campaignName;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)

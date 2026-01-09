@@ -1,4 +1,4 @@
-package com.danny.ewf_service.repository;
+package com.danny.ewf_service.repository.Wayfair;
 
 import com.danny.ewf_service.entity.wayfair.WayfairKeywordReportDaily;
 import org.springframework.data.jpa.repository.JpaRepository;

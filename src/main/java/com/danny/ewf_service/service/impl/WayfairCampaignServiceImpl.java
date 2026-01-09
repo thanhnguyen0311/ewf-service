@@ -3,10 +3,13 @@ package com.danny.ewf_service.service.impl;
 import com.danny.ewf_service.entity.wayfair.WayfairCampaign;
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
 import com.danny.ewf_service.entity.wayfair.WayfairCategory;
+import com.danny.ewf_service.entity.wayfair.WayfairCategoryReport;
+import com.danny.ewf_service.exception.ResourceNotFoundException;
 import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
+import com.danny.ewf_service.payload.request.campaign.WayfairCategoryReportRequestDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
-import com.danny.ewf_service.repository.*;
+import com.danny.ewf_service.repository.Wayfair.*;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import com.danny.ewf_service.utils.DateTimeUtils;
 import lombok.AllArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +43,9 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
 
     @Autowired
     private final WayfairCategoryRepository wayfairCategoryRepository;
+
+    @Autowired
+    private final WayfairCategoryReportRepository wayfairCategoryReportRepository;
 
     @Override
     public List<WayfairCampaignParentSku> findAllActiveCampaignsWithParentSkus() {
@@ -121,6 +128,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
             } else {
                 wayfairCategory = optionalWayfairCategory.get();
             }
+
             for (String campaignId : dto.getCampaignIds()) {
                 Optional<WayfairCampaign> optionalWayfairCampaign = wayfairCampaignRepository.findByCampaignId(campaignId);
                 if (optionalWayfairCampaign.isPresent()) {
@@ -132,5 +140,35 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
         }
     }
 
+    @Override
+    public void updateCategoryReports(List<WayfairCategoryReportRequestDto> wayfairCategoryReportRequestDtos) {
+        DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+        DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate reportDate;
+        WayfairCategoryReport wayfairCategoryReport;
+        WayfairCategory wayfairCategory;
+        for (WayfairCategoryReportRequestDto dto : wayfairCategoryReportRequestDtos) {
+            Optional<WayfairCategory> optionalWayfairCategory = wayfairCategoryRepository.findByTitle(dto.getCategory());
+            wayfairCategory = optionalWayfairCategory.orElseThrow(() ->
+                    new ResourceNotFoundException("Wayfair category with ID " + dto.getCategory() + " not found"));
 
+            if (dto.getReportDate().contains("/")) {
+                reportDate = LocalDate.parse(dto.getReportDate(), slashFormatter);
+            } else {
+                reportDate = LocalDate.parse(dto.getReportDate(), hyphenFormatter);
+            }
+            Optional<WayfairCategoryReport> optionalWayfairCategoryReport = wayfairCategoryReportRepository.findByCategory_TitleAndReportDate(dto.getCategory(), reportDate);
+            wayfairCategoryReport = optionalWayfairCategoryReport.orElseGet(WayfairCategoryReport::new);
+            wayfairCategoryReport.setAcos(dto.getAcos());
+            wayfairCategoryReport.setReportDate(reportDate);
+            wayfairCategoryReport.setCategory(wayfairCategory);
+            wayfairCategoryReport.setTacos(dto.getTacos());
+            wayfairCategoryReport.setAdSpend(dto.getAdSpend());
+            wayfairCategoryReport.setSaleByAds(dto.getSaleByAds());
+            wayfairCategoryReport.setTargetAcos(dto.getTargetAcos());
+            wayfairCategoryReport.setTotalSales(dto.getTotalSale());
+            wayfairCategoryReport.setOrderQuantity(dto.getOrderQuantity());
+            wayfairCategoryReportRepository.save(wayfairCategoryReport);
+        }
+    }
 }

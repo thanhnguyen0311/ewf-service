@@ -1,10 +1,8 @@
 package com.danny.ewf_service.utils.imports;
 
 
-import com.danny.ewf_service.entity.Price;
-import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.wayfair.*;
-import com.danny.ewf_service.repository.*;
+import com.danny.ewf_service.repository.Wayfair.*;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
