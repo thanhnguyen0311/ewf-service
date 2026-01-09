@@ -35,7 +35,7 @@ public interface WayfairKeywordReportDailyRepository extends JpaRepository<Wayfa
         FROM WayfairKeywordReportDaily w
         WHERE w.reportDate BETWEEN :fromDate AND :toDate
           AND w.campaign.type = 'Keyword'
-        GROUP BY w.campaignId, w.keywordId
+        GROUP BY w.campaignId, w.keywordId, w.keyword.type
         ORDER BY w.campaignId, w.keywordId
         """)
     List<Object[]> getAggregatedReportsByDateRange(
