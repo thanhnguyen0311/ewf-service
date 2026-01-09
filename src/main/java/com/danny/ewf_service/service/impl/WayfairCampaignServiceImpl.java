@@ -2,13 +2,11 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.entity.wayfair.WayfairCampaign;
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
+import com.danny.ewf_service.entity.wayfair.WayfairCategory;
 import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
-import com.danny.ewf_service.repository.WayfairAdsReportDayRepository;
-import com.danny.ewf_service.repository.WayfairCampaignParentSkuRepository;
-import com.danny.ewf_service.repository.WayfairCampaignRepository;
-import com.danny.ewf_service.repository.WayfairKeywordReportDailyRepository;
+import com.danny.ewf_service.repository.*;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import com.danny.ewf_service.utils.DateTimeUtils;
 import lombok.AllArgsConstructor;
@@ -39,6 +37,8 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
     @Autowired
     private final WayfairCampaignRepository wayfairCampaignRepository;
 
+    @Autowired
+    private final WayfairCategoryRepository wayfairCategoryRepository;
 
     @Override
     public List<WayfairCampaignParentSku> findAllActiveCampaignsWithParentSkus() {
@@ -112,12 +112,20 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
     @Override
     public void updateCategoryCampaign(List<WayfairCampaignCategoryDto> wayfairCampaignCategoryDto) {
         WayfairCampaign wayfairCampaign;
+        WayfairCategory wayfairCategory;
         for (WayfairCampaignCategoryDto dto : wayfairCampaignCategoryDto) {
+            Optional<WayfairCategory> optionalWayfairCategory = wayfairCategoryRepository.findByTitle(dto.getCategory());
+            if (optionalWayfairCategory.isEmpty()) {
+                wayfairCategory = WayfairCategory.builder().title(dto.getCategory()).build();
+                wayfairCategoryRepository.save(wayfairCategory);
+            } else {
+                wayfairCategory = optionalWayfairCategory.get();
+            }
             for (String campaignId : dto.getCampaignIds()) {
                 Optional<WayfairCampaign> optionalWayfairCampaign = wayfairCampaignRepository.findByCampaignId(campaignId);
                 if (optionalWayfairCampaign.isPresent()) {
                     wayfairCampaign = optionalWayfairCampaign.get();
-                    wayfairCampaign.setCategory(dto.getCategory());
+                    wayfairCampaign.setCategory(wayfairCategory);
                     wayfairCampaignRepository.save(wayfairCampaign);
                 }
             }
