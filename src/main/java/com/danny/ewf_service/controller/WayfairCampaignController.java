@@ -2,6 +2,7 @@ package com.danny.ewf_service.controller;
 
 
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
+import com.danny.ewf_service.entity.wayfair.WayfairCategoryReport;
 import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCategoryReportRequestDto;
 import com.danny.ewf_service.payload.request.user.UserCreateRequestDto;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/v1/ad")
 @RestController
@@ -32,6 +34,19 @@ public class WayfairCampaignController {
             return ResponseEntity.status(404).body("Not found");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error fetching product");
+        }
+    }
+
+
+    @GetMapping("/campaigns/category/report")
+    public ResponseEntity<?> getCategoryReport(@RequestParam String date) {
+        try {
+            Map<String, WayfairCategoryReport> wayfairCategoryReportMap =  wayfairCampaignService.getCategoryReportsByDate(date);
+            return ResponseEntity.status(200).body(wayfairCategoryReportMap);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Cannot create user");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error creating new user");
         }
     }
 

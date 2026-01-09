@@ -18,9 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -170,5 +168,21 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
             wayfairCategoryReport.setOrderQuantity(dto.getOrderQuantity());
             wayfairCategoryReportRepository.save(wayfairCategoryReport);
         }
+    }
+
+    @Override
+    public Map<String, WayfairCategoryReport> getCategoryReportsByDate(String date) {
+        DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
+        DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate reportDate;
+        if (date.contains("/")) {
+            reportDate = LocalDate.parse(date, slashFormatter);
+        } else {
+            reportDate = LocalDate.parse(date, hyphenFormatter);
+        }
+        List<WayfairCategoryReport> reports = wayfairCategoryReportRepository.findAllByReportDate(reportDate);
+        Map<String, WayfairCategoryReport> wayfairCategoryReportMap = new HashMap<>();
+        reports.forEach(report -> wayfairCategoryReportMap.put(report.getCategory().getTitle(), report));
+        return wayfairCategoryReportMap;
     }
 }
