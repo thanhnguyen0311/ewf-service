@@ -23,5 +23,4 @@ public class WayfairKeywordReportDto {
     private String campaignName;
     private String startDate;
     private String dailyCap;
-    private String searchTerm;
 }

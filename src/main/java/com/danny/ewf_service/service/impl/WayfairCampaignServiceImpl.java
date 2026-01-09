@@ -97,7 +97,6 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
                     .campaignName(result[10].toString())
                     .startDate(result[11].toString())
                     .dailyCap(result[12].toString())
-                    .searchTerm(result[13].toString())
                     .build();
             wayfairKeywordReportDtos.add(wayfairKeywordReportDto);
         }
