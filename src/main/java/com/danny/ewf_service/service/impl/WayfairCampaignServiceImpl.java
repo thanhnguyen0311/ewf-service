@@ -1,10 +1,8 @@
 package com.danny.ewf_service.service.impl;
 
-import com.danny.ewf_service.entity.wayfair.WayfairCampaign;
-import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
-import com.danny.ewf_service.entity.wayfair.WayfairCategory;
-import com.danny.ewf_service.entity.wayfair.WayfairCategoryReport;
+import com.danny.ewf_service.entity.wayfair.*;
 import com.danny.ewf_service.exception.ResourceNotFoundException;
+import com.danny.ewf_service.payload.request.campaign.WayfairBiddingLogicRequestDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCategoryReportRequestDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
@@ -45,6 +43,9 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
 
     @Autowired
     private final WayfairCategoryReportRepository wayfairCategoryReportRepository;
+
+    @Autowired
+    private final WayfairBiddingLogicRepository wayfairBiddingLogicRepository;
 
     @Override
     public List<WayfairCampaignParentSku> findAllActiveCampaignsWithParentSkus() {
@@ -215,5 +216,19 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
 
 
         return sortedMap;
+    }
+
+    @Override
+    public void updateBiddingLogic(WayfairBiddingLogicRequestDto wayfairBiddingLogicRequestDto) {
+        Optional<WayfairCategory> wayfairCategory = wayfairCategoryRepository.findByTitle(wayfairBiddingLogicRequestDto.getCategory());
+        WayfairBiddingLogic wayfairBiddingLogic;
+        if (wayfairCategory.isPresent()) {
+            Optional<WayfairBiddingLogic> optionalWayfairBiddingLogic = wayfairBiddingLogicRepository.findByCategory(wayfairCategory.get());
+            wayfairBiddingLogic = optionalWayfairBiddingLogic.orElseGet(() -> WayfairBiddingLogic.builder().category(wayfairCategory.get()).build());
+            wayfairBiddingLogic.setLogic(wayfairBiddingLogicRequestDto.getBiddingLogic());
+            wayfairBiddingLogicRepository.save(wayfairBiddingLogic);
+        }
+
+
     }
 }

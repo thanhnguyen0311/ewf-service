@@ -2,6 +2,7 @@ package com.danny.ewf_service.service;
 
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
 import com.danny.ewf_service.entity.wayfair.WayfairCategoryReport;
+import com.danny.ewf_service.payload.request.campaign.WayfairBiddingLogicRequestDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCampaignClickRequestDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCategoryReportRequestDto;
@@ -29,4 +30,6 @@ public interface WayfairCampaignService {
     Map<String, WayfairCategoryReport> getCategoryReportsByDate(String date);
 
     Map<LocalDate, Map<String, WayfairCategoryReport>> getRecentCategoryReports();
+
+    void updateBiddingLogic(WayfairBiddingLogicRequestDto wayfairBiddingLogicRequestDto);
 }
