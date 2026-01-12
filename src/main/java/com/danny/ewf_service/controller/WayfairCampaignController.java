@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +35,7 @@ public class WayfairCampaignController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Not found");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error fetching product");
+            return ResponseEntity.internalServerError().body("Error fetching campaigns");
         }
     }
 
@@ -44,9 +46,21 @@ public class WayfairCampaignController {
             Map<String, WayfairCategoryReport> wayfairCategoryReportMap =  wayfairCampaignService.getCategoryReportsByDate(date);
             return ResponseEntity.status(200).body(wayfairCategoryReportMap);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body("Cannot create user");
+            return ResponseEntity.status(404).body("ERROR");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error creating new user");
+            return ResponseEntity.internalServerError().body("ERROR");
+        }
+    }
+
+    @GetMapping("/campaigns/category/report/recent")
+    public ResponseEntity<?> getRecentCategoryReport() {
+        try {
+            Map<LocalDate, Map<String, WayfairCategoryReport>> wayfairCategoryReportMap =  wayfairCampaignService.getRecentCategoryReports();
+            return ResponseEntity.status(200).body(wayfairCategoryReportMap);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("ERROR");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("ERROR");
         }
     }
 
