@@ -12,6 +12,7 @@ import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
 import com.danny.ewf_service.repository.Wayfair.*;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import com.danny.ewf_service.utils.DateTimeUtils;
+import jnr.constants.platform.Local;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -184,5 +185,35 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
         Map<String, WayfairCategoryReport> wayfairCategoryReportMap = new HashMap<>();
         reports.forEach(report -> wayfairCategoryReportMap.put(report.getCategory().getTitle(), report));
         return wayfairCategoryReportMap;
+    }
+
+    @Override
+    public Map<LocalDate, Map<String, WayfairCategoryReport>> getRecentCategoryReports() {
+        List<String> recentDates = wayfairCategoryReportRepository.findTop3RecentDates();
+        System.out.println(recentDates);
+        List<LocalDate> getRecentDate = recentDates.stream().map(LocalDate::parse).toList();
+        Map<LocalDate, Map<String, WayfairCategoryReport>> resultMap = new HashMap<>();
+        List<WayfairCategoryReport> reports = wayfairCategoryReportRepository.findAllFromRecentDates(getRecentDate);
+        for (WayfairCategoryReport report : reports) {
+            if (report.getCategory() == null) {
+                continue;
+            }
+
+            // Get or create the inner map for this report date
+            Map<String, WayfairCategoryReport> categoryMap = resultMap.computeIfAbsent(
+                    report.getReportDate(), k -> new HashMap<>());
+
+            // Add the report to the inner map, keyed by category title
+            categoryMap.put(report.getCategory().getTitle(), report);
+        }
+
+        Map<LocalDate, Map<String, WayfairCategoryReport>> sortedMap = new LinkedHashMap<>();
+        resultMap.entrySet().stream()
+                .sorted(Map.Entry.<LocalDate, Map<String, WayfairCategoryReport>>comparingByKey(Comparator.reverseOrder()))
+                .forEachOrdered(entry -> sortedMap.put(entry.getKey(), entry.getValue()));
+
+
+
+        return sortedMap;
     }
 }

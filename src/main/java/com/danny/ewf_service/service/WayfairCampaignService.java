@@ -27,4 +27,6 @@ public interface WayfairCampaignService {
     void updateCategoryReports(List<WayfairCategoryReportRequestDto> wayfairCategoryReportRequestDtos);
 
     Map<String, WayfairCategoryReport> getCategoryReportsByDate(String date);
+
+    Map<LocalDate, Map<String, WayfairCategoryReport>> getRecentCategoryReports();
 }
