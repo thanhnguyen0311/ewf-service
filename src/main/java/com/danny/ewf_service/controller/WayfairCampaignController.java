@@ -3,6 +3,7 @@ package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.entity.wayfair.WayfairCampaignParentSku;
 import com.danny.ewf_service.entity.wayfair.WayfairCategoryReport;
+import com.danny.ewf_service.payload.request.campaign.WayfairBiddingLogicRequestDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCampaignCategoryDto;
 import com.danny.ewf_service.payload.request.campaign.WayfairCategoryReportRequestDto;
 import com.danny.ewf_service.payload.request.user.UserCreateRequestDto;
@@ -118,6 +119,18 @@ public class WayfairCampaignController {
     public ResponseEntity<?> updateCategoryReport(@RequestBody List<WayfairCategoryReportRequestDto> wayfairCategoryReportRequestDtos) {
         try {
             wayfairCampaignService.updateCategoryReports(wayfairCategoryReportRequestDtos);
+            return ResponseEntity.status(200).body("Category updated successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Cannot create user");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error creating new user");
+        }
+    }
+
+    @PostMapping("/campaigns/bidding")
+    public ResponseEntity<?> updateBiddingLogic(@RequestBody WayfairBiddingLogicRequestDto wayfairBiddingLogicRequestDto) {
+        try {
+            wayfairCampaignService.updateBiddingLogic(wayfairBiddingLogicRequestDto);
             return ResponseEntity.status(200).body("Category updated successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Cannot create user");
