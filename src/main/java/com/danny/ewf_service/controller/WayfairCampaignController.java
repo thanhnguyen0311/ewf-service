@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import retrofit2.http.GET;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -129,11 +130,23 @@ public class WayfairCampaignController {
         }
     }
 
-    @PostMapping("/campaigns/bidding")
+    @PostMapping("/bidding")
     public ResponseEntity<?> updateBiddingLogic(@RequestBody WayfairBiddingLogicRequestDto wayfairBiddingLogicRequestDto) {
         try {
             wayfairCampaignService.updateBiddingLogic(wayfairBiddingLogicRequestDto);
             return ResponseEntity.status(200).body("Category updated successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Cannot create user");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error creating new user");
+        }
+    }
+
+    @GetMapping("/bidding")
+    public ResponseEntity<?> getBiddingLogic(@RequestParam String category) {
+        try {
+            String logic = wayfairCampaignService.getBiddingLogic(category);
+            return ResponseEntity.status(200).body(logic);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body("Cannot create user");
         } catch (Exception e) {

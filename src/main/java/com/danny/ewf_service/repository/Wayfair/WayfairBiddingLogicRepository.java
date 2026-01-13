@@ -12,4 +12,5 @@ public interface WayfairBiddingLogicRepository extends JpaRepository<WayfairBidd
 
     Optional<WayfairBiddingLogic> findByCategory(WayfairCategory category);
 
+
 }

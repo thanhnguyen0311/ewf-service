@@ -220,15 +220,28 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
 
     @Override
     public void updateBiddingLogic(WayfairBiddingLogicRequestDto wayfairBiddingLogicRequestDto) {
+        System.out.println(wayfairBiddingLogicRequestDto.getCategory() + " " + wayfairBiddingLogicRequestDto.getBiddingLogic());
         Optional<WayfairCategory> wayfairCategory = wayfairCategoryRepository.findByTitle(wayfairBiddingLogicRequestDto.getCategory());
         WayfairBiddingLogic wayfairBiddingLogic;
         if (wayfairCategory.isPresent()) {
             Optional<WayfairBiddingLogic> optionalWayfairBiddingLogic = wayfairBiddingLogicRepository.findByCategory(wayfairCategory.get());
             wayfairBiddingLogic = optionalWayfairBiddingLogic.orElseGet(() -> WayfairBiddingLogic.builder().category(wayfairCategory.get()).build());
-            wayfairBiddingLogic.setLogic(wayfairBiddingLogicRequestDto.getBiddingLogic());
+            wayfairBiddingLogic.setLogic(String.valueOf(wayfairBiddingLogicRequestDto.getBiddingLogic()));
             wayfairBiddingLogicRepository.save(wayfairBiddingLogic);
         }
 
 
+    }
+
+    @Override
+    public String getBiddingLogic(String category) {
+        Optional<WayfairCategory> wayfairCategory = wayfairCategoryRepository.findByTitle(category);
+        if (wayfairCategory.isPresent()) {
+            Optional<WayfairBiddingLogic> optionalWayfairBiddingLogic = wayfairBiddingLogicRepository.findByCategory(wayfairCategory.get());
+            if (optionalWayfairBiddingLogic.isPresent()) {
+                return optionalWayfairBiddingLogic.get().getLogic();
+            }
+        }
+        return null;
     }
 }
