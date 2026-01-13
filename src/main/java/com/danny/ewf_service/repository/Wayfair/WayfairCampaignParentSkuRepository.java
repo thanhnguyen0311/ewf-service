@@ -12,6 +12,15 @@ public interface WayfairCampaignParentSkuRepository extends JpaRepository<Wayfai
     @Query("SELECT wcps FROM WayfairCampaignParentSku wcps WHERE wcps.campaign.isActive = true AND wcps.campaign.isB2b = false")
     List<WayfairCampaignParentSku> findAllCampaign();
 
+
+    @Query("SELECT wcps FROM WayfairCampaignParentSku wcps " +
+           "JOIN FETCH wcps.campaign c " +
+           "JOIN FETCH wcps.parentSku ps " +
+           "LEFT JOIN FETCH c.category " )
+    List<WayfairCampaignParentSku> findActiveCampaignsWithJoinFetch();
+
+
+
     boolean existsByCampaignCampaignIdAndParentSkuParentSku(String campaignId, String parentSku);
 
     WayfairCampaignParentSku findByCampaignCampaignIdAndParentSkuParentSku(String campaignId, String parentSku);

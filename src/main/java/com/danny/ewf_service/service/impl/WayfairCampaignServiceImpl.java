@@ -10,6 +10,9 @@ import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
 import com.danny.ewf_service.repository.Wayfair.*;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import com.danny.ewf_service.utils.DateTimeUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jnr.constants.platform.Local;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -243,5 +246,20 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
             }
         }
         return null;
+    }
+
+    @Override
+    public Map<String, String> getAllBiddingLogic() {
+        List<WayfairBiddingLogic> allBiddingLogic = wayfairBiddingLogicRepository.findAll();
+        Map<String, String> biddingLogicMap = new HashMap<>();
+
+        for (WayfairBiddingLogic biddingLogic : allBiddingLogic) {
+            if (biddingLogic.getCategory() != null && biddingLogic.getCategory().getTitle() != null) {
+                // Direct assignment - the logic is already stored as a JSON string
+                biddingLogicMap.put(biddingLogic.getCategory().getTitle(), biddingLogic.getLogic());
+            }
+        }
+
+        return biddingLogicMap;
     }
 }

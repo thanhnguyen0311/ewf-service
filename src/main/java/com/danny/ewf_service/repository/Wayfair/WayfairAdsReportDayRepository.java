@@ -62,5 +62,15 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
     @Query("SELECT MAX(w.reportDate) FROM WayfairAdsReportDay w")
     LocalDate findNewestReportDate();
 
-
+    @Query("SELECT w FROM WayfairAdsReportDay w " +
+           "JOIN FETCH w.campaignParentSku cps " +
+           "JOIN FETCH cps.campaign c " +
+           "JOIN FETCH cps.parentSku ps " +
+           "JOIN FETCH c.category " +
+           "WHERE w.reportDate BETWEEN :startDate AND :endDate " +
+           "ORDER BY w.reportDate DESC")
+    List<WayfairAdsReportDay> findAllWithJoinFetchBetweenDates(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }

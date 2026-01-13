@@ -151,4 +151,16 @@ public class WayfairCampaignController {
             return ResponseEntity.internalServerError().body("Error creating new user");
         }
     }
+
+    @GetMapping("/bidding/all")
+    public ResponseEntity<?> getAllBiddingLogic() {
+        try {
+            Map<String, String> logic = wayfairCampaignService.getAllBiddingLogic();
+            return ResponseEntity.status(200).body(logic);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body("Cannot create user");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error creating new user");
+        }
+    }
 }
