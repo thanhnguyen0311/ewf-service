@@ -35,4 +35,6 @@ public interface WayfairCampaignService {
     void updateBiddingLogic(WayfairBiddingLogicRequestDto wayfairBiddingLogicRequestDto);
 
     String getBiddingLogic(String category);
+
+    Map<String, String> getAllBiddingLogic();
 }
