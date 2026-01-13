@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
         name = "wayfair_ads_report_daily",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        columnNames = {"report_date", "campaign_id", "parent_sku"}
+                        columnNames = {"report_date", "campaign_id", "parent_sku","is_b2b"}
                 )
         }
 )
