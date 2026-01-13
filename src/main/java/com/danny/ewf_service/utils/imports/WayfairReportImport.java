@@ -57,9 +57,8 @@ public class WayfairReportImport {
         DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
         DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        // First pass: determine min and max dates in the CSV
-        LocalDate minDate = LocalDate.MAX; // Initialize to furthest future date
-        LocalDate maxDate = LocalDate.MIN; // Initialize to furthest past date
+        LocalDate minDate = LocalDate.MAX;
+        LocalDate maxDate = LocalDate.MIN;
 
         // FIRST PASS - Find min and max dates
         try (InputStream firstPassStream = getClass().getResourceAsStream(filepath);
@@ -95,8 +94,6 @@ public class WayfairReportImport {
             throw new RuntimeException("Error reading CSV file for date range detection", e);
         }
 
-
-        // Only query for report keys within the date range found in the CSV
         Set<String> existingReportKeys = new HashSet<>();
         if (!minDate.equals(LocalDate.MAX) && !maxDate.equals(LocalDate.MIN)) {
             // Only query the database if we found valid dates in the CSV
@@ -206,13 +203,7 @@ public class WayfairReportImport {
                     campaign.setType("Product");
 
                     campaignCache.put(campaignId, campaign);
-                    campaignBatch.add(campaign);
-
-                    // Save batch if needed
-                    if (campaignBatch.size() >= ENTITY_BATCH_SIZE) {
-                        wayfairCampaignRepository.saveAll(campaignBatch);
-                        campaignBatch.clear();
-                    }
+                    wayfairCampaignRepository.save(campaign);
                 }
 
                 // Process Parent SKU
@@ -226,22 +217,10 @@ public class WayfairReportImport {
                     parentSkuEntity.setProducts(products);
 
                     parentSkuCache.put(parentSku, parentSkuEntity);
-                    parentSkuBatch.add(parentSkuEntity);
-
-                    // Save batch if needed
-                    if (parentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
-                        wayfairParentSkuRepository.saveAll(parentSkuBatch);
-                        parentSkuBatch.clear();
-                    }
+                    wayfairParentSkuRepository.save(parentSkuEntity);
                 } else if (isUpdateBid) {
                     parentSkuEntity.setDefaultBid(Float.valueOf(bid));
-                    parentSkuBatch.add(parentSkuEntity);
-
-                    // Save batch if needed
-                    if (parentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
-                        wayfairParentSkuRepository.saveAll(parentSkuBatch);
-                        parentSkuBatch.clear();
-                    }
+                    wayfairParentSkuRepository.save(parentSkuEntity);
                 }
 
                 // Process Campaign-ParentSKU relationship
@@ -252,13 +231,7 @@ public class WayfairReportImport {
                     relation.setParentSku(parentSkuEntity);
 
                     campaignParentSkuCache.put(relationshipKey, relation);
-                    campaignParentSkuBatch.add(relation);
-
-                    // Save batch if needed
-                    if (campaignParentSkuBatch.size() >= ENTITY_BATCH_SIZE) {
-                        wayfairCampaignParentSkuRepository.saveAll(campaignParentSkuBatch);
-                        campaignParentSkuBatch.clear();
-                    }
+                    wayfairCampaignParentSkuRepository.save(relation);
                 }
 
                 // Process Report
@@ -286,19 +259,6 @@ public class WayfairReportImport {
                 if (processedRows % 1000 == 0) {
                     System.out.println("Processed " + processedRows + " rows");
                 }
-            }
-
-            // Save any remaining batches
-            if (!campaignBatch.isEmpty()) {
-                wayfairCampaignRepository.saveAll(campaignBatch);
-            }
-
-            if (!parentSkuBatch.isEmpty()) {
-                wayfairParentSkuRepository.saveAll(parentSkuBatch);
-            }
-
-            if (!campaignParentSkuBatch.isEmpty()) {
-                wayfairCampaignParentSkuRepository.saveAll(campaignParentSkuBatch);
             }
 
             if (!reportBatch.isEmpty()) {
