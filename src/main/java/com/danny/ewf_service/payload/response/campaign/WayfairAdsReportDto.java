@@ -20,10 +20,6 @@ public class WayfairAdsReportDto {
     private Long totalOrders;
     private Double defaultBid;
     private String campaignName;
-    private String parentSkuName;
     private String products;
-    private String className;
-    private String startDate;
-    private String dailyCap;
     private String category;
 }
