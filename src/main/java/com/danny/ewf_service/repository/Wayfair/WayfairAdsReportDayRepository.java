@@ -2,6 +2,7 @@ package com.danny.ewf_service.repository.Wayfair;
 
 import com.danny.ewf_service.entity.wayfair.WayfairAdsReportDay;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -45,6 +46,14 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
         ORDER BY w.campaignId, w.parentSku
         """)
     List<Object[]> getAggregatedReportsByDateRange(
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+
+    @Modifying
+    @Query("DELETE FROM WayfairAdsReportDay w WHERE w.reportDate BETWEEN :fromDate AND :toDate")
+    int removeByDateRange(
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate
     );

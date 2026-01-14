@@ -41,7 +41,7 @@ public class WayfairReportImport {
     @Autowired
     private final WayfairKeywordReportDailyRepository wayfairKeywordReportDailyRepository;
 
-    public void importWayfairReportDaily(String filepath, boolean isUpdateBid) {
+    public void importWayfairReportDaily(String filepath) {
         CSVParserBuilder parserBuilder = new CSVParserBuilder()
                 .withSeparator(',')
                 .withQuoteChar('"')
@@ -60,41 +60,48 @@ public class WayfairReportImport {
         LocalDate minDate = LocalDate.MAX;
         LocalDate maxDate = LocalDate.MIN;
 
-//        // FIRST PASS - Find min and max dates
-//        try (InputStream firstPassStream = getClass().getResourceAsStream(filepath);
-//             BufferedReader firstPassReader = new BufferedReader(new InputStreamReader(firstPassStream));
-//             CSVReader firstPassCsvReader = new CSVReaderBuilder(firstPassReader)
-//                     .withCSVParser(parser)
-//                     .withSkipLines(1)
-//                     .withMultilineLimit(-1)
-//                     .build()) {
-//
-//            String[] columns;
-//            while ((columns = firstPassCsvReader.readNext()) != null) {
-//                String dateStr = getValueByIndex(columns, 0);
-//                if (dateStr.isEmpty()) continue;
-//
-//                LocalDate reportDate;
-//                if (dateStr.contains("/")) {
-//                    reportDate = LocalDate.parse(dateStr, slashFormatter);
-//                } else {
-//                    reportDate = LocalDate.parse(dateStr, hyphenFormatter);
-//                }
-//
-//                // Update min and max dates
-//                if (reportDate.isBefore(minDate)) {
-//                    minDate = reportDate;
-//                }
-//                if (reportDate.isAfter(maxDate)) {
-//                    maxDate = reportDate;
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw new RuntimeException("Error reading CSV file for date range detection", e);
-//        }
-//
+        // FIRST PASS - Find min and max dates
+        try (InputStream firstPassStream = getClass().getResourceAsStream(filepath);
+             BufferedReader firstPassReader = new BufferedReader(new InputStreamReader(firstPassStream));
+             CSVReader firstPassCsvReader = new CSVReaderBuilder(firstPassReader)
+                     .withCSVParser(parser)
+                     .withSkipLines(1)
+                     .withMultilineLimit(-1)
+                     .build()) {
 
+            String[] columns;
+            while ((columns = firstPassCsvReader.readNext()) != null) {
+                String dateStr = getValueByIndex(columns, 0);
+                if (dateStr.isEmpty()) continue;
+
+                LocalDate reportDate;
+                if (dateStr.contains("/")) {
+                    reportDate = LocalDate.parse(dateStr, slashFormatter);
+                } else {
+                    reportDate = LocalDate.parse(dateStr, hyphenFormatter);
+                }
+
+                // Update min and max dates
+                if (reportDate.isBefore(minDate)) {
+                    minDate = reportDate;
+                }
+                if (reportDate.isAfter(maxDate)) {
+                    maxDate = reportDate;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error reading CSV file for date range detection", e);
+        }
+
+
+        try {
+            int removeRecords = wayfairAdsReportDayRepository.removeByDateRange(minDate, maxDate);
+            System.out.println("Removed " + removeRecords + " old reports from " + minDate + " to " + maxDate + "");
+        } catch (Exception e) {
+            e.getMessage();
+
+        }
         // SECOND PASS - Process the CSV data
         try (InputStream secondPassStream = getClass().getResourceAsStream(filepath);
              BufferedReader secondPassReader = new BufferedReader(new InputStreamReader(secondPassStream));
@@ -127,10 +134,8 @@ public class WayfairReportImport {
                 parentSkuCache.put(parentSku.getParentSku(), parentSku);
             }
 
-
             String[] columns;
             int processedRows = 0;
-
 
             while ((columns = csvReader.readNext()) != null) {
 
@@ -161,8 +166,6 @@ public class WayfairReportImport {
                 }
 
                 String compositeKey = reportDate + "_" + campaignId + "_" + parentSku;
-
-
 
                 // Process Campaign
                 WayfairCampaign campaign = campaignCache.get(campaignId);

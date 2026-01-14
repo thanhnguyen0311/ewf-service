@@ -161,11 +161,9 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
             wayfairCategoryReport.setAcos(dto.getAcos());
             wayfairCategoryReport.setReportDate(reportDate);
             wayfairCategoryReport.setCategory(wayfairCategory);
-            wayfairCategoryReport.setTacos(dto.getTacos());
             wayfairCategoryReport.setAdSpend(dto.getAdSpend());
             wayfairCategoryReport.setSaleByAds(dto.getSaleByAds());
             wayfairCategoryReport.setTargetAcos(dto.getTargetAcos());
-            wayfairCategoryReport.setTotalSales(dto.getTotalSale());
             wayfairCategoryReport.setOrderQuantity(dto.getOrderQuantity());
             wayfairCategoryReportRepository.save(wayfairCategoryReport);
         }
