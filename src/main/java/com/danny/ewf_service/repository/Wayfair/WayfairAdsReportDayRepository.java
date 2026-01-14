@@ -45,7 +45,7 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
         FROM WayfairAdsReportDay w
         WHERE w.reportDate BETWEEN :fromDate AND :toDate
           AND w.campaignParentSku.campaign.type = 'Product'
-        GROUP BY w.campaignId, w.parentSku, w.isB2b
+        GROUP BY w.campaignId, w.parentSku
         ORDER BY w.campaignId, w.parentSku
         """)
     List<Object[]> getAggregatedReportsByDateRange(
