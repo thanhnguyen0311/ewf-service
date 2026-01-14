@@ -33,17 +33,11 @@ public class WayfairCategoryReport {
     @Column(name = "report_date", nullable = false)
     private LocalDate reportDate;
 
-    @Column(name = "total_sale")
-    private Double totalSales;
-
     @Column(name = "ad_spend")
     private Double adSpend;
 
     @Column(name = "sale_by_ads")
     private Double saleByAds;
-
-    @Column(name = "tacos")
-    private Double tacos;
 
     @Column(name = "acos")
     private Double acos;

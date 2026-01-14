@@ -70,7 +70,7 @@ public class ImportController {
 //            shopifyExport.exportShopifyProductsPrice("product_prices_12-09.csv");
 //            wayfairReportImport.importWayfairReportDaily(filepath, false);
 //                shopifyExport.exportAmazonReviews();
-            wayfairReportImport.importWayfairReportDaily(filepath, true);
+            wayfairReportImport.importWayfairReportDaily(filepath);
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
 
