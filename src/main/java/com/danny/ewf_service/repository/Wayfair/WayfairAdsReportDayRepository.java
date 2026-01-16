@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -52,10 +53,10 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
 
 
     @Modifying
-    @Query("DELETE FROM WayfairAdsReportDay w WHERE w.reportDate BETWEEN :fromDate AND :toDate")
+    @Transactional
+    @Query("DELETE FROM WayfairAdsReportDay w WHERE w.reportDate = :reportDate")
     int removeByDateRange(
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
+            @Param("reportDate") LocalDate reportDate
     );
 
     List<WayfairAdsReportDay> findAllByReportDateIn(Collection<LocalDate> dates);
