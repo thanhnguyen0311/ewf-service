@@ -12,8 +12,6 @@ import lombok.*;
 public class WayfairCategoryReportRequestDto {
     private String reportDate;
     private String category;
-    private Double totalSale;
-    private Double tacos;
     private Double adSpend;
     private Double saleByAds;
     private Integer orderQuantity;
