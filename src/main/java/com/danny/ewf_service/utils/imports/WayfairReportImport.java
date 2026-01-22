@@ -41,6 +41,7 @@ public class WayfairReportImport {
     @Autowired
     private final WayfairKeywordReportDailyRepository wayfairKeywordReportDailyRepository;
 
+
     public void importWayfairReportDaily(String filepath) {
         CSVParserBuilder parserBuilder = new CSVParserBuilder()
                 .withSeparator(',')
@@ -150,8 +151,6 @@ public class WayfairReportImport {
                 String spend = getValueByIndex(columns, 21);
                 String totalSale = getValueByIndex(columns, 25);
                 String orderQty = getValueByIndex(columns, 26);
-
-
 
 
                 if (dateStr.isEmpty()) continue;
@@ -322,7 +321,6 @@ public class WayfairReportImport {
 
             // Batch size constants
             final int REPORT_BATCH_SIZE = 1000;
-            final int ENTITY_BATCH_SIZE = 100;
             List<WayfairCampaign> existingCampaigns = wayfairCampaignRepository.findAllByTypeIsContaining("Keyword");
             for (WayfairCampaign campaign : existingCampaigns) {
                 campaignCache.put(campaign.getCampaignId(), campaign);
@@ -337,7 +335,7 @@ public class WayfairReportImport {
             // Main processing loop
             String[] columns;
             int processedRows = 0;
-
+            String removeReportDate = "";
 
             while ((columns = csvReader.readNext()) != null) {
 
@@ -374,10 +372,16 @@ public class WayfairReportImport {
                     reportDate = LocalDate.parse(dateStr, hyphenFormatter);
                 }
 
-                // Create unique key for this report
-                String reportKey = reportDate + "_" + campaignId + "_" + keywordId + "_" + searchTerm;
-
-
+                if (!dateStr.equals(removeReportDate)) {
+                    try {
+                        int removeRecords = wayfairKeywordReportDailyRepository.removeByDateRange(reportDate);
+                        System.out.println("Removed " + removeRecords + " old reports at " + dateStr);
+                    } catch (Exception e) {
+                        e.getMessage();
+                        throw new RuntimeException("Error removing old reports", e);
+                    }
+                    removeReportDate = dateStr;
+                }
 
                 // Process Campaign
                 WayfairCampaign campaign = campaignCache.get(campaignId);
@@ -392,8 +396,6 @@ public class WayfairReportImport {
 
                     campaignCache.put(campaignId, campaign);
                     wayfairCampaignRepository.save(campaign);
-
-
                 }
 
                 // Process Parent SKU
@@ -434,11 +436,7 @@ public class WayfairReportImport {
                 if (processedRows % 1000 == 0) {
                     System.out.println("Processed " + processedRows + " rows");
                 }
-
-
             }
-
-
 
             System.out.println("Saving " + reportBatch.size() + " new reports");
 

@@ -10,8 +10,6 @@ import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
-import com.danny.ewf_service.entity.product.ProductComponent;
-import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -45,7 +44,8 @@ public class ProductsImport {
     @Transactional
     public void importProductDetails() {
         try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file, StandardCharsets.UTF_8))) {
+
 
             CSVParserBuilder parserBuilder = new CSVParserBuilder()
                     .withSeparator(',')
@@ -63,103 +63,59 @@ public class ProductsImport {
                     .withCSVParser(parser)
                     .withMultilineLimit(-1); // No limit on multiline fields
 
+            Map<String, Product> productMap = new HashMap<>();
+            List<Product> products = productRepository.findAllProducts();
+            System.out.println("Total Products: " + products.size());
+            for (Product product : products) {
+                String normalizedSku = product.getSku().replaceAll("[\\p{C}]", "").trim();
+                productMap.put(normalizedSku, product);
+            }
+
             try (CSVReader csvReader = readerBuilder.build()) {
                 String productSku;
-                String upc;
-                String asin;
-                String name;
                 String title;
+                String shippingMethod;
+                String asin;
                 String description;
-                String htmlDescription;
+                String html;
+                String mainCategory;
+                String subCategory;
+                String chairType;
                 String finish;
                 String sizeShape;
+                String style;
+                String pieces;
                 String collection;
-                String lwh;
-                String material;
                 String[] columns;
 
                 while ((columns = csvReader.readNext()) != null) {
                     productSku = getValueByIndex(columns, 0);
-                    upc = getValueByIndex(columns, 1);
-                    title = getValueByIndex(columns, 2);
-                    name = getValueByIndex(columns, 2);
-                    description = getValueByIndex(columns, 3);
-                    htmlDescription = getValueByIndex(columns, 3);
-                    asin = getValueByIndex(columns, 4);
-                    finish = getValueByIndex(columns, 5);
-                    sizeShape = getValueByIndex(columns, 6);
-                    collection = getValueByIndex(columns, 7);
-                    lwh = getValueByIndex(columns, 8);
-                    material = getValueByIndex(columns, 9);
-
-
-//                    name = getValueByIndex(columns, 2);
-//                    mainCategory = getValueByIndex(columns, 4);
-//                    subCategory = getValueByIndex(columns, 5);
-//                    chairType = getValueByIndex(columns, 6);
-//                    finish = getValueByIndex(columns, 7);
-//                    style = getValueByIndex(columns, 9);
-//                    pieces = getValueByIndex(columns, 10);
-//                    collection = getValueByIndex(columns, 11);
-//                    productType = getValueByIndex(columns, 12);
+                    title = getValueByIndex(columns, 1);
+                    title = getValueByIndex(columns, 1);
+                    title = getValueByIndex(columns, 1);
 
 
                     if (productSku.isEmpty()) {
                         continue;
                     }
+                    String normalizedSku = productSku.replaceAll("[\\p{C}]", "").trim();
 
-                    System.out.println("Processing SKU: " + productSku);
-
-
-                    Optional<Product> optionalProduct = productRepository.findBySku(productSku);
-                    Product product;
-
-
-                    if (optionalProduct.isPresent()) {
-                        product = optionalProduct.get();
-                    } else {
+                    Product product = productMap.get(normalizedSku);
+                    if (product == null) {
                         product = Product.builder()
                                 .sku(productSku)
-                                .upc(upc)
-                                .name(name)
-                                .title(title)
-                                .localSku(skuGenerator.generateNewSKU(productSku))
-                                .asin(asin)
-                                .discontinued(false)
-                                .shippingMethod("GND")
+                                .localSku(skuGenerator.generateNewSKU(normalizedSku))
                                 .isDeleted(false)
-                                .type("Single")
                                 .build();
-
-                        ProductDetail productDetail = product.getProductDetail();
-                        if (productDetail == null) productDetail = new ProductDetail();
-                        productDetail.setDescription(description);
-                        productDetail.setHtmlDescription(htmlDescription);
-                        productDetail.setFinish(finish);
-                        productDetail.setSizeShape(sizeShape);
-                        productDetail.setCollection(collection);
-                        productDetail.setMaterial(material);
-                        productDetail.setStyle("Bedroom Sets");
-
-
-                        product.setProductDetail(productDetail);
-
-                        Dimension dimension = product.getDimension();
-                        if (dimension == null) dimension = new Dimension();
-                        dimension.setLwh(lwh);
-
-                        product.setDimension(dimension);
-
-                        ProductWholesales productWholesales = product.getWholesales();
-                        if (productWholesales == null) productWholesales = new ProductWholesales();
-                        productWholesales.setEwfmain(true);
-                        productWholesales.setEwfdirect(true);
-
-                        product.setWholesales(productWholesales);
-
                         productRepository.save(product);
-                        System.out.println("Inserted new SKU: " + productSku);
+                        System.out.println("Inserted new SKU: " + normalizedSku);
                     }
+
+                    if (product.getUpc() != null) continue;
+
+//                    product.setUpc(upc);
+                    productRepository.save(product);
+                    System.out.println("Updated SKU: " + normalizedSku);
                 }
             }
 
@@ -175,7 +131,8 @@ public class ProductsImport {
         if (index < array.length && array[index] != null) { // Check for null
             value = array[index].trim();
         }
-        System.out.println("Column " + index + " value: " + value);
+
+//        System.out.println("Column " + index + " value: " + value);
         return value;
     }
 
