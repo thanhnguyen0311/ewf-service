@@ -9,6 +9,7 @@ import com.danny.ewf_service.payload.request.campaign.WayfairCategoryReportReque
 import com.danny.ewf_service.payload.request.user.UserCreateRequestDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairAdsReportDto;
 import com.danny.ewf_service.payload.response.campaign.WayfairKeywordReportDto;
+import com.danny.ewf_service.repository.Wayfair.WayfairKeywordReportDailyRepository;
 import com.danny.ewf_service.service.WayfairCampaignService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class WayfairCampaignController {
 
     @Autowired
     private final WayfairCampaignService wayfairCampaignService;
+
+    @Autowired
+    private final WayfairKeywordReportDailyRepository wayfairKeywordReportDailyRepository;
 
     @GetMapping("/campaigns")
     public ResponseEntity<?> getAllActiveCampaigns() {
@@ -94,11 +98,21 @@ public class WayfairCampaignController {
         }
     }
     @GetMapping("/campaigns/last-update")
-    public ResponseEntity<?> getClickStats() {
+    public ResponseEntity<?> getProductLastUpdate() {
         try {
             System.out.println("Fetching last update date");
             return ResponseEntity.ok(wayfairCampaignService.getLastUpdateDate());
 
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error retrieving click statistics: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/campaigns/keyword/last-update")
+    public ResponseEntity<?> getKeywordLastUpdate() {
+        try {
+            return ResponseEntity.ok(wayfairKeywordReportDailyRepository.findNewestReportDate());
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body("Error retrieving click statistics: " + e.getMessage());

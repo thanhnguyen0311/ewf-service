@@ -9,12 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(
-        name = "wayfair_keyword_report_daily",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        columnNames = {"report_date", "campaign_id", "search_term","keyword_id"}
-                )
-        }
+        name = "wayfair_keyword_report_daily"
 )
 @AllArgsConstructor
 @NoArgsConstructor
