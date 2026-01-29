@@ -79,6 +79,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         """, nativeQuery = true)
     String getFinishFilter(@Param("subCategory") String subCategory);
 
+
+    @Query("SELECT p FROM Product p " +
+           "LEFT JOIN FETCH p.components " +
+           "LEFT JOIN FETCH p.wholesales " +
+           "LEFT JOIN FETCH p.dimension " +
+           "LEFT JOIN FETCH p.productDetail " +
+           "LEFT JOIN FETCH p.price " +
+           "WHERE p.price.ewfdirect > 0 " +
+           "AND p.price.ewfdirect < 500 " +
+           "AND p.isDeleted = false  AND p.asin IS NOT NULL\n" +
+           "ORDER BY p.createdAt DESC")
+    List<Product> findProductsByPriceEwfdirectBetweenZeroAndFiveHundred();
+
+
     @Query(value = """
         SELECT GROUP_CONCAT(DISTINCT pd.collection ORDER BY pd.collection SEPARATOR ',') AS collections
         FROM product_details pd

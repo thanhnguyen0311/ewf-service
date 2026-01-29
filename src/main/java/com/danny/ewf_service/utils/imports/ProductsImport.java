@@ -1,6 +1,7 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.product.ProductDetail;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -91,8 +92,18 @@ public class ProductsImport {
                 while ((columns = csvReader.readNext()) != null) {
                     productSku = getValueByIndex(columns, 0);
                     title = getValueByIndex(columns, 1);
-                    title = getValueByIndex(columns, 1);
-                    title = getValueByIndex(columns, 1);
+                    shippingMethod = getValueByIndex(columns, 2);
+                    asin = getValueByIndex(columns, 3);
+                    description = getValueByIndex(columns, 4);
+                    html = getValueByIndex(columns, 5);
+                    mainCategory = getValueByIndex(columns, 6);
+                    subCategory = getValueByIndex(columns, 7);
+                    chairType = getValueByIndex(columns, 8);
+                    finish = getValueByIndex(columns, 9);
+                    sizeShape = getValueByIndex(columns, 10);
+                    style = getValueByIndex(columns, 11);
+                    pieces = getValueByIndex(columns, 12);
+                    collection = getValueByIndex(columns, 13);
 
 
                     if (productSku.isEmpty()) {
@@ -100,22 +111,35 @@ public class ProductsImport {
                     }
                     String normalizedSku = productSku.replaceAll("[\\p{C}]", "").trim();
 
-                    Product product = productMap.get(normalizedSku);
+                    Product product = productMap.get(normalizedSku.toUpperCase());
                     if (product == null) {
-                        product = Product.builder()
-                                .sku(productSku)
-                                .localSku(skuGenerator.generateNewSKU(normalizedSku))
-                                .isDeleted(false)
-                                .build();
-                        productRepository.save(product);
+                        product = new Product();
+                        product.setSku(normalizedSku.toUpperCase());
                         System.out.println("Inserted new SKU: " + normalizedSku);
                     }
 
-                    if (product.getUpc() != null) continue;
+                    if (!title.isEmpty()) product.setTitle(title);
+                    if (!shippingMethod.isEmpty()) product.setShippingMethod(shippingMethod);
+                    if (!asin.isEmpty()) product.setAsin(asin);
 
-//                    product.setUpc(upc);
+                    ProductDetail productDetail = product.getProductDetail();
+                    if (productDetail == null) productDetail = new ProductDetail();
+
+                    if(!description.isEmpty()) productDetail.setDescription(description);
+                    if (!html.isEmpty()) productDetail.setHtmlDescription(html);
+                    if (!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
+                    if (!subCategory.isEmpty()) productDetail.setSubCategory(subCategory);
+                    if (!chairType.isEmpty()) productDetail.setChairType(chairType);
+                    if (!finish.isEmpty()) productDetail.setFinish(finish);
+                    if (!sizeShape.isEmpty()) productDetail.setSizeShape(sizeShape);
+                    if (!style.isEmpty()) productDetail.setStyle(style);
+                    if (!pieces.isEmpty()) productDetail.setPieces(pieces);
+                    if (!collection.isEmpty()) productDetail.setCollection(collection);
+
+                    product.setProductDetail(productDetail);
+
                     productRepository.save(product);
-                    System.out.println("Updated SKU: " + normalizedSku);
+                    System.out.println("Updated SKU: " + normalizedSku + " VALUES : " + productDetail);
                 }
             }
 

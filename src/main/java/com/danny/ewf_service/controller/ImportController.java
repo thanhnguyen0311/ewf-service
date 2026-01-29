@@ -61,10 +61,12 @@ public class ImportController {
     @Autowired
     private final ProductExport productExport;
 
+
+
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "/data/keyword_report_19_19.csv";
+            String filepath = "/data/product_report_day.csv";
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing(products, "products.csv", true);
 //            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
@@ -74,11 +76,13 @@ public class ImportController {
 //            shopifyExport.exportShopifyProductsPrice("product_prices_12-09.csv");
 //            wayfairReportImport.importWayfairReportKeywordDaily(filepath);
 //                shopifyExport.exportAmazonReviews();
-            wayfairReportImport.importWayfairReportKeywordDaily(filepath);
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
 //            productExport.exportProduct("wayfair_reviews.csv");
+//                amazonDataExport.extractDataFromAmazon();
+//            shopifyExport.exportShopifyProductsPrice(filepath);
 
+            wayfairReportImport.importWayfairReportDaily(filepath);
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
