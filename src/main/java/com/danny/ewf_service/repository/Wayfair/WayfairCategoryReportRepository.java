@@ -24,8 +24,8 @@ public interface WayfairCategoryReportRepository extends JpaRepository<WayfairCa
     List<WayfairCategoryReport> findAllByReportDate(@Param("reportDate") LocalDate reportDate);
 
 
-    @Query(value = "SELECT DISTINCT w.report_date FROM wayfair_category_reports w ORDER BY w.report_date DESC LIMIT 3", nativeQuery = true)
-    List<String> findTop3RecentDates();
+    @Query(value = "SELECT DISTINCT w.report_date FROM wayfair_category_reports w ORDER BY w.report_date DESC LIMIT 10", nativeQuery = true)
+    List<String> findTop10RecentDates();
 
 
     @Query("SELECT w FROM WayfairCategoryReport w LEFT JOIN FETCH w.category WHERE w.reportDate IN :recentDates ORDER BY w.reportDate DESC")

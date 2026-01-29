@@ -189,7 +189,7 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
 
     @Override
     public Map<LocalDate, Map<String, WayfairCategoryReport>> getRecentCategoryReports() {
-        List<String> recentDates = wayfairCategoryReportRepository.findTop3RecentDates();
+        List<String> recentDates = wayfairCategoryReportRepository.findTop10RecentDates();
         System.out.println(recentDates);
         List<LocalDate> getRecentDate = recentDates.stream().map(LocalDate::parse).toList();
         Map<LocalDate, Map<String, WayfairCategoryReport>> resultMap = new HashMap<>();
