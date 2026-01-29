@@ -47,4 +47,10 @@ public class WayfairCategoryReport {
 
     @Column(name = "order_quantity")
     private Integer orderQuantity;
+
+    @Column(name = "impressions")
+    private Long impressions;
+
+    @Column(name = "clicks")
+    private Long clicks;
 }

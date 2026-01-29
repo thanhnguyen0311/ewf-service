@@ -158,13 +158,15 @@ public class WayfairCampaignServiceImpl implements WayfairCampaignService {
             }
             Optional<WayfairCategoryReport> optionalWayfairCategoryReport = wayfairCategoryReportRepository.findByCategory_TitleAndReportDate(dto.getCategory(), reportDate);
             wayfairCategoryReport = optionalWayfairCategoryReport.orElseGet(WayfairCategoryReport::new);
-            wayfairCategoryReport.setAcos(dto.getAcos());
+            wayfairCategoryReport.setImpressions(Long.valueOf(dto.getImpressions()));
+            wayfairCategoryReport.setClicks(Long.valueOf(dto.getClicks()));
+            wayfairCategoryReport.setAcos(Double.valueOf(dto.getAcos()));
             wayfairCategoryReport.setReportDate(reportDate);
             wayfairCategoryReport.setCategory(wayfairCategory);
-            wayfairCategoryReport.setAdSpend(dto.getAdSpend());
-            wayfairCategoryReport.setSaleByAds(dto.getSaleByAds());
-            wayfairCategoryReport.setTargetAcos(dto.getTargetAcos());
-            wayfairCategoryReport.setOrderQuantity(dto.getOrderQuantity());
+            wayfairCategoryReport.setAdSpend(Double.valueOf(dto.getAdSpend()));
+            wayfairCategoryReport.setSaleByAds(Double.valueOf(dto.getSaleByAds()));
+            wayfairCategoryReport.setTargetAcos(Double.valueOf(dto.getTargetAcos()));
+            wayfairCategoryReport.setOrderQuantity(Integer.valueOf(dto.getOrderQuantity()));
             wayfairCategoryReportRepository.save(wayfairCategoryReport);
         }
     }

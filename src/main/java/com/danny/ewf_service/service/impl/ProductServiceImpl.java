@@ -194,11 +194,11 @@ public class ProductServiceImpl implements ProductService {
 
                 } else {
                     if (componentWeight <= 20) {
-                        shippingCost = 20;
+                        shippingCost = 22;
                     } else if (componentWeight <= 40) {
-                        shippingCost = 23;
+                        shippingCost = 25;
                     } else if (componentWeight <= 50) {
-                        shippingCost = 27;
+                        shippingCost = 30;
                     } else if (componentWeight <= 60) {
                         shippingCost = 30;
                     } else if (componentWeight <= 70) {
@@ -277,15 +277,14 @@ public class ProductServiceImpl implements ProductService {
 
 
             boolean isPromoted = false;
-            if (price.getPromotion() != null) {
-                if (price.getPromotion() > 0) {
-                    comparePrice = totalQB1 + totalShipCost;
-                    totalQB1 = totalQB1 * (1 - (double) price.getPromotion() / 100);
-                    productPrice = totalQB1 + totalShipCost;
-                    isPromoted = true;
-                    product.getPrice().setEwfdirect(productPrice);
-                }
-            }
+//            if (price.getPromotion() != null) {
+//                if (price.getPromotion() > 0) {
+//                    comparePrice = totalQB1 + totalShipCost;
+//                    totalQB1 = totalQB1 * (1 - (double) price.getPromotion() / 100);
+//                    productPrice = totalQB1 + totalShipCost;
+//                    isPromoted = true;
+//                }
+//            }
 
             if (product.getShippingMethod().equals("LTL")) {
                 if (productPrice < 400) {
@@ -299,16 +298,22 @@ public class ProductServiceImpl implements ProductService {
 
             productPrice = productPrice * 1.05;
 
-            if (price.getAmazonPrice() != null && !isPromoted) {
-                if (productPrice < price.getAmazonPrice()) {
-                    comparePrice = price.getAmazonPrice() * 1.2;
-                    productPrice = price.getAmazonPrice();
+            if (price.getAmazonPrice() != null) {
+                if (productPrice < 250.0) {
+                    if (productPrice < price.getAmazonPrice()) {
+                        productPrice = price.getAmazonPrice();
+                    }
                 }
 
-//                if (productPrice <= price.getAmazonPrice() * 0.95 ) {
-//                    productPrice = price.getAmazonPrice() * 0.95;
-//                }
             }
+
+
+            if (productPrice > 1000.0) productPrice = productPrice*0.95;
+            if (productPrice > 2000.0) productPrice = productPrice*0.90;
+
+
+
+            product.getPrice().setEwfdirect(productPrice);
         }
 
         productRepository.save(product);

@@ -12,9 +12,11 @@ import lombok.*;
 public class WayfairCategoryReportRequestDto {
     private String reportDate;
     private String category;
-    private Double adSpend;
-    private Double saleByAds;
-    private Integer orderQuantity;
-    private Double acos;
-    private Double targetAcos;
+    private String impressions;
+    private String clicks;
+    private String adSpend;
+    private String saleByAds;
+    private String orderQuantity;
+    private String acos;
+    private String targetAcos;
 }
