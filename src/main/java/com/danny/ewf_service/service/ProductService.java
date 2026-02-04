@@ -8,7 +8,6 @@ import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ProductService {
 
@@ -28,11 +27,12 @@ public interface ProductService {
 
     double calculateEWFDirectPriceLTL(Product product, List<String[]> rows);
 
-    Map<String,Long> getProductInfoSheetGo(String Sku);
-
     ProductPriceResponseDto getProductPrice(String sku);
 
     void calculateProductPrice();
 
     List<Product> getListProductFromCsvFile(String filePath);
+
+
+    List<com.danny.ewf_service.projection.ProductManagementDto> getAllProductManagementDtos();
 }

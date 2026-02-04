@@ -16,6 +16,7 @@ import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
+import com.danny.ewf_service.projection.ProductManagementDto;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
@@ -259,11 +260,11 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
-        if (totalQB1 > 2000) totalShipCost = totalShipCost*0.70;
-        else if (totalQB1 > 1500) totalShipCost = totalShipCost*0.75;
-        else if (totalQB1 > 1000) totalShipCost = totalShipCost*0.80;
-        else if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
-
+//        if (totalQB1 > 2000) totalShipCost = totalShipCost*0.70;
+//        else if (totalQB1 > 1500) totalShipCost = totalShipCost*0.75;
+//        else if (totalQB1 > 1000) totalShipCost = totalShipCost*0.80;
+//        else if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
+        if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
 
 
 
@@ -341,19 +342,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public double calculateEWFDirectPriceLTL(Product product, List<String[]> rows) {
         return 0;
-    }
-
-    @Override
-    public Map<String,Long> getProductInfoSheetGo(String Sku) {
-        Optional<Product> optionalProduct = productRepository.findProductBySku(Sku);
-        Map<String,Long> components = new HashMap<>();
-        if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            for (ProductComponent productComponent : product.getComponents()) {
-                components.put(productComponent.getComponent().getSku(), productComponent.getQuantity());
-            }
-        }
-        return components;
     }
 
     @Override
@@ -638,6 +626,13 @@ public class ProductServiceImpl implements ProductService {
 
         return responseDto;
     }
+    @Override
+    public List<ProductManagementDto> getAllProductManagementDtos() {
+        List<ProductManagementDto> productManagementDtos;
+        productManagementDtos = productRepository.getAllProduct();
+        return productManagementDtos;
+    }
+
 
 }
 
