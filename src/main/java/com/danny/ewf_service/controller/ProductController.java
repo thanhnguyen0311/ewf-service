@@ -1,10 +1,12 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
+import com.danny.ewf_service.projection.ProductManagementDto;
 import com.danny.ewf_service.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -82,11 +84,13 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/sheetgo/{sku}")
-    public ResponseEntity<Map<String,Long>> getProductInfoSheetGo(@PathVariable String sku) {
+
+
+    @GetMapping("/price/{sku}")
+    public ResponseEntity<?> getProductPrice(@PathVariable String sku) {
         try {
-            Map<String,Long> components = productService.getProductInfoSheetGo(sku);
-            return ResponseEntity.ok(components);
+            ProductPriceResponseDto productPriceResponseDto = productService.getProductPrice(sku);
+            return ResponseEntity.ok(productPriceResponseDto);
 
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -95,11 +99,11 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/price/{sku}")
-    public ResponseEntity<?> getProductPrice(@PathVariable String sku) {
+    @GetMapping("")
+    public ResponseEntity<List<ProductManagementDto>> getAllProduct() {
         try {
-            ProductPriceResponseDto productPriceResponseDto = productService.getProductPrice(sku);
-            return ResponseEntity.ok(productPriceResponseDto);
+            List<ProductManagementDto> products = productService.getAllProductManagementDtos();
+            return ResponseEntity.ok(products);
 
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

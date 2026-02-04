@@ -1,11 +1,13 @@
 package com.danny.ewf_service.repository;
 
 import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.projection.ProductManagementDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -149,4 +151,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            WHERE pw.ewfdirect = TRUE
        """, nativeQuery = true)
     String getCollectionsNewArrivals();
+
+
+    @Query("""
+        SELECT
+            p.sku as sku, 
+            p.localSku as localSku, 
+            p.upc as upc, 
+            p.asin as asin, 
+            p.shippingMethod as shippingMethod, 
+            p.discontinued as discontinued
+        FROM Product p
+        WHERE p.isDeleted = false
+        """)
+    List<ProductManagementDto> getAllProduct();
 }

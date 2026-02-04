@@ -65,13 +65,13 @@ public class ProductsImport {
                     .withMultilineLimit(-1); // No limit on multiline fields
 
             Map<String, Product> productMap = new HashMap<>();
-            List<Product> products = productRepository.findAllProducts();
-            System.out.println("Total Products: " + products.size());
-            for (Product product : products) {
-                String normalizedSku = product.getSku().replaceAll("[\\p{C}]", "").trim();
-                productMap.put(normalizedSku, product);
-            }
-
+//            List<Product> products = productRepository.findAllProducts();
+//            System.out.println("Total Products: " + products.size());
+//            for (Product product : products) {
+//                String normalizedSku = product.getSku().replaceAll("[\\p{C}]", "").trim();
+//                productMap.put(normalizedSku, product);
+//            }
+            Product product;
             try (CSVReader csvReader = readerBuilder.build()) {
                 String productSku;
                 String title;
@@ -111,12 +111,15 @@ public class ProductsImport {
                     }
                     String normalizedSku = productSku.replaceAll("[\\p{C}]", "").trim();
 
-                    Product product = productMap.get(normalizedSku.toUpperCase());
-                    if (product == null) {
+                    Optional<Product> optionalProduct = productRepository.findProductBySku(normalizedSku);
+                    if (optionalProduct.isPresent()) product = optionalProduct.get();
+                    else {
                         product = new Product();
                         product.setSku(normalizedSku.toUpperCase());
                         System.out.println("Inserted new SKU: " + normalizedSku);
+
                     }
+                    if (product.getLocalSku() == null) product.setLocalSku(skuGenerator.generateNewSKU(normalizedSku.toUpperCase()));
 
                     if (!title.isEmpty()) product.setTitle(title);
                     if (!shippingMethod.isEmpty()) product.setShippingMethod(shippingMethod);
@@ -139,7 +142,7 @@ public class ProductsImport {
                     product.setProductDetail(productDetail);
 
                     productRepository.save(product);
-                    System.out.println("Updated SKU: " + normalizedSku + " VALUES : " + productDetail);
+                    System.out.println("Updated SKU: " + normalizedSku);
                 }
             }
 
@@ -250,7 +253,7 @@ public class ProductsImport {
     }
 
     public void importProductPrice() {
-        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/beds.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
@@ -258,17 +261,17 @@ public class ProductsImport {
             while ((line = reader.readLine()) != null) {
 
                 String[] columns = line.split(",");
-                if (columns.length < 2) {
+                if (columns.length < 1) {
                     continue;
                 }
 
                 String sku = columns[0].trim().toUpperCase();
-                double qb1 = Double.parseDouble(columns[1].trim());
-                double qb2 = Double.parseDouble(columns[2].trim());
-                double qb3 = Double.parseDouble(columns[3].trim());
-                double qb4 = Double.parseDouble(columns[4].trim());
-                double qb5 = Double.parseDouble(columns[5].trim());
-                double qb6 = Double.parseDouble(columns[6].trim());
+//                double qb1 = Double.parseDouble(columns[1].trim());
+//                double qb2 = Double.parseDouble(columns[2].trim());
+//                double qb3 = Double.parseDouble(columns[3].trim());
+//                double qb4 = Double.parseDouble(columns[4].trim());
+//                double qb5 = Double.parseDouble(columns[5].trim());
+//                double qb6 = Double.parseDouble(columns[6].trim());
 
 
                 if (sku.isEmpty()) {
@@ -282,15 +285,16 @@ public class ProductsImport {
                         product = optionalProduct.get();
                         Price price = product.getPrice();
                         if (price == null) price = new Price();
-                        price.setQB1(qb1);
-                        price.setQB2(qb2);
-                        price.setQB3(qb3);
-                        price.setQB4(qb4);
-                        price.setQB5(qb5);
-                        price.setQB6(qb6);
+//                        price.setQB1(qb1);
+//                        price.setQB2(qb2);
+//                        price.setQB3(qb3);
+//                        price.setQB4(qb4);
+//                        price.setQB5(qb5);
+//                        price.setQB6(qb6);
+                        price.setShippingCost(200.0);
                         product.setPrice(price);
                         productRepository.save(product);
-                        System.out.println("Successfully Updated product : " + sku + " VALUES : " + price);
+                        System.out.println("Successfully Updated product : " + sku);
                     }
 
                 } catch (RuntimeException e) {
