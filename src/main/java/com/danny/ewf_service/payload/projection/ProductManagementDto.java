@@ -1,4 +1,8 @@
-package com.danny.ewf_service.projection;
+package com.danny.ewf_service.payload.projection;
+
+import com.danny.ewf_service.entity.product.ProductComponent;
+
+import java.util.List;
 
 public interface ProductManagementDto {
 
@@ -8,4 +12,5 @@ public interface ProductManagementDto {
     String getAsin();
     String getShippingMethod();
     Boolean getDiscontinued();
+
 }

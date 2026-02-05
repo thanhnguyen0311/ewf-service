@@ -1,6 +1,8 @@
 package com.danny.ewf_service.service;
 
 import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.payload.projection.ProductComponentDto;
+import com.danny.ewf_service.payload.projection.ProductManagementDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
@@ -34,5 +36,6 @@ public interface ProductService {
     List<Product> getListProductFromCsvFile(String filePath);
 
 
-    List<com.danny.ewf_service.projection.ProductManagementDto> getAllProductManagementDtos();
+    List<ProductManagementDto> getAllProductManagementDtos();
+    List<ProductComponentDto> getAllProductComponentDtos();
 }

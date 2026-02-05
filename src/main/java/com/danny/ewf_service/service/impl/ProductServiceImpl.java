@@ -8,6 +8,7 @@ import com.danny.ewf_service.entity.Price;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
+import com.danny.ewf_service.payload.projection.ProductComponentDto;
 import com.danny.ewf_service.payload.request.product.ProductComponentRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.entity.product.ProductComponent;
@@ -16,7 +17,7 @@ import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
-import com.danny.ewf_service.projection.ProductManagementDto;
+import com.danny.ewf_service.payload.projection.ProductManagementDto;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
@@ -631,6 +632,13 @@ public class ProductServiceImpl implements ProductService {
         List<ProductManagementDto> productManagementDtos;
         productManagementDtos = productRepository.getAllProduct();
         return productManagementDtos;
+    }
+
+    @Override
+    public List<ProductComponentDto> getAllProductComponentDtos() {
+        List<ProductComponentDto> productComponentDtos;
+        productComponentDtos = productRepository.getAllProductComponents();
+        return productComponentDtos;
     }
 
 

@@ -75,7 +75,7 @@ public class ImportController {
 //            componentsImport.importDimensions();
 //            shopifyExport.exportShopifyProductsPrice("product_prices_02-02.csv");
 //            wayfairReportImport.importWayfairReportKeywordDaily(filepath);
-            productsImport.importProductDetails();
+//            productsImport.importProductDetails();
 //                shopifyExport.exportAmazonReviews();
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
@@ -83,7 +83,7 @@ public class ImportController {
 //                amazonDataExport.extractDataFromAmazon();
 //            shopifyExport.exportShopifyProductsPrice(filepath);
 
-//            wayfairReportImport.importWayfairReportDaily(filepath);
+            wayfairReportImport.importWayfairReportDaily(filepath);
 //                productsImport.importProductPrice();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
