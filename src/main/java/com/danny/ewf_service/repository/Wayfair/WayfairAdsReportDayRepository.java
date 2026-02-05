@@ -27,25 +27,32 @@ public interface WayfairAdsReportDayRepository  extends JpaRepository<WayfairAds
             @Param("parentSku") String parentSku
     );
 
-    @Query("""
+    @Query(value = """
         SELECT
-          w.campaignId,
-          w.parentSku,
-          COALESCE(SUM(w.clicks), 0),
-          COALESCE(SUM(w.impressions), 0),
-          COALESCE(SUM(w.spend), 0),
-          COALESCE(SUM(w.totalSale), 0),
-          COALESCE(SUM(w.orderQuantity), 0),
-          w.campaignParentSku.parentSku.defaultBid,
-          w.campaignParentSku.campaign.campaignName,
-          w.campaignParentSku.parentSku.products,
-          w.campaignParentSku.campaign.category.title
-        FROM WayfairAdsReportDay w
-        WHERE w.reportDate BETWEEN :fromDate AND :toDate
-          AND w.campaignParentSku.campaign.type = 'Product'
-        GROUP BY w.campaignId, w.parentSku
-        ORDER BY w.campaignId, w.parentSku
-        """)
+            w.campaign_id AS campaignId,
+            w.parent_sku AS parentSku,
+            COALESCE(SUM(w.clicks), 0) AS totalClicks,
+            COALESCE(SUM(w.impressions), 0) AS totalImpressions,
+            COALESCE(SUM(w.spend), 0) AS totalSpend,
+            COALESCE(SUM(w.total_sale), 0) AS totalSales,
+            COALESCE(SUM(w.order_quantity), 0) AS totalOrderQuantity,
+            p.default_bid,
+            c.campaign_name AS campaignName,
+            p.products,
+            cat.title AS categoryTitle
+        FROM
+            wayfair_ads_report_daily w
+            INNER JOIN wayfair_campaign c ON w.campaign_id = c.campaign_id
+            INNER JOIN wayfair_parent_sku p ON w.parent_sku = p.parent_sku
+            LEFT JOIN wayfair_category cat ON c.category_id = cat.id
+        WHERE
+            w.report_date BETWEEN :fromDate AND :toDate
+            AND c.type = 'Product'
+        GROUP BY
+            w.campaign_id, w.parent_sku
+        ORDER BY
+            w.campaign_id, w.parent_sku
+        """, nativeQuery = true)
     List<Object[]> getAggregatedReportsByDateRange(
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate

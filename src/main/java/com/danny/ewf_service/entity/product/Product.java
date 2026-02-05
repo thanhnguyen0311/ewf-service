@@ -55,7 +55,7 @@ public class Product implements Serializable {
     private String localSku;
 
     @Column(name = "discontinued")
-    private Boolean discontinued;
+    private Boolean discontinued= false;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "wholesales_id", referencedColumnName = "id")
@@ -93,6 +93,6 @@ public class Product implements Serializable {
     private String asin;
 
     @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 
 }

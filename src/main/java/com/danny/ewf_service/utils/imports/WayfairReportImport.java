@@ -99,6 +99,7 @@ public class WayfairReportImport {
 
         // SECOND PASS - Process the CSV data
         try (InputStream secondPassStream = getClass().getResourceAsStream(filepath);
+
              BufferedReader secondPassReader = new BufferedReader(new InputStreamReader(secondPassStream));
              CSVReader csvReader = new CSVReaderBuilder(secondPassReader)
                      .withCSVParser(parser)
@@ -126,7 +127,8 @@ public class WayfairReportImport {
             List<WayfairParentSku> existingParentSkus = wayfairParentSkuRepository.findAll();
             System.out.println("Found " + existingParentSkus.size() + " existing parent SKUs");
             for (WayfairParentSku parentSku : existingParentSkus) {
-                parentSkuCache.put(parentSku.getParentSku(), parentSku);
+                String normalizedSku = parentSku.getParentSku().replaceAll("[\\p{C}]", "").trim();
+                parentSkuCache.put(normalizedSku, parentSku);
             }
 
             String[] columns;
@@ -151,9 +153,9 @@ public class WayfairReportImport {
                 String spend = getValueByIndex(columns, 21);
                 String totalSale = getValueByIndex(columns, 25);
                 String orderQty = getValueByIndex(columns, 26);
+                String normalizedSku = parentSku.replaceAll("[\\p{C}]", "").trim();
 
-
-                if (dateStr.isEmpty()) continue;
+                if (dateStr.isEmpty() || normalizedSku.isEmpty()) continue;
                 LocalDate reportDate;
                 if (dateStr.contains("/")) {
                     reportDate = LocalDate.parse(dateStr, slashFormatter);
@@ -164,6 +166,7 @@ public class WayfairReportImport {
                 if (!dateStr.equals(removeReportDate)) {
                     try {
                         int removeRecords = wayfairAdsReportDayRepository.removeByDateRange(reportDate);
+                        Thread.sleep(5000);
                         System.out.println("Removed " + removeRecords + " old reports at " + dateStr);
                     } catch (Exception e) {
                         e.getMessage();
@@ -188,16 +191,16 @@ public class WayfairReportImport {
                 }
 
                 // Process Parent SKU
-                WayfairParentSku parentSkuEntity = parentSkuCache.get(parentSku);
+                WayfairParentSku parentSkuEntity = parentSkuCache.get(normalizedSku);
                 if (parentSkuEntity == null) {
                     parentSkuEntity = new WayfairParentSku();
-                    parentSkuEntity.setParentSku(parentSku);
+                    parentSkuEntity.setParentSku(normalizedSku);
                     parentSkuEntity.setProductName(productName);
                     parentSkuEntity.setClassName(className);
                     parentSkuEntity.setDefaultBid(Float.valueOf(bid));
                     parentSkuEntity.setProducts(products);
 
-                    parentSkuCache.put(parentSku, parentSkuEntity);
+                    parentSkuCache.put(normalizedSku, parentSkuEntity);
                     wayfairParentSkuRepository.save(parentSkuEntity);
 
                     WayfairCampaignParentSku relation = new WayfairCampaignParentSku();
@@ -211,7 +214,7 @@ public class WayfairReportImport {
                 WayfairAdsReportDay report = new WayfairAdsReportDay();
                 report.setReportDate(reportDate);
                 report.setCampaignId(campaignId);
-                report.setParentSku(parentSku);
+                report.setParentSku(normalizedSku);
                 report.setIsB2b(b2b);
                 report.setClicks(Integer.valueOf(clicks));
                 report.setImpressions(Integer.valueOf(impressions));
