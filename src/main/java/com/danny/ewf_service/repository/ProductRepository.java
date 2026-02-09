@@ -161,8 +161,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             p.upc as upc, 
             p.asin as asin, 
             p.shippingMethod as shippingMethod, 
-            p.discontinued as discontinued
+            p.discontinued as discontinued,
+            pd.subCategory as subCategory,
+            pd.mainCategory as mainCategory,
+            p.category as category
         FROM Product p
+        LEFT JOIN p.productDetail pd
+                
         WHERE p.isDeleted = false
         """)
     List<ProductManagementDto> getAllProduct();

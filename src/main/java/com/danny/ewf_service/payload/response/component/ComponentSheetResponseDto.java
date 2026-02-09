@@ -26,4 +26,5 @@ public class ComponentSheetResponseDto {
     private String fabricCode;
     private String sizeShape;
     private String collection;
+    private String style;
 }
