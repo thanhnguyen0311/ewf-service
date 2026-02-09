@@ -3,10 +3,7 @@ package com.danny.ewf_service.converter;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.ImageUrls;
 import com.danny.ewf_service.entity.product.Product;
-import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
-import com.danny.ewf_service.payload.response.component.ComponentInventoryResponseDto;
-import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
-import com.danny.ewf_service.payload.response.component.ComponentResponseDto;
+import com.danny.ewf_service.payload.response.component.*;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,6 +13,24 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface IComponentMapper {
+
+
+    @Mapping(target = "sku", source = "component.sku")
+    @Mapping(target = "upc", source = "component.upc")
+    @Mapping(target = "id", source = "component.id")
+    @Mapping(target = "manufacturer", source = "component.manufacturer")
+    @Mapping(target = "lastUpdated", source = "component.updatedAt")
+    @Mapping(target = "type", source = "component.type")
+    @Mapping(target = "finish", source = "component.finish")
+    @Mapping(target = "category", source = "component.category")
+    @Mapping(target = "name", source = "component.name")
+    @Mapping(target = "fabricColor", source = "component.fabricColor")
+    @Mapping(target = "fabricCode", source = "component.fabricCode")
+    @Mapping(target = "sizeShape", source = "component.sizeShape")
+    @Mapping(target = "collection", source = "component.collection")
+    ComponentSheetResponseDto componentToComponentSheetResponseDto(Component component);
+    List<ComponentSheetResponseDto> componentListToComponentSheetResponseDtoList(List<Component> components);
+
 
     @Mapping(target = "sku", source = "component.sku")
     @Mapping(target = "upc", source = "component.upc")

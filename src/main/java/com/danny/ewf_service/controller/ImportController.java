@@ -79,12 +79,13 @@ public class ImportController {
 //                shopifyExport.exportAmazonReviews();
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
-//            productExport.exportProduct("wayfair_reviews.csv");
+            productExport.exportComponent("components.csv");
 //                amazonDataExport.extractDataFromAmazon();
 //            shopifyExport.exportShopifyProductsPrice(filepath);
 
-            wayfairReportImport.importWayfairReportDaily(filepath);
+//            wayfairReportImport.importWayfairReportDaily(filepath);
 //                productsImport.importProductPrice();
+//            componentsImport.importComponentsFromData();
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

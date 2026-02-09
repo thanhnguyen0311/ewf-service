@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
 import com.danny.ewf_service.payload.response.component.ComponentResponseDto;
+import com.danny.ewf_service.payload.response.component.ComponentSheetResponseDto;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface ComponentService {
     Component findComponentById(Long id);
 
     List<ComponentListWMSResponse> findAllComponentsWMS();
+
+    List<ComponentSheetResponseDto> findAllComponentsSheet();
 }

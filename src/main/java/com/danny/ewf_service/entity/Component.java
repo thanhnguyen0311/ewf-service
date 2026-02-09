@@ -15,7 +15,6 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-@ToString
 public class Component {
 
     @Id
@@ -48,7 +47,7 @@ public class Component {
     private Long inventory = 0L;
 
     @Column(name = "type")
-    private String type;
+    private String type = "";
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "price_id", referencedColumnName = "id")
@@ -66,7 +65,7 @@ public class Component {
     @Column(name = "discontinue")
     private Boolean discontinue;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "dimensions_id", referencedColumnName = "id")
     private Dimension dimension;
 
@@ -85,4 +84,17 @@ public class Component {
 
     @Column(name = "sub_type")
     private String subType;
+
+    @Column(name = "fabric_color")
+    private String fabricColor = "";
+
+    @Column(name = "fabric_code")
+    private String fabricCode = "";
+
+    @Column(name = "size_shape")
+    private String sizeShape = "";
+
+    @Column(name = "collection")
+    private String collection = "";
+
 }

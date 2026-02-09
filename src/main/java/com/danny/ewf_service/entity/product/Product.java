@@ -16,7 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Getter
-@ToString
 @Setter
 public class Product implements Serializable {
 

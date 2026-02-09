@@ -7,6 +7,7 @@ import java.util.List;
 public interface ProductManagementDto {
 
     String getSku();
+    Long getProductId();
     String getLocalSku();
     String getUpc();
     String getAsin();

@@ -156,6 +156,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("""
         SELECT
             p.sku as sku, 
+            p.id as productId,
             p.localSku as localSku, 
             p.upc as upc, 
             p.asin as asin, 
