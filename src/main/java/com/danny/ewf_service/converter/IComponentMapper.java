@@ -28,6 +28,7 @@ public interface IComponentMapper {
     @Mapping(target = "fabricCode", source = "component.fabricCode")
     @Mapping(target = "sizeShape", source = "component.sizeShape")
     @Mapping(target = "collection", source = "component.collection")
+    @Mapping(target = "style", source = "component.style")
     ComponentSheetResponseDto componentToComponentSheetResponseDto(Component component);
     List<ComponentSheetResponseDto> componentListToComponentSheetResponseDtoList(List<Component> components);
 

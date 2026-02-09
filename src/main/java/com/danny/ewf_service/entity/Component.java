@@ -97,4 +97,6 @@ public class Component {
     @Column(name = "collection")
     private String collection = "";
 
+    @Column(name = "style")
+    private String style = "";
 }
