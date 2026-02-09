@@ -13,5 +13,8 @@ public interface ProductManagementDto {
     String getAsin();
     String getShippingMethod();
     Boolean getDiscontinued();
+    String getSubCategory();
+    String getMainCategory();
+    String getCategory();
 
 }
