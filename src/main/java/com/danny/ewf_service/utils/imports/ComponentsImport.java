@@ -89,14 +89,26 @@ public class ComponentsImport {
 
             try (CSVReader csvReader = readerBuilder.build()) {
                 String componentSku;
+                String manufacturer;
+                String type;
+                String category;
                 String upc;
                 String name;
+                String finish;
+                String fabricColor;
+                String fabricCode;
                 String[] columns;
 
                 while ((columns = csvReader.readNext()) != null) {
                     componentSku = getValueByIndex(columns, 0);
-                    upc = getValueByIndex(columns, 1);
-                    name = getValueByIndex(columns, 2);
+                    manufacturer = getValueByIndex(columns, 1);
+                    type = getValueByIndex(columns, 2);
+                    category = getValueByIndex(columns, 3);
+                    upc = getValueByIndex(columns, 4);
+                    name = getValueByIndex(columns, 5);
+                    finish = getValueByIndex(columns, 6);
+                    fabricColor = getValueByIndex(columns, 7);
+                    fabricCode = getValueByIndex(columns, 8);
 
 
                     if (componentSku.isEmpty()) {
@@ -113,19 +125,21 @@ public class ComponentsImport {
                     if (optionalComponent.isEmpty()) {
                         component = Component.builder()
                                 .sku(componentSku)
-                                .upc(upc)
-                                .name(name)
-                                .inventory(0L)
-                                .category("BedFF")
-                                .subType("Full Platform Bed")
-                                .pos(1L)
-                                .type("Single")
-                                .manufacturer("TT")
                                 .discontinue(false)
+                                .inventory(0L)
                                 .build();
-                        componentRepository.save(component);
                         System.out.println("Inserted new SKU: " + componentSku);
-                    }
+                    } else component = optionalComponent.get();
+
+                    if (!manufacturer.isEmpty()) component.setManufacturer(manufacturer);
+                    if (!type.isEmpty()) component.setType(type);
+                    if (!category.isEmpty()) component.setCategory(category);
+                    if (!upc.isEmpty()) component.setUpc(upc);
+                    if (!name.isEmpty()) component.setName(name);
+                    if (!finish.isEmpty()) component.setFinish(finish);
+                    if (!fabricColor.isEmpty()) component.setFabricColor(fabricColor);
+                    if (!fabricCode.isEmpty()) component.setFabricCode(fabricCode);
+                    componentRepository.save(component);
                 }
             }
 

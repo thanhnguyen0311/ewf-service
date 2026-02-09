@@ -8,6 +8,7 @@ import com.danny.ewf_service.entity.Report;
 import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
 import com.danny.ewf_service.payload.response.component.ComponentResponseDto;
+import com.danny.ewf_service.payload.response.component.ComponentSheetResponseDto;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ReportRepository;
 import com.danny.ewf_service.service.ComponentService;
@@ -89,5 +90,11 @@ public class ComponentServiceImpl implements ComponentService {
     public List<ComponentListWMSResponse> findAllComponentsWMS() {
         List<Component> components = componentRepository.findAllByDiscontinueFalse();
         return componentMapper.componentListToComponentListWMSResponseDtoList(components);
+    }
+
+    @Override
+    public List<ComponentSheetResponseDto> findAllComponentsSheet() {
+        List<Component> components = componentRepository.findAll();
+        return new ArrayList<>(componentMapper.componentListToComponentSheetResponseDtoList(components));
     }
 }

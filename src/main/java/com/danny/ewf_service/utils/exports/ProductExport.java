@@ -1,7 +1,9 @@
 package com.danny.ewf_service.utils.exports;
 
+import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
+import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.utils.CsvWriter;
 import lombok.AllArgsConstructor;
@@ -20,6 +22,9 @@ public class ProductExport {
 
     @Autowired
     private final CsvWriter csvWriter;
+
+    @Autowired
+    private final ComponentRepository componentRepository;
 
     public void exportProduct(String filePath){
         List<Product> products = productRepository.findAllProducts();
@@ -66,4 +71,14 @@ public class ProductExport {
         csvWriter.exportToCsv(rows, filePath);
     }
 
+    public void exportComponent(String filePath){
+        List<Component> allComponents = componentRepository.findAll();
+
+        System.out.println("Found " + allComponents.size() + " components");
+        List<String[]> rows = new ArrayList<>();
+        for (Component component : allComponents) {
+            rows.add(new String[]{component.getSku()});
+        }
+        csvWriter.exportToCsv(rows, filePath);
+    }
 }
