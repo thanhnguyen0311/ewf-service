@@ -20,6 +20,7 @@ public interface IComponentMapper {
     @Mapping(target = "id", source = "component.id")
     @Mapping(target = "manufacturer", source = "component.manufacturer")
     @Mapping(target = "lastUpdated", source = "component.updatedAt")
+    @Mapping(target = "createdAt", source = "component.createdAt")
     @Mapping(target = "type", source = "component.type")
     @Mapping(target = "finish", source = "component.finish")
     @Mapping(target = "category", source = "component.category")

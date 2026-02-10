@@ -18,6 +18,7 @@ public class ComponentSheetResponseDto {
     private Long id;
     private String manufacturer;
     private LocalDateTime lastUpdated;
+    private LocalDateTime createdAt;
     private String type;
     private String finish;
     private String category;
@@ -27,4 +28,5 @@ public class ComponentSheetResponseDto {
     private String sizeShape;
     private String collection;
     private String style;
+
 }
