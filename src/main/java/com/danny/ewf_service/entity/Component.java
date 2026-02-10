@@ -59,6 +59,9 @@ public class Component {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     @Column(name = "metadata", columnDefinition = "JSON")
     private String metadata;
 
