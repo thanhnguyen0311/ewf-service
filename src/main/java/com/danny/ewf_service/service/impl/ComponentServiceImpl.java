@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.Report;
+import com.danny.ewf_service.payload.request.ComponentSheetRequestDto;
 import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
 import com.danny.ewf_service.payload.response.component.ComponentResponseDto;
@@ -97,14 +98,14 @@ public class ComponentServiceImpl implements ComponentService {
     }
 
     @Override
-    public LocalDateTime updateComponentsFromSheet(List<ComponentSheetResponseDto> componentSheetResponseDtos) {
-        if (componentSheetResponseDtos == null || componentSheetResponseDtos.isEmpty()) {
+    public LocalDateTime updateComponentsFromSheet(List<ComponentSheetRequestDto> componentSheetRequestDtos) {
+        if (componentSheetRequestDtos == null || componentSheetRequestDtos.isEmpty()) {
             // Skip processing if the input list is empty
             return LocalDateTime.now();
         }
         // Extract all SKUs from the DTOs
-        List<String> skus = componentSheetResponseDtos.stream()
-                .map(ComponentSheetResponseDto::getSku)
+        List<String> skus = componentSheetRequestDtos.stream()
+                .map(ComponentSheetRequestDto::getSku)
                 .filter(sku -> sku != null && !sku.isEmpty())
                 .toList();
 
@@ -117,7 +118,7 @@ public class ComponentServiceImpl implements ComponentService {
 
         // Create or update components
         List<Component> componentsToSave = new ArrayList<>();
-        for (ComponentSheetResponseDto dto : componentSheetResponseDtos) {
+        for (ComponentSheetRequestDto dto : componentSheetRequestDtos) {
             // Check if the component already exists
             Component component = componentMap.get(dto.getSku());
 

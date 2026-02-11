@@ -1,5 +1,6 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.payload.request.ComponentSheetRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
@@ -63,9 +64,9 @@ public class ComponentController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> updateComponentsfromSheet(@RequestBody List<ComponentSheetResponseDto> componentSheetResponseDtos) {
+    public ResponseEntity<?> updateComponentsfromSheet(@RequestBody List<ComponentSheetRequestDto> componentSheetRequestDtos) {
         try {
-            LocalDateTime updated = componentService.updateComponentsFromSheet(componentSheetResponseDtos);
+            LocalDateTime updated = componentService.updateComponentsFromSheet(componentSheetRequestDtos);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
