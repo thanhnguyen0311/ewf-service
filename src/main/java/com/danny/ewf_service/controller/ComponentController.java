@@ -6,12 +6,14 @@ import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse
 import com.danny.ewf_service.payload.response.component.ComponentSheetResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.service.ComponentService;
+import jnr.constants.platform.Local;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequestMapping("/api/v1/component")
@@ -63,7 +65,8 @@ public class ComponentController {
     @PostMapping("")
     public ResponseEntity<?> updateComponentsfromSheet(@RequestBody List<ComponentSheetResponseDto> componentSheetResponseDtos) {
         try {
-            return ResponseEntity.ok().build();
+            LocalDateTime updated = componentService.updateComponentsFromSheet(componentSheetResponseDtos);
+            return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
