@@ -7,6 +7,7 @@ import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse
 import com.danny.ewf_service.payload.response.component.ComponentResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentSheetResponseDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ComponentService {
@@ -24,4 +25,6 @@ public interface ComponentService {
     List<ComponentListWMSResponse> findAllComponentsWMS();
 
     List<ComponentSheetResponseDto> findAllComponentsSheet();
+
+    LocalDateTime updateComponentsFromSheet(List<ComponentSheetResponseDto> componentSheetResponseDtos);
 }

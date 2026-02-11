@@ -17,7 +17,6 @@ public interface IComponentMapper {
 
     @Mapping(target = "sku", source = "component.sku")
     @Mapping(target = "upc", source = "component.upc")
-    @Mapping(target = "id", source = "component.id")
     @Mapping(target = "manufacturer", source = "component.manufacturer")
     @Mapping(target = "lastUpdated", source = "component.updatedAt")
     @Mapping(target = "createdAt", source = "component.createdAt")

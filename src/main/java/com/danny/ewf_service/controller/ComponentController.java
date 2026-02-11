@@ -1,15 +1,16 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
 import com.danny.ewf_service.payload.response.component.ComponentSheetResponseDto;
+import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.service.ComponentService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,6 +57,17 @@ public class ComponentController {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error fetching components");
+        }
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> updateComponentsfromSheet(@RequestBody List<ComponentSheetResponseDto> componentSheetResponseDtos) {
+        try {
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching product");
         }
     }
 }
