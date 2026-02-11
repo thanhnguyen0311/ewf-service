@@ -2,6 +2,7 @@ package com.danny.ewf_service.service;
 
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.payload.request.ComponentSheetRequestDto;
 import com.danny.ewf_service.payload.response.component.ComponentInboundResponseDto;
 import com.danny.ewf_service.payload.response.component.ComponentListWMSResponse;
 import com.danny.ewf_service.payload.response.component.ComponentResponseDto;
@@ -26,5 +27,5 @@ public interface ComponentService {
 
     List<ComponentSheetResponseDto> findAllComponentsSheet();
 
-    LocalDateTime updateComponentsFromSheet(List<ComponentSheetResponseDto> componentSheetResponseDtos);
+    LocalDateTime updateComponentsFromSheet(List<ComponentSheetRequestDto> componentSheetResponseDtos);
 }
