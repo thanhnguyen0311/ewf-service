@@ -17,10 +17,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,5 +94,61 @@ public class ComponentServiceImpl implements ComponentService {
     public List<ComponentSheetResponseDto> findAllComponentsSheet() {
         List<Component> components = componentRepository.findAll();
         return new ArrayList<>(componentMapper.componentListToComponentSheetResponseDtoList(components));
+    }
+
+    @Override
+    public LocalDateTime updateComponentsFromSheet(List<ComponentSheetResponseDto> componentSheetResponseDtos) {
+        if (componentSheetResponseDtos == null || componentSheetResponseDtos.isEmpty()) {
+            // Skip processing if the input list is empty
+            return LocalDateTime.now();
+        }
+        // Extract all SKUs from the DTOs
+        List<String> skus = componentSheetResponseDtos.stream()
+                .map(ComponentSheetResponseDto::getSku)
+                .filter(sku -> sku != null && !sku.isEmpty())
+                .toList();
+
+        // Fetch existing components by SKUs in bulk
+        List<Component> existingComponents = componentRepository.findComponentsBySkuIn(skus);
+
+        // Build a map of existing components for fast lookup
+        Map<String, Component> componentMap = existingComponents.stream()
+                .collect(Collectors.toMap(Component::getSku, component -> component));
+
+        // Create or update components
+        List<Component> componentsToSave = new ArrayList<>();
+        for (ComponentSheetResponseDto dto : componentSheetResponseDtos) {
+            // Check if the component already exists
+            Component component = componentMap.get(dto.getSku());
+
+            if (component == null) {
+                // If no existing component, create a new one
+                component = new Component();
+                component.setSku(dto.getSku());
+                component.setCreatedAt(LocalDateTime.now());
+            }
+
+            // Update component fields from DTO
+            component.setUpc(dto.getUpc());
+            component.setManufacturer(dto.getManufacturer());
+            component.setType(dto.getType());
+            component.setFinish(dto.getFinish());
+            component.setCategory(dto.getCategory());
+            component.setName(dto.getName());
+            component.setFabricColor(dto.getFabricColor());
+            component.setFabricCode(dto.getFabricCode());
+            component.setSizeShape(dto.getSizeShape());
+            component.setCollection(dto.getCollection());
+            component.setStyle(dto.getStyle());
+
+            // Add to the save list
+            componentsToSave.add(component);
+        }
+
+        // Step 5: Save all components in bulk
+        componentRepository.saveAll(componentsToSave);
+
+        // Return the timestamp of the operation
+        return LocalDateTime.now();
     }
 }

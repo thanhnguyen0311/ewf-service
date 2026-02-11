@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class ComponentSheetResponseDto {
     private String sku;
     private String upc;
-    private Long id;
     private String manufacturer;
     private LocalDateTime lastUpdated;
     private LocalDateTime createdAt;
