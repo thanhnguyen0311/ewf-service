@@ -35,17 +35,33 @@ public class Dimension {
     private Double boxWidth;
 
     @Column(name = "width")
-    private Double width;
+    private String width;
 
     @Column(name = "height")
-    private Double height;
+    private String height;
 
     @Column(name = "length")
-    private Double length;
+    private String length;
+
+    @Column(name = "weight")
+    private Double weight;
 
     @Column(name = "l_w_h")
     private String lwh;
 
     @Column(name = "pallet_capacity")
     private Long palletCapacity;
+
+    @Column(name = "volume_per_box")
+    private Double volumePerBox;
+
+    @Column(name = "volume_per_piece_inch")
+    private Double volumePerPieceInch;
+
+    @Column(name = "volume_per_piece_m3")
+    private Double volumePerPieceM3;
+
+    @Column(name = "container_load")
+    private Long piecesPerContainer;
+
 }

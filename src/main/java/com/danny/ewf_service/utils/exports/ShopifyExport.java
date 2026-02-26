@@ -522,9 +522,9 @@ public class ShopifyExport {
                         if (maxLength == null || length > maxLength) {
                             maxLength = length;
                             boxDimension = lwhToString(
-                                    productComponent.getComponent().getDimension().getBoxLength(),
-                                    productComponent.getComponent().getDimension().getBoxWidth(),
-                                    productComponent.getComponent().getDimension().getBoxHeight()
+                                    productComponent.getComponent().getDimension().getBoxLength().toString(),
+                                    productComponent.getComponent().getDimension().getBoxWidth().toString(),
+                                    productComponent.getComponent().getDimension().getBoxHeight().toString()
                             );
                         }
 
@@ -565,7 +565,7 @@ public class ShopifyExport {
                             lwh,
                             dimension.getQuantityBox() != null ? productComponent.getQuantity() / dimension.getQuantityBox() + "" : "",
                             dimension.getBoxLength() != null
-                                    ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : "",
+                                    ? lwhToString(dimension.getBoxLength().toString(), dimension.getBoxWidth().toString(), dimension.getBoxHeight().toString()) : "",
                     });
                 }
             }
@@ -593,7 +593,7 @@ public class ShopifyExport {
                             component.getSubType() != null ? component.getSubType() : "",
                             lwh,
                             dimension.getQuantityBox() != null ? productComponent.getQuantity() / dimension.getQuantityBox() + "" : "",
-                            dimension.getBoxLength() != null ? lwhToString(dimension.getBoxLength(), dimension.getBoxWidth(), dimension.getBoxHeight()) : ""
+                            dimension.getBoxLength() != null ? lwhToString(dimension.getBoxLength().toString(), dimension.getBoxWidth().toString(), dimension.getBoxHeight().toString()) : ""
                     });
                 }
             }
@@ -698,12 +698,12 @@ public class ShopifyExport {
 
     }
 
-    private String lwhToString(double length, double width, double height) {
-        if (Double.isNaN(length) || Double.isNaN(width) || Double.isNaN(height)) {
+    private String lwhToString(String length, String width, String height) {
+        if (length.isEmpty() || width.isEmpty() || height.isEmpty()) {
             return "";
         }
 
-        return "L " + (int) Math.floor(length) + " x W " + (int) Math.floor(width) + " x H " + (int) Math.floor(height);
+        return "L " + length + " x W " + width + " x H " + height;
     }
 
     private long countMergedProduct(Product product, Product mergedProduct) {

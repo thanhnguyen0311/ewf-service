@@ -63,7 +63,7 @@ public interface ProductComponentRepository extends JpaRepository<ProductCompone
             FROM product_components pc 
             JOIN components c ON pc.component_id = c.id 
             JOIN products p ON pc.product_id = p.id 
-            WHERE p.id = :id AND c.type = 'Single'""",
+            WHERE p.id = :id AND c.type = 'SI'""",
             nativeQuery = true)
     List<String> findSingleProductsByProductSku(@Param("id") Long id);
 

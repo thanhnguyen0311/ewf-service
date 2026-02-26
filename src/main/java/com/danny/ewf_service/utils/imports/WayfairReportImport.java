@@ -164,13 +164,13 @@ public class WayfairReportImport {
                 }
 
                 if (!dateStr.equals(removeReportDate)) {
+                    System.out.println("Removing reports for " + removeReportDate);
                     try {
                         int removeRecords = wayfairAdsReportDayRepository.removeByDateRange(reportDate);
                         Thread.sleep(5000);
                         System.out.println("Removed " + removeRecords + " old reports at " + dateStr);
                     } catch (Exception e) {
                         e.getMessage();
-                        throw new RuntimeException("Error removing old reports", e);
                     }
                     removeReportDate = dateStr;
                 }

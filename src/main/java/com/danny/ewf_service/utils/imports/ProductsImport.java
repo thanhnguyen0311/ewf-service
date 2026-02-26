@@ -1,6 +1,7 @@
 package com.danny.ewf_service.utils.imports;
 
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -40,7 +41,41 @@ public class ProductsImport {
     @Autowired
     private final ComponentRepository componentRepository;
 
+    @Autowired
     private final SKUGenerator skuGenerator;
+
+    // Define the list of valid SKUs
+    private static final List<String> validSkus = Arrays.asList(
+            "NOBO3-WHI-LC", "NOBO5-WHI-LC", "1LEDA5-AWA-13", "1LEDA7-AWA-13", "1LEDA9-AWA-13",
+            "EWT-OAK-T", "E5AB7-LWH-02", "E5AB9-LWH-02", "E5AS5-LWH-41", "E5AS5-LWH-42",
+            "E5AS5-LWH-43", "E5AS7-LWH-41", "E5AS7-LWH-42", "E5AS7-LWH-43", "E5AS9-LWH-41",
+            "E5AS9-LWH-42", "E5AS9-LWH-43", "E5BO5-LWH-LC", "E5BO5-LWH-W", "E5BO7-LWH-LC",
+            "E5BO7-LWH-W", "E5BO9-LWH-LC", "E5BO9-LWH-W", "E5CL5-LWH-C", "E5CL5-LWH-W",
+            "E5CL7-LWH-C", "E5CL7-LWH-W", "E5CL9-LWH-C", "E5CL9-LWH-W", "E5DA5-LWH-13",
+            "E5DA5-LWH-22", "E5DA5-LWH-23", "E5DA5-LWH-27", "E5DA5-LWH-32", "E5DA7-LWH-13",
+            "E5DA7-LWH-22", "E5DA7-LWH-23", "E5DA7-LWH-27", "E5DA7-LWH-32", "E5DA9-LWH-13",
+            "E5DA9-LWH-22", "E5DA9-LWH-23", "E5DA9-LWH-27", "E5DA9-LWH-32", "E5GR5-LWH-W",
+            "E5GR7-LWH-W", "E5GR9-LWH-W", "E5NF5-LWH-W", "E5NF7-LWH-W", "E5NF9-LWH-W",
+            "E5VA5-LWH-C", "E5VA5-LWH-W", "E5VA7-LWH-C", "E5VA7-LWH-W", "E5VA9-LWH-C",
+            "E5VA9-LWH-W", "E5LY5-ESP-LC", "E5LY5-ESP-W", "E5LY7-ESP-LC", "E5LY9-ESP-LC",
+            "E5LY9-ESP-W", "E5VA5-ESP-LC", "E5VA5-ESP-W", "E5VA9-ESP-C", "E5VA9-ESP-W",
+            "E5AN5-BCH-W", "E5AN7-BCH-W", "E5AN9-BCH-W", "E5AS5-BCH-09", "E5AS5-BCH-12",
+            "E5AS7-BCH-09", "E5AS7-BCH-12", "E5AS9-BCH-09", "E5AS9-BCH-12", "E5AV5-BCH-W",
+            "E5AV7-BCH-W", "E5AV9-BCH-W", "E5BO5-BCH-W", "E5BO7-BCH-W", "E5BO9-BCH-W",
+            "E5CL5-BCH-W", "E5CL7-BCH-W", "E5CL9-BCH-W", "E5DA5-BCH-W", "E5DA7-BCH-W",
+            "E5DA9-BCH-W", "E5DO5-BCH-W", "E5DO7-BCH-W", "E5DO9-BCH-W", "E5EN5-BCH-69",
+            "E5EN7-BCH-69", "E5EN9-BCH-69", "E5FR5-BCH-02", "E5FR7-BCH-02", "E5FR9-BCH-02",
+            "E5GR5-BCH-W", "E5GR7-BCH-W", "E5GR9-BCH-W", "E5KE5-BCH-LC", "E5KE5-BCH-W",
+            "E5KE7-BCH-LC", "E5KE7-BCH-W", "E5KE9-BCH-LC", "E5KE9-BCH-W", "E5NF5-BCH-W",
+            "E5NF7-BCH-W", "E5NF9-BCH-W", "E5NI5-BCH-W", "E5NI7-BCH-W", "E5NI9-BCH-W",
+            "E5PV5-BCH-W", "E5PV7-BCH-W", "E5PV9-BCH-W", "E5QU5-BCH-W", "E5QU7-BCH-W",
+            "E5QU9-BCH-W", "E5VA5-BCH-W", "E5VA7-BCH-W", "E5VA9-BCH-W", "E5WE5-BCH-W",
+            "E5WE7-BCH-W", "E5WE9-BCH-W", "DAPEL32", "DAPEF29", "DAPEF27", "DAPEF26",
+            "DAPEL24", "DAPEF23", "DAPEF22", "DAPEF13", "DAPEF12", "1DLT-WHI-TP",
+            "1DLT-SBR-TP", "1DLT-OAK-TP", "1DLT-MAH-TP", "1DLT-ESP-TP", "1DLT-BLK-TP",
+            "CLC-ESP-W"
+    );
+
 
     @Transactional
     public void importProductDetails() {
@@ -344,6 +379,128 @@ public class ProductsImport {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error reading CSV file", e);
+        }
+    }
+
+    @Transactional
+    public void importProductComponents() {
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
+             BufferedReader reader = new BufferedReader(new InputStreamReader(file, StandardCharsets.UTF_8))) {
+
+
+            CSVParserBuilder parserBuilder = new CSVParserBuilder()
+                    .withSeparator(',')
+                    .withQuoteChar('"')
+                    .withEscapeChar('\\')
+                    .withStrictQuotes(false)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreQuotations(false)
+                    .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
+
+            CSVParser parser = parserBuilder.build();
+
+            // Create reader with the configured parser
+            CSVReaderBuilder readerBuilder = new CSVReaderBuilder(reader)
+                    .withCSVParser(parser)
+                    .withMultilineLimit(-1); // No limit on multiline fields
+
+            Product product;
+            try (CSVReader csvReader = readerBuilder.build()) {
+                String productSku;
+                String cat;
+                String cat2;
+                String item1Sku;
+                String item2Sku;
+                String item3Sku;
+                String item4Sku;
+                String item5Sku;
+                String item6Sku;
+                String item7Sku;
+                String[] columns;
+
+                while ((columns = csvReader.readNext()) != null) {
+                    productSku = getValueByIndex(columns, 0);
+                    cat = getValueByIndex(columns, 1);
+                    cat2 = getValueByIndex(columns, 2);
+                    item1Sku = getValueByIndex(columns, 3);
+                    item2Sku = getValueByIndex(columns, 5);
+                    item3Sku = getValueByIndex(columns, 7);
+                    item4Sku = getValueByIndex(columns, 9);
+                    item5Sku = getValueByIndex(columns, 11);
+                    item6Sku = getValueByIndex(columns, 13);
+                    item7Sku = getValueByIndex(columns, 15);
+
+
+
+                    if (productSku.isEmpty()) {
+                        continue;
+                    }
+
+
+                    String normalizedSku = productSku.replaceAll("[\\p{C}]", "").trim();
+
+
+                    if (!validSkus.contains(normalizedSku.trim().toUpperCase())) {
+                        continue;
+                    }
+                    System.out.println("Processing SKU: " + normalizedSku);
+
+                    Optional<Product> optionalProduct = productRepository.findProductBySku(normalizedSku);
+                    if (optionalProduct.isPresent()) product = optionalProduct.get();
+                    else {
+                        product = new Product();
+                        product.setSku(normalizedSku.toUpperCase());
+                        System.out.println("Inserted new SKU: " + normalizedSku);
+
+                    }
+                    product.setCategory(cat);
+                    product.setCategory2(cat2);
+                    List<ProductComponent> productComponents = product.getComponents();
+                    if (productComponents == null) {
+                        productComponents = new ArrayList<>();
+                        product.setComponents(productComponents); // Ensure it's initialized
+                    }
+                    if (productComponents.isEmpty()) {
+                        // Populate product components
+                        addComponentToProduct(productComponents, columns, product, 3, 4);  // item1Sku
+                        addComponentToProduct(productComponents, columns, product, 5, 6);  // item2Sku
+                        addComponentToProduct(productComponents, columns, product, 7, 8);  // item3Sku
+                        addComponentToProduct(productComponents, columns, product, 9, 10); // item4Sku
+                        addComponentToProduct(productComponents, columns, product, 11, 12); // item5Sku
+                        addComponentToProduct(productComponents, columns, product, 13, 14); // item6Sku
+                        addComponentToProduct(productComponents, columns, product, 15, 16);
+                    }
+
+                    for (ProductComponent productComponent : productComponents) {
+                        System.out.println("Added component SKU: " + productComponent.getComponent().getSku());
+                    }
+                    System.out.println("Updated SKU: " + normalizedSku + " VALUES : " + productComponents.size());
+                    productRepository.save(product);
+                }
+            }
+
+
+        } catch (Exception e) {
+            System.err.println("Error importing SKUs: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void addComponentToProduct(List<ProductComponent> productComponents, String[] columns, Product product, int skuIndex, int quantityIndex) {
+        String componentSku = getValueByIndex(columns, skuIndex).toUpperCase();
+        if (!componentSku.isEmpty()) {
+            Component component = componentRepository.findBySku(componentSku).orElseGet(() -> {
+                Component newComponent = new Component();
+                newComponent.setSku(componentSku);
+                componentRepository.save(newComponent);
+                return newComponent;
+            });
+
+            ProductComponent productComponent = new ProductComponent();
+            productComponent.setProduct(product);
+            productComponent.setComponent(component);
+            productComponent.setQuantity(Long.parseLong(getValueByIndex(columns, quantityIndex)));
+            productComponents.add(productComponent);
         }
     }
 

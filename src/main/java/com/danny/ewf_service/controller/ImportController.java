@@ -73,19 +73,19 @@ public class ImportController {
 //            productsImport.importProductDetails();
 //            componentsImport.importPrices();
 //            componentsImport.importDimensions();
-//            shopifyExport.exportShopifyProductsPrice("product_prices_02-02.csv");
+//            shopifyExport.exportShopifyProductsPrice("product_prices_02-18.csv");
 //            wayfairReportImport.importWayfairReportKeywordDaily(filepath);
 //            productsImport.importProductDetails();
 //                shopifyExport.exportAmazonReviews();
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
-            productExport.exportComponent("components.csv");
+//            productExport.exportComponent("components.csv");
 //                amazonDataExport.extractDataFromAmazon();
-//            shopifyExport.exportShopifyProductsPrice(filepath);
-
 //            wayfairReportImport.importWayfairReportDaily(filepath);
-//                productsImport.importProductPrice();
-//            componentsImport.importComponentsFromData();
+//                productsImport.importProductComponents();
+//            componentsImport.importDimensions();
+//            productExport.exportProductWithDimension("product_dimensions.csv");
+            productExport.exportMergedProducts("merged_products.csv");
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
