@@ -261,18 +261,17 @@ public class ProductServiceImpl implements ProductService {
                 stt++;
             }
         }
-//        if (totalQB1 > 2000) totalShipCost = totalShipCost*0.70;
-//        else if (totalQB1 > 1500) totalShipCost = totalShipCost*0.75;
-//        else if (totalQB1 > 1000) totalShipCost = totalShipCost*0.80;
-//        else if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
-        if (totalQB1 > 600) totalShipCost = totalShipCost*0.90;
 
+        if (totalQB1 > 2000) totalShipCost = totalShipCost*0.8;
+        else if (totalQB1 > 1500 && totalQB1 < 2000) totalShipCost = totalShipCost*0.85;
+        else if (totalQB1 > 1000 && totalQB1 < 1500) totalShipCost = totalShipCost*0.90;
+        else if (totalQB1 > 600 && totalQB1 < 1000) totalShipCost = totalShipCost*0.95;
 
+        if (totalQB1 > 1000.0 && totalQB1 < 2000.0) totalQB1 = totalQB1*0.95;
+        if (totalQB1 > 2000.0) totalQB1 = totalQB1*0.90;
 
         productPrice = totalQB1 + totalShipCost;
 //        productPrice = productPrice * 1.03;
-
-        product.getPrice().setEwfdirect(productPrice);
 
         Price price = product.getPrice();
         if (price != null) {
@@ -300,18 +299,18 @@ public class ProductServiceImpl implements ProductService {
 
             productPrice = productPrice * 1.05;
 
-            if (price.getAmazonPrice() != null) {
-                if (productPrice < 250.0) {
-                    if (productPrice < price.getAmazonPrice()) {
-                        productPrice = price.getAmazonPrice();
-                    }
-                }
+//            if (price.getAmazonPrice() != null) {
+//                if (productPrice < 250.0) {
+//                    if (productPrice < price.getAmazonPrice()) {
+//                        productPrice = price.getAmazonPrice();
+//                    }
+//                }
+//
+//            }
 
-            }
 
-
-            if (productPrice > 1000.0) productPrice = productPrice*0.95;
-            if (productPrice > 2000.0) productPrice = productPrice*0.90;
+//            if (productPrice > 1000.0) productPrice = productPrice*0.95;
+//            if (productPrice > 2000.0) productPrice = productPrice*0.90;
 
 
 
@@ -413,7 +412,7 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> findMergedProducts(Product product) {
 
         List<ProductComponent> groupComponents = product.getComponents().stream()
-                .filter(pc -> "Group".equalsIgnoreCase(pc.getComponent().getType()))
+                .filter(pc -> "CO".equalsIgnoreCase(pc.getComponent().getType()))
                 .toList();
         if (groupComponents.size() < 2) {
             return null; // No merged product exists
@@ -639,6 +638,11 @@ public class ProductServiceImpl implements ProductService {
         List<ProductComponentDto> productComponentDtos;
         productComponentDtos = productRepository.getAllProductComponents();
         return productComponentDtos;
+    }
+
+    @Override
+    public Product findMergedProductFrom2Comps(Component component1, Component component2) {
+        return null;
     }
 
 

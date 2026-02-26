@@ -372,13 +372,22 @@ public class ComponentsImport {
                 }
 
                 String componentSku = columns[0].trim();
-                String boxLength = columns[1].trim();
-                String boxWidth = columns[2].trim();
-                String boxHeight = columns[3].trim();
-                String boxWeight = columns[4].trim();
-                String length = columns[5].trim();
-                String width = columns[6].trim();
-                String height = columns[7].trim();
+                String qtyBox = columns[1].trim();
+                String volumePerBox = columns[2].trim();
+                String volumePerPieceInch = columns[3].trim();
+                String volumePerPieceM3 = columns[4].trim();
+                String piecesPerContainer = columns[5].trim();
+
+                String length = columns[6] == null ? "" : columns[6].trim();
+                String width = columns[7] == null ? "" : columns[7].trim();
+                String height = columns[8] == null ? "" : columns[8].trim();
+
+                String weight = columns[9].trim();
+                String boxLength = columns[10].trim();
+                String boxWidth = columns[11].trim();
+                String boxHeight = columns[12].trim();
+                String boxWeight = columns[13].trim();
+                String packageVolume = columns[14].trim();
 
                 if (componentSku.isEmpty() || componentSkus.contains(componentSku)) {
                     continue;
@@ -400,17 +409,23 @@ public class ComponentsImport {
                     Dimension dimension = component.getDimension();
                     if (dimension == null) dimension = new Dimension();
 
-                    dimension.setLength(Double.valueOf(length));
-                    dimension.setWidth(Double.valueOf(width));
-                    dimension.setHeight(Double.valueOf(height));
-                    dimension.setBoxWeight(Double.valueOf(boxWeight));
-                    dimension.setBoxLength(Double.valueOf(boxLength));
-                    dimension.setBoxWidth(Double.valueOf(boxWidth));
-                    dimension.setBoxHeight(Double.valueOf(boxHeight));
-                    component.setDimension(dimension);
+                    if (!qtyBox.equals("*")) dimension.setQuantityBox(Long.valueOf(qtyBox));
+                    if (!volumePerBox.equals("*")) dimension.setVolumePerBox(Double.valueOf(volumePerBox));
+                    if (!volumePerPieceInch.equals("*"))dimension.setVolumePerPieceInch(Double.valueOf(volumePerPieceInch));
+                    if (!volumePerPieceM3.equals("*")) dimension.setVolumePerPieceM3(Double.valueOf(volumePerPieceM3));
+                    if (!piecesPerContainer.equals("*")) dimension.setPiecesPerContainer(Long.valueOf(piecesPerContainer));
+                    if (!boxHeight.equals("*")) dimension.setBoxHeight(Double.valueOf(boxHeight));
+                    if (!boxLength.equals("*")) dimension.setBoxLength(Double.valueOf(boxLength));
+                    if (!boxWidth.equals("*")) dimension.setBoxWidth(Double.valueOf(boxWidth));
+                    if (!boxWeight.equals("*")) dimension.setBoxWeight(Double.valueOf(boxWeight));
+                    if (!length.equals("*")) dimension.setLength(length);
+                    if (!width.equals("*")) dimension.setWidth(width);
+                    if (!height.equals("*")) dimension.setHeight(height);
+                    if (!weight.equals("*")) dimension.setWeight(Double.valueOf(weight));
+
                     componentRepository.save(component);
                     componentSkus.add(componentSku);
-
+                    System.out.println("Successfully Updated product : " + componentSku + " VALUES : " + dimension);
 
                 } catch (RuntimeException e) {
                     System.err.println("Error processing row for component " + componentSku + ": " + e.getMessage());
