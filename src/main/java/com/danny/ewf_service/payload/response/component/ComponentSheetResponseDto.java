@@ -27,5 +27,15 @@ public class ComponentSheetResponseDto {
     private String sizeShape;
     private String collection;
     private String style;
-
+    private String shippingMethod;
+    private Long quantityBox;
+    private String length;
+    private String width;
+    private String height;
+    private Double weight;
+    private Double boxWeight;
+    private Double boxLength;
+    private Double boxWidth;
+    private Double boxHeight;
+    private Boolean discontinue;
 }

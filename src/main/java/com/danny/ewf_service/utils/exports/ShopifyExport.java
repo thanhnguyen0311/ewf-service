@@ -273,7 +273,6 @@ public class ShopifyExport {
                     if (!product.getWholesales().getEwfdirect()) continue;
                 }
 
-                if (product.getDiscontinued() == null || product.getDiscontinued()) continue;
                 if (product.getComponents().isEmpty()) continue;
                 if (product.getTitle() == null) continue;
                 if (product.getProductDetail() != null) {
@@ -488,7 +487,6 @@ public class ShopifyExport {
 
         for (Product product : products) {
             System.out.println("Processing " + product.getSku());
-            if (product.getDiscontinued() == null || product.getDiscontinued()) continue;
             if (product.getComponents().isEmpty()) continue;
             if (product.getProductDetail() == null) continue;
 

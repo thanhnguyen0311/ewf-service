@@ -167,11 +167,12 @@ public class ProductExport {
                 }
 
             }
+            // Find components with quantityBox > 1
+            components.removeIf(productComponent -> productComponent.getComponent().getSku().contains("DSP")
+                                                    || productComponent.getComponent().getSku().contains("DSL"));
         }
 
-        // Find components with quantityBox > 1
-        components.removeIf(productComponent -> productComponent.getComponent().getSku().contains("DSP")
-                                                || productComponent.getComponent().getSku().contains("DSL"));
+
 
         for (ProductComponent productComponent : components) {
             if (productComponent.getComponent() != null

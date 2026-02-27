@@ -29,6 +29,17 @@ public interface IComponentMapper {
     @Mapping(target = "sizeShape", source = "component.sizeShape")
     @Mapping(target = "collection", source = "component.collection")
     @Mapping(target = "style", source = "component.style")
+    @Mapping(target = "shippingMethod", source = "component.shippingMethod")
+    @Mapping(target = "quantityBox", source = "component.dimension.quantityBox")
+    @Mapping(target = "length", source = "component.dimension.length")
+    @Mapping(target = "width", source = "component.dimension.width")
+    @Mapping(target = "height", source = "component.dimension.height")
+    @Mapping(target = "weight", source = "component.dimension.weight")
+    @Mapping(target = "boxWeight", source = "component.dimension.boxWeight")
+    @Mapping(target = "boxLength", source = "component.dimension.boxLength")
+    @Mapping(target = "boxWidth", source = "component.dimension.boxWidth")
+    @Mapping(target = "boxHeight", source = "component.dimension.boxHeight")
+    @Mapping(target = "discontinue", source = "component.discontinue")
     ComponentSheetResponseDto componentToComponentSheetResponseDto(Component component);
     List<ComponentSheetResponseDto> componentListToComponentSheetResponseDtoList(List<Component> components);
 

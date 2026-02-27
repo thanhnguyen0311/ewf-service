@@ -2,6 +2,7 @@ package com.danny.ewf_service.service;
 
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.projection.ProductComponentDto;
 import com.danny.ewf_service.payload.projection.ProductManagementDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
@@ -41,4 +42,6 @@ public interface ProductService {
     List<ProductComponentDto> getAllProductComponentDtos();
 
     Product findMergedProductFrom2Comps(Component component1, Component component2);
+
+    void sortedListProductComponent(List<ProductComponent> productComponents);
 }
