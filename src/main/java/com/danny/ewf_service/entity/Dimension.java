@@ -52,16 +52,5 @@ public class Dimension {
     @Column(name = "pallet_capacity")
     private Long palletCapacity;
 
-    @Column(name = "volume_per_box")
-    private Double volumePerBox;
-
-    @Column(name = "volume_per_piece_inch")
-    private Double volumePerPieceInch;
-
-    @Column(name = "volume_per_piece_m3")
-    private Double volumePerPieceM3;
-
-    @Column(name = "container_load")
-    private Long piecesPerContainer;
 
 }

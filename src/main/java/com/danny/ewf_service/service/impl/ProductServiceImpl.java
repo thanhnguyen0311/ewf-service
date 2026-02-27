@@ -483,7 +483,6 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getOrder() != null) product.setOrder(dto.getOrder());
         if (dto.getCategory() != null) product.setCategory(dto.getCategory());
         if (dto.getShippingMethod() != null) product.setShippingMethod(dto.getShippingMethod());
-        if (dto.getDiscontinued() != null) product.setDiscontinued(dto.getDiscontinued());
 
         // Initialize productDetail if null
         if (product.getProductDetail() == null) {
@@ -559,7 +558,6 @@ public class ProductServiceImpl implements ProductService {
             if (product.getLocalTitle() != null) responseDto.setLocalTitle(product.getLocalTitle());
             if (product.getShippingMethod() != null) responseDto.setShippingMethod(product.getShippingMethod());
             if (product.getType() != null) responseDto.setType(product.getType());
-            if (product.getDiscontinued() != null) responseDto.setDiscontinued(product.getDiscontinued());
             if (product.getPrice() != null) {
                 responseDto.setEwfdirectPrice(product.getPrice().getEwfdirect());
                 responseDto.setEwfdirectManualPrice(product.getPrice().getEwfdirectManualPrice());
@@ -643,6 +641,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product findMergedProductFrom2Comps(Component component1, Component component2) {
         return null;
+    }
+
+    @Override
+    public void sortedListProductComponent(List<ProductComponent> productComponents) {
+
     }
 
 

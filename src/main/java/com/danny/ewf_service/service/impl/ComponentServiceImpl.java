@@ -93,7 +93,7 @@ public class ComponentServiceImpl implements ComponentService {
 
     @Override
     public List<ComponentSheetResponseDto> findAllComponentsSheet() {
-        List<Component> components = componentRepository.findAll();
+        List<Component> components = componentRepository.findAllComponents();
         return new ArrayList<>(componentMapper.componentListToComponentSheetResponseDtoList(components));
     }
 

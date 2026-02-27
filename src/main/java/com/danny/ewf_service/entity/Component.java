@@ -66,7 +66,7 @@ public class Component {
     private String metadata;
 
     @Column(name = "discontinue")
-    private Boolean discontinue;
+    private Boolean discontinue = false;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "dimensions_id", referencedColumnName = "id")
@@ -102,4 +102,9 @@ public class Component {
 
     @Column(name = "style")
     private String style = "";
+
+    @Column(name = "shipping_method")
+    private String shippingMethod;
+
+
 }
