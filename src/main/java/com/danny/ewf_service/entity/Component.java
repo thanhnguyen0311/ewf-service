@@ -78,7 +78,6 @@ public class Component {
     @OneToMany(mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContainerComponent> containerComponents = new ArrayList<>();
 
-
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "component", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LooseInventory> looseInventories = new ArrayList<>();
 
