@@ -23,4 +23,14 @@ public class ComponentSheetRequestDto {
     private String sizeShape;
     private String collection;
     private String style;
+    private String shippingMethod;
+    private String quantityBox;
+    private String length;
+    private String width;
+    private String height;
+    private String weight;
+    private String boxLength;
+    private String boxWidth;
+    private String boxHeight;
+    private String boxWeight;
 }

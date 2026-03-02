@@ -2,6 +2,7 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IComponentMapper;
 import com.danny.ewf_service.entity.Component;
+import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.Report;
@@ -141,7 +142,21 @@ public class ComponentServiceImpl implements ComponentService {
             component.setSizeShape(dto.getSizeShape());
             component.setCollection(dto.getCollection());
             component.setStyle(dto.getStyle());
+            component.setShippingMethod(dto.getShippingMethod());
 
+            Dimension dimension = component.getDimension();
+            if (dimension == null) dimension = new Dimension();
+
+            if (!dto.getQuantityBox().isEmpty()) dimension.setQuantityBox(Long.valueOf(dto.getQuantityBox()));
+            dimension.setLength(dto.getLength());
+            dimension.setWidth(dto.getWidth());
+            dimension.setHeight(dto.getHeight());
+            if (!dto.getWeight().isEmpty()) dimension.setWeight(Double.valueOf(dto.getWeight()));
+            if (!dto.getBoxLength().isEmpty()) dimension.setBoxLength(Double.valueOf(dto.getBoxLength()));
+            if (!dto.getBoxWidth().isEmpty()) dimension.setBoxWidth(Double.valueOf(dto.getBoxWidth()));
+            if (!dto.getBoxHeight().isEmpty()) dimension.setBoxHeight(Double.valueOf(dto.getBoxHeight()));
+            if (!dto.getBoxWeight().isEmpty()) dimension.setBoxWeight(Double.valueOf(dto.getBoxWeight()));
+            component.setDimension(dimension);
             // Add to the save list
             componentsToSave.add(component);
         }
