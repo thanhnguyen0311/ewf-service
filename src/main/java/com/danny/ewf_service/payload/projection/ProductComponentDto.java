@@ -4,4 +4,5 @@ public interface ProductComponentDto {
     String getProductSku();
     String getComponentSku();
     Long getQuantity();
+    String getCategory();
 }
