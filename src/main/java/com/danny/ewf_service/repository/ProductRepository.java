@@ -176,7 +176,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         SELECT
             p.sku as productSku,  
             c.sku as componentSku,
-            pc.quantity as quantity
+            pc.quantity as quantity,
+            c.category as category
             FROM Product p
             LEFT JOIN p.components pc
             LEFT JOIN pc.component c
