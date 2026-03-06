@@ -157,6 +157,7 @@ public class ComponentServiceImpl implements ComponentService {
             if (!dto.getBoxHeight().isEmpty()) dimension.setBoxHeight(Double.valueOf(dto.getBoxHeight()));
             if (!dto.getBoxWeight().isEmpty()) dimension.setBoxWeight(Double.valueOf(dto.getBoxWeight()));
             component.setDimension(dimension);
+            component.setIsDeleted(dto.getIsDeleted());
             // Add to the save list
             componentsToSave.add(component);
         }

@@ -38,4 +38,5 @@ public class ComponentSheetResponseDto {
     private Double boxWidth;
     private Double boxHeight;
     private Boolean discontinue;
+    private Boolean isDeleted;
 }
