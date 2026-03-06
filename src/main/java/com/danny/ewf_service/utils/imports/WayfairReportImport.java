@@ -58,43 +58,6 @@ public class WayfairReportImport {
         DateTimeFormatter slashFormatter = DateTimeFormatter.ofPattern("M/d/yyyy");
         DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-//        LocalDate minDate = LocalDate.MAX;
-//        LocalDate maxDate = LocalDate.MIN;
-//
-//        // FIRST PASS - Find min and max dates
-//        try (InputStream firstPassStream = getClass().getResourceAsStream(filepath);
-//             BufferedReader firstPassReader = new BufferedReader(new InputStreamReader(firstPassStream));
-//             CSVReader firstPassCsvReader = new CSVReaderBuilder(firstPassReader)
-//                     .withCSVParser(parser)
-//                     .withSkipLines(1)
-//                     .withMultilineLimit(-1)
-//                     .build()) {
-//
-//            String[] columns;
-//            while ((columns = firstPassCsvReader.readNext()) != null) {
-//                String dateStr = getValueByIndex(columns, 0);
-//                if (dateStr.isEmpty()) continue;
-//
-//                LocalDate reportDate;
-//                if (dateStr.contains("/")) {
-//                    reportDate = LocalDate.parse(dateStr, slashFormatter);
-//                } else {
-//                    reportDate = LocalDate.parse(dateStr, hyphenFormatter);
-//                }
-//
-//                // Update min and max dates
-//                if (reportDate.isBefore(minDate)) {
-//                    minDate = reportDate;
-//                }
-//                if (reportDate.isAfter(maxDate)) {
-//                    maxDate = reportDate;
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw new RuntimeException("Error reading CSV file for date range detection", e);
-//        }
-
 
 
         // SECOND PASS - Process the CSV data
@@ -265,45 +228,6 @@ public class WayfairReportImport {
         DateTimeFormatter hyphenFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
-        // First pass: determine min and max dates in the CSV
-        LocalDate minDate = LocalDate.MAX; // Initialize to furthest future date
-        LocalDate maxDate = LocalDate.MIN; // Initialize to furthest past date
-
-        // FIRST PASS - Find min and max dates
-        try (InputStream firstPassStream = getClass().getResourceAsStream(filepath);
-             BufferedReader firstPassReader = new BufferedReader(new InputStreamReader(firstPassStream));
-             CSVReader firstPassCsvReader = new CSVReaderBuilder(firstPassReader)
-                     .withCSVParser(parser)
-                     .withSkipLines(1)
-                     .withMultilineLimit(-1)
-                     .build()) {
-
-            String[] columns;
-            while ((columns = firstPassCsvReader.readNext()) != null) {
-                String dateStr = getValueByIndex(columns, 0);
-                if (dateStr.isEmpty()) continue;
-
-                LocalDate reportDate;
-                if (dateStr.contains("/")) {
-                    reportDate = LocalDate.parse(dateStr, slashFormatter);
-                } else {
-                    reportDate = LocalDate.parse(dateStr, hyphenFormatter);
-                }
-
-                // Update min and max dates
-                if (reportDate.isBefore(minDate)) {
-                    minDate = reportDate;
-                }
-                if (reportDate.isAfter(maxDate)) {
-                    maxDate = reportDate;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error reading CSV file for date range detection", e);
-        }
-
-
 
         // SECOND PASS - Process the CSV data
         try (InputStream secondPassStream = getClass().getResourceAsStream(filepath);
@@ -376,12 +300,13 @@ public class WayfairReportImport {
                 }
 
                 if (!dateStr.equals(removeReportDate)) {
+                    System.out.println("Removing reports for " + removeReportDate);
                     try {
                         int removeRecords = wayfairKeywordReportDailyRepository.removeByDateRange(reportDate);
+                        Thread.sleep(5000);
                         System.out.println("Removed " + removeRecords + " old reports at " + dateStr);
                     } catch (Exception e) {
                         e.getMessage();
-                        throw new RuntimeException("Error removing old reports", e);
                     }
                     removeReportDate = dateStr;
                 }
@@ -398,6 +323,9 @@ public class WayfairReportImport {
                     campaign.setType("Keyword");
 
                     campaignCache.put(campaignId, campaign);
+                    wayfairCampaignRepository.save(campaign);
+                } else if (!campaign.getCampaignName().equals(campaignName)) {
+                    campaign.setCampaignName(campaignName);
                     wayfairCampaignRepository.save(campaign);
                 }
 
@@ -435,6 +363,7 @@ public class WayfairReportImport {
                     reportBatch.clear();
 
                 }
+
                 processedRows++;
                 if (processedRows % 1000 == 0) {
                     System.out.println("Processed " + processedRows + " rows");

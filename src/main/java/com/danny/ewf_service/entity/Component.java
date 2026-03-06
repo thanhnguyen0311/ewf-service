@@ -105,5 +105,6 @@ public class Component {
     @Column(name = "shipping_method")
     private String shippingMethod;
 
-
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 }

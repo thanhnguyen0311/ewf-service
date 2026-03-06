@@ -33,4 +33,5 @@ public class ComponentSheetRequestDto {
     private String boxWidth;
     private String boxHeight;
     private String boxWeight;
+    private Boolean isDeleted;
 }
