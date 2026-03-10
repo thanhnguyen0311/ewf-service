@@ -24,4 +24,5 @@ public interface ComponentRepository extends JpaRepository<Component, Long> {
     List<Component> findAllByDiscontinueFalse();
 
     List<Component> findComponentsBySkuIn(List<String> skus);
+
 }

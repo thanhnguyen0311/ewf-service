@@ -16,5 +16,6 @@ public interface ProductManagementDto {
     String getSubCategory();
     String getMainCategory();
     String getCategory();
+    List<String> getSubProducts();
 
 }

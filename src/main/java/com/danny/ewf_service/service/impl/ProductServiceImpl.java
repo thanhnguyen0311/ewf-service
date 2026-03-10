@@ -148,10 +148,6 @@ public class ProductServiceImpl implements ProductService {
         return toProductDetailResponseDto(savedProduct);
     }
 
-    @Override
-    public List<String> getAllImagesProduct(Product product) {
-        return List.of();
-    }
 
     @Override
     public double calculateEWFDirectPriceGround(Product product, List<String[]> rows) {
@@ -312,13 +308,10 @@ public class ProductServiceImpl implements ProductService {
 //            if (productPrice > 1000.0) productPrice = productPrice*0.95;
 //            if (productPrice > 2000.0) productPrice = productPrice*0.90;
 
-
-
             product.getPrice().setEwfdirect(productPrice);
         }
 
         productRepository.save(product);
-
 
         rows.add(new String[]{
                 String.valueOf(stt),
@@ -340,11 +333,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public double calculateEWFDirectPriceLTL(Product product, List<String[]> rows) {
-        return 0;
-    }
-
-    @Override
     public ProductPriceResponseDto getProductPrice(String sku) {
         Optional<Product> optionalProduct = productRepository.findProductBySku(sku);
         Optional<Component> optionalComponent = componentRepository.findBySku(sku);
@@ -360,65 +348,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void calculateProductPrice() {
-        List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
-        try {
-            for (Product product : products) {
-                double QB1 = 0;
-                double QB2 = 0;
-                double QB3 = 0;
-                double QB4 = 0;
-                double QB5 = 0;
-                double QB6 = 0;
-                double QB7 = 0;
-                if (product.getComponents() != null && !product.getComponents().isEmpty() && product.getPrice() != null && product.getPrice().getEwfdirect() == null) {
-                    for (ProductComponent productComponent : product.getComponents()) {
-                        QB1 = QB1 + (productComponent.getComponent().getPrice().getQB1() * productComponent.getQuantity());
-                        QB2 = QB2 + (productComponent.getComponent().getPrice().getQB2() * productComponent.getQuantity());
-                        QB3 = QB3 + (productComponent.getComponent().getPrice().getQB3() * productComponent.getQuantity());
-                        QB4 = QB4 + (productComponent.getComponent().getPrice().getQB4() * productComponent.getQuantity());
-                        QB5 = QB5 + (productComponent.getComponent().getPrice().getQB5() * productComponent.getQuantity());
-                        QB6 = QB6 + (productComponent.getComponent().getPrice().getQB6() * productComponent.getQuantity());
-                        QB7 = QB7 + (productComponent.getComponent().getPrice().getQB7() * productComponent.getQuantity());
-                    }
-
-                    Price price = product.getPrice();
-                    price.setQB1(QB1);
-                    price.setQB2(QB2);
-                    price.setQB3(QB3);
-                    price.setQB4(QB4);
-                    price.setQB5(QB5);
-                    price.setQB6(QB6);
-                    price.setQB7(QB7);
-                    product.setPrice(price);
-                    productRepository.save(product);
-                    System.out.println("SAVED :  " + product.getSku() + " | " + product.getPrice());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Override
-    public List<Product> getListProductFromCsvFile(String filePath) {
-        List<String> skus = csvWriter.skuListFromCsv(filePath);
-        return productRepository.findAllBySkus(skus);
-    }
-
-
-    @Override
     public List<Product> findMergedProducts(Product product) {
+        List<Product> mergedProducts = new ArrayList<>();
+        if(componentRepository.existsBySku(product.getSku())) {
+            mergedProducts.add(product);
+            return mergedProducts;
+        }
 
         List<ProductComponent> groupComponents = product.getComponents().stream()
                 .filter(pc -> "CO".equalsIgnoreCase(pc.getComponent().getType()))
                 .toList();
-        if (groupComponents.size() < 2) {
-            return null; // No merged product exists
-        }
 
-        List<Product> mergedProducts = new ArrayList<>();
+        if (groupComponents.size() < 2) {
+            return new ArrayList<>(); // No merged product exists
+        }
 
         for (int size = 2; size <= groupComponents.size(); size++) {
             List<List<ProductComponent>> combinations = generateCombinations(groupComponents, size);
@@ -441,9 +384,28 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
+
         return mergedProducts;
     }
 
+    @Override
+    public void updateSubProduct() {
+        List<Product> products = productRepository.findAllProducts();
+        List<Product> mergedProducts;
+        List<String> mergedSkus;
+
+        for (Product product : products) {
+            mergedSkus = new ArrayList<>();
+            mergedProducts = findMergedProducts(product);
+            for (Product mergedProduct : mergedProducts) {
+                mergedSkus.add(mergedProduct.getSku());
+            }
+            if (mergedSkus.isEmpty()) mergedSkus.add(product.getSku());
+            product.setSubProducts(mergedSkus);
+            productRepository.save(product);
+            System.out.println("Update sub product for " + product.getSku() + " | " + mergedSkus.size());
+        }
+    }
 
     private List<List<ProductComponent>> generateCombinations(List<ProductComponent> components, int size) {
         List<List<ProductComponent>> combinations = new ArrayList<>();
@@ -485,9 +447,7 @@ public class ProductServiceImpl implements ProductService {
         if (dto.getShippingMethod() != null) product.setShippingMethod(dto.getShippingMethod());
 
         // Initialize productDetail if null
-        if (product.getProductDetail() == null) {
-            product.setProductDetail(new ProductDetail());
-        }
+        if (product.getProductDetail() == null) product.setProductDetail(new ProductDetail());
 
         // Update productDetail fields
         if (dto.getDescription() != null) product.getProductDetail().setDescription(dto.getDescription());
@@ -621,9 +581,9 @@ public class ProductServiceImpl implements ProductService {
                 responseDto.setImages(imageService.parseImageJson(product.getImages()));
             }
         }
-
         return responseDto;
     }
+
     @Override
     public List<ProductManagementDto> getAllProductManagementDtos() {
         List<ProductManagementDto> productManagementDtos;
@@ -637,17 +597,6 @@ public class ProductServiceImpl implements ProductService {
         productComponentDtos = productRepository.getAllProductComponents();
         return productComponentDtos;
     }
-
-    @Override
-    public Product findMergedProductFrom2Comps(Component component1, Component component2) {
-        return null;
-    }
-
-    @Override
-    public void sortedListProductComponent(List<ProductComponent> productComponents) {
-
-    }
-
 
 }
 

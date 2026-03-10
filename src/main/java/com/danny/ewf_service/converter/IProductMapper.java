@@ -16,7 +16,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface IProductMapper {
@@ -28,6 +30,8 @@ public interface IProductMapper {
     @Mapping(target = "localSku", source = "product.localSku")
     @Mapping(target = "images", source = "product.images", qualifiedByName = "extractImages")
     @Mapping(target = "finish", source = "product.productDetail.finish")
+    @Mapping(target = "subProducts", source = "product.subProducts", qualifiedByName = "mapSubProducts")
+
     ProductResponseDto productToProductResponseDto(Product product);
     List<ProductResponseDto> productListToProductResponseDtoList(List<Product> products);
 
@@ -52,7 +56,6 @@ public interface IProductMapper {
     @Mapping(target = "id", source = "product.id")
     @Mapping(target = "sku", source = "product.sku")
     ProductInventoryResponseDto productToProductInventoryResponseDto(Product product);
-
     List<ProductInventoryResponseDto> productListToProductInventoryResponseDtoList(List<Product> products);
 
     @Mapping(target = "sku", source = "product.sku")
@@ -120,6 +123,20 @@ public interface IProductMapper {
         return componentList;
     }
 
+    @Named("mapSubProducts")
+    default List<ProductResponseDto> mapSubProducts(List<String> subProductSkus) {
+        if (subProductSkus == null || subProductSkus.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // Map or fetch ProductResponseDto from subProductSkus
+        return subProductSkus.stream()
+                .map(sku -> {
+                    ProductResponseDto dto = new ProductResponseDto();
+                    dto.setSku(sku); // Set other required fields here
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
 
 }

@@ -25,23 +25,13 @@ public interface ProductService {
 
     ProductDetailResponseDto updateProductDetailById(Long id, ProductDetailRequestDto productDetailRequestDto);
 
-    List<String> getAllImagesProduct(Product product);
-
     double calculateEWFDirectPriceGround(Product product, List<String[]> rows);
-
-    double calculateEWFDirectPriceLTL(Product product, List<String[]> rows);
 
     ProductPriceResponseDto getProductPrice(String sku);
 
-    void calculateProductPrice();
-
-    List<Product> getListProductFromCsvFile(String filePath);
-
-
     List<ProductManagementDto> getAllProductManagementDtos();
+
     List<ProductComponentDto> getAllProductComponentDtos();
 
-    Product findMergedProductFrom2Comps(Component component1, Component component2);
-
-    void sortedListProductComponent(List<ProductComponent> productComponents);
+    void updateSubProduct();
 }
