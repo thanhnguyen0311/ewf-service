@@ -164,7 +164,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             p.discontinued as discontinued,
             pd.subCategory as subCategory,
             pd.mainCategory as mainCategory,
-            p.category as category
+            p.category as category,
+            p.subProducts as subProducts
         FROM Product p
         LEFT JOIN p.productDetail pd
                 

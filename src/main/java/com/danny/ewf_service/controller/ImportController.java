@@ -83,9 +83,11 @@ public class ImportController {
 //            productsImport.importProductComponents();
 //            componentsImport.importDimensions();
 //            productExport.exportProductWithDimension("product_dimensions.csv");
-//            productExport.exportMergedProducts("merged_products.csv");
+//            productExport.exportMergedProducts("merged_products.csv")
+//            productService.updateSubProduct();
             wayfairReportImport.importWayfairReportDaily(filepath);
 //            wayfairReportImport.importWayfairReportKeywordDaily(filepath);
+
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

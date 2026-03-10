@@ -4,10 +4,11 @@ import com.danny.ewf_service.entity.Dimension;
 import com.danny.ewf_service.entity.Price;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 
 
 @Entity
@@ -94,4 +95,7 @@ public class Product implements Serializable {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+    @Type(JsonType.class)
+    @Column(name = "sub_products", columnDefinition = "json")
+    private List<String> subProducts;
 }
