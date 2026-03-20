@@ -301,7 +301,6 @@ public class ProductServiceImpl implements ProductService {
 //                        productPrice = price.getAmazonPrice();
 //                    }
 //                }
-//
 //            }
 
 
@@ -350,10 +349,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> findMergedProducts(Product product) {
         List<Product> mergedProducts = new ArrayList<>();
-        if(componentRepository.existsBySku(product.getSku())) {
-            mergedProducts.add(product);
-            return mergedProducts;
-        }
 
         List<ProductComponent> groupComponents = product.getComponents().stream()
                 .filter(pc -> "CO".equalsIgnoreCase(pc.getComponent().getType()))
@@ -397,9 +392,36 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : products) {
             mergedSkus = new ArrayList<>();
             mergedProducts = findMergedProducts(product);
+
             for (Product mergedProduct : mergedProducts) {
                 mergedSkus.add(mergedProduct.getSku());
             }
+
+            for (ProductComponent pc : product.getComponents()) {
+                if (pc.getComponent().getType().equals("SI")) {
+                    if (pc.getComponent().getCategory().contains("Table"))  mergedSkus.add(0, pc.getComponent().getSku());
+                    else mergedSkus.add(pc.getComponent().getSku());
+                }
+            }
+
+            if (mergedSkus.size() > 1) {
+                List<String> dapSkus = new ArrayList<>();
+
+                // Collect all items starting with "DAP"
+                Iterator<String> iterator = mergedSkus.iterator();
+                while (iterator.hasNext()) {
+                    String sku = iterator.next();
+                    if (sku.startsWith("DAP")) {
+                        dapSkus.add(sku); // Collect "DAP" SKUs
+                        iterator.remove(); // Remove from original list safely
+                    }
+                }
+
+                // Add all "DAP" SKUs at index position 2 (index 1)
+                mergedSkus.addAll(1, dapSkus);
+            }
+
+
             if (mergedSkus.isEmpty()) mergedSkus.add(product.getSku());
             product.setSubProducts(mergedSkus);
             productRepository.save(product);

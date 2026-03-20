@@ -165,9 +165,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             pd.subCategory as subCategory,
             pd.mainCategory as mainCategory,
             p.category as category,
-            p.subProducts as subProducts
+            p.subProducts as subProducts,
+            pw.ewfdirect as ewfDirect,
+            pw.ewfmain as ewfMain,
+            pw.houstonDirect as houstonDirect
         FROM Product p
         LEFT JOIN p.productDetail pd
+        LEFT JOIN p.wholesales pw
                 
         WHERE p.isDeleted = false
         """)

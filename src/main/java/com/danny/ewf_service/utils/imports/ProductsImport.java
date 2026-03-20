@@ -3,10 +3,8 @@ package com.danny.ewf_service.utils.imports;
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.entity.product.ProductDetail;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
+import com.danny.ewf_service.utils.CsvWriter;
+import com.opencsv.*;
 import com.opencsv.enums.CSVReaderNullFieldIndicator;
 
 import com.danny.ewf_service.entity.Dimension;
@@ -18,6 +16,7 @@ import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.python.antlr.ast.Str;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +42,9 @@ public class ProductsImport {
 
     @Autowired
     private final SKUGenerator skuGenerator;
+
+    @Autowired
+    private final CsvWriter csvWriter;
 
     // Define the list of valid SKUs
     private static final List<String> validSkus = Arrays.asList(
@@ -504,4 +506,17 @@ public class ProductsImport {
         }
     }
 
+    public void updateSaleChannel(String filePath) {
+        List<String> skuList = csvWriter.skuListFromCsv(filePath);
+        List<Product> products = productRepository.findAllProducts();
+        for (Product product : products) {
+            ProductWholesales productWholesales = product.getWholesales();
+            if (productWholesales == null) productWholesales = new ProductWholesales();
+            productWholesales.setEwfdirect(false);
+            if (skuList.contains(product.getSku())) productWholesales.setEwfdirect(true);
+            product.setWholesales(productWholesales);
+            productRepository.save(product);
+            System.out.println("Updated SKU: " + product.getSku() + " VALUES : " + productWholesales.getEwfmain());
+        }
+    }
 }

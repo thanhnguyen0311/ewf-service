@@ -17,5 +17,8 @@ public interface ProductManagementDto {
     String getMainCategory();
     String getCategory();
     List<String> getSubProducts();
+    Boolean getEwfDirect();
+    Boolean getEwfMain();
+    Boolean getHoustonDirect();
 
 }
