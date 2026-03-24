@@ -130,7 +130,7 @@ public class ProductController {
     @PostMapping("")
     public ResponseEntity<?> updateProductFromSheet(@RequestBody List<ProductSheetRequestDto> productSheetRequestDtos) {
         try {
-            LocalDateTime updated = componentService.updateComponentsFromSheet(componentSheetRequestDtos);
+            LocalDateTime updated = productService.updateProductFromSheet(productSheetRequestDtos);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
