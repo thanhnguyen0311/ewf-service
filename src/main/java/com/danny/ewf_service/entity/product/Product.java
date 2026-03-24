@@ -92,13 +92,13 @@ public class Product implements Serializable {
     @Column(name = "asin")
     private String asin;
 
-    @Column(name = "parentAsin")
+    @Column(name = "parent_asin")
     private String parentAsin;
 
-    @Column(name = "amzVariationID")
+    @Column(name = "amz_variation_id")
     private String amzVariationID;
 
-    @Column(name = "wayfairVariationID")
+    @Column(name = "wayfair_variation_id")
     private String wayfairVariationID;
 
     @Column(name = "is_deleted")
