@@ -69,7 +69,7 @@ public class Product implements Serializable {
     @JoinColumn(name = "dimension_id", referencedColumnName = "id")
     private Dimension dimension;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "detail_id", referencedColumnName = "id")
     private ProductDetail productDetail;
 
