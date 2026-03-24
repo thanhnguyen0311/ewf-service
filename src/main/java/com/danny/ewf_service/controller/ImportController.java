@@ -66,26 +66,24 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
+//            String filepath = "D:\\ewf-app\\ewf-service\\src\\main\\resources\\data\\skus.csv";
             String filepath = "/data/product_report_day.csv";
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing(products, "products.csv", true);
 //            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
-//            productsImport.importProductDetails();
-//            componentsImport.importPrices();
-//            componentsImport.importDimensions();
 //            shopifyExport.exportShopifyProductsPrice("product_prices_02-18.csv");
-//            productsImport.importProductDetails();
+            componentsImport.importProductComponentMapping();
 //            shopifyExport.exportAmazonReviews();
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
 //            productExport.exportComponent("components.csv");
 //            amazonDataExport.extractDataFromAmazon();
-//            productsImport.importProductComponents();
+//            productsImport.updateSaleChannel(filepath);
 //            componentsImport.importDimensions();
 //            productExport.exportProductWithDimension("product_dimensions.csv");
 //            productExport.exportMergedProducts("merged_products.csv")
 //            productService.updateSubProduct();
-            wayfairReportImport.importWayfairReportDaily(filepath);
+//            wayfairReportImport.importWayfairReportDaily(filepath);
 //            wayfairReportImport.importWayfairReportKeywordDaily(filepath);
 
             return ResponseEntity.ok().body("SUCCESS");

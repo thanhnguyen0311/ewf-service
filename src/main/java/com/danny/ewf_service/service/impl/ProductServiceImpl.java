@@ -9,9 +9,11 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductDetail;
 import com.danny.ewf_service.entity.product.ProductWholesales;
 import com.danny.ewf_service.payload.projection.ProductComponentDto;
+import com.danny.ewf_service.payload.request.ComponentSheetRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductComponentRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
 import com.danny.ewf_service.payload.response.component.ComponentProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -76,6 +79,64 @@ public class ProductServiceImpl implements ProductService {
 
         String getSku();
     }
+    @Override
+    public LocalDateTime updateProductFromSheet(List<ProductSheetRequestDto> productSheetRequestDtos) {
+        if (productSheetRequestDtos == null || productSheetRequestDtos.isEmpty()) {
+            // Skip processing if the input list is empty
+            return LocalDateTime.now();
+        }
+
+        // Extract all SKUs from the DTOs
+        List<String> skus = productSheetRequestDtos.stream()
+                .map(ProductSheetRequestDto::getSku)
+                .filter(sku -> sku != null && !sku.isEmpty())
+                .toList();
+
+        // Fetch existing  by SKUs in bulk
+        List<Product> products = productRepository.findProductsBySkuIn(skus);
+
+        // Build a map of existing  for fast lookup
+        Map<String, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getSku, product -> product));
+
+        // Create or update
+        List<Product> productsToSave = new ArrayList<>();
+        for (ProductSheetRequestDto dto : productSheetRequestDtos) {
+            // Check if the component already exists
+            Product product = productMap.get(dto.getSku());
+
+            if (product == null) {
+                // If no existing product, create a new one
+                product = new Product();
+                product.setSku(dto.getSku());
+                product.setLocalSku(skuGenerator.generateNewSKU(dto.getSku()));
+            }
+            ProductDetail productDetail = product.getProductDetail();
+            if (productDetail == null) productDetail = new ProductDetail();
+
+            // Update component fields from DTO
+            product.setUpc(dto.getUpc());
+            product.setCategory(dto.getCategory());
+            product.setAsin(dto.getAsin());
+            product.setParentAsin(dto.getParentAsin());
+            product.setAmzVariationID(dto.getAmzVariationID());
+            product.setWayfairVariationID(dto.getWayfairVariationID());
+            product.setShippingMethod(dto.getShipping());
+            productDetail.setMainCategory(dto.getMainCategory());
+            productDetail.setSubCategory(dto.getSubCategory());
+
+            product.setProductDetail(productDetail);
+            // Add to the save list
+            productsToSave.add(product);
+        }
+
+        // Step 5: Save all components in bulk
+        productRepository.saveAll(productsToSave);
+
+        // Return the timestamp of the operation
+        return LocalDateTime.now();
+    }
+
 
     @Override
     public ProductResponseDto findBySku(String sku) {
@@ -301,7 +362,6 @@ public class ProductServiceImpl implements ProductService {
 //                        productPrice = price.getAmazonPrice();
 //                    }
 //                }
-//
 //            }
 
 
@@ -350,10 +410,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> findMergedProducts(Product product) {
         List<Product> mergedProducts = new ArrayList<>();
-        if(componentRepository.existsBySku(product.getSku())) {
-            mergedProducts.add(product);
-            return mergedProducts;
-        }
 
         List<ProductComponent> groupComponents = product.getComponents().stream()
                 .filter(pc -> "CO".equalsIgnoreCase(pc.getComponent().getType()))
@@ -397,15 +453,44 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : products) {
             mergedSkus = new ArrayList<>();
             mergedProducts = findMergedProducts(product);
+
             for (Product mergedProduct : mergedProducts) {
                 mergedSkus.add(mergedProduct.getSku());
             }
+
+            for (ProductComponent pc : product.getComponents()) {
+                if (pc.getComponent().getType().equals("SI")) {
+                    if (pc.getComponent().getCategory().contains("Table"))  mergedSkus.add(0, pc.getComponent().getSku());
+                    else mergedSkus.add(pc.getComponent().getSku());
+                }
+            }
+
+            if (mergedSkus.size() > 1) {
+                List<String> dapSkus = new ArrayList<>();
+
+                // Collect all items starting with "DAP"
+                Iterator<String> iterator = mergedSkus.iterator();
+                while (iterator.hasNext()) {
+                    String sku = iterator.next();
+                    if (sku.startsWith("DAP")) {
+                        dapSkus.add(sku); // Collect "DAP" SKUs
+                        iterator.remove(); // Remove from original list safely
+                    }
+                }
+
+                // Add all "DAP" SKUs at index position 2 (index 1)
+                mergedSkus.addAll(1, dapSkus);
+            }
+
+
             if (mergedSkus.isEmpty()) mergedSkus.add(product.getSku());
             product.setSubProducts(mergedSkus);
             productRepository.save(product);
             System.out.println("Update sub product for " + product.getSku() + " | " + mergedSkus.size());
         }
     }
+
+
 
     private List<List<ProductComponent>> generateCombinations(List<ProductComponent> components, int size) {
         List<List<ProductComponent>> combinations = new ArrayList<>();

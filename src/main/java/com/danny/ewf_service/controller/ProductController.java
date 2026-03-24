@@ -1,7 +1,9 @@
 package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.payload.projection.ProductComponentDto;
+import com.danny.ewf_service.payload.request.ComponentSheetRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
+import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -121,6 +124,18 @@ public class ProductController {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> updateProductFromSheet(@RequestBody List<ProductSheetRequestDto> productSheetRequestDtos) {
+        try {
+            LocalDateTime updated = productService.updateProductFromSheet(productSheetRequestDtos);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching product");
         }
     }
 }

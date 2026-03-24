@@ -65,6 +65,9 @@ public class ComponentsImport {
     @Autowired
     private CacheService cacheService;
 
+    @Autowired
+    private SKUGenerator skuGenerator;
+
 
     @Transactional
     public void importComponentsFromData() {
@@ -165,12 +168,12 @@ public class ComponentsImport {
         return true;
     }
 
+    @Transactional
     public void importProductComponentMapping() {
-        try (InputStream file = getClass().getResourceAsStream("/data/import_components.csv");
+        try (InputStream file = getClass().getResourceAsStream("/data/skus.csv");
              BufferedReader reader = new BufferedReader(new InputStreamReader(file))) {
 
             String line;
-            String headerRow = reader.readLine();
 
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split(",");
@@ -182,7 +185,6 @@ public class ComponentsImport {
                 if (productSku.isEmpty() || componentSku.isEmpty() || quantityStr.isEmpty()) {
                     continue;
                 }
-
 
                 // Parse quantity
 
@@ -200,9 +202,13 @@ public class ComponentsImport {
                     if (optionalProduct.isPresent()) {
                         product = optionalProduct.get();
                     } else {
-                        System.out.println("Can't find product with SKU: " + productSku );
-                        continue;
+                        product = new Product();
+                        product.setSku(productSku);
+                        product.setLocalSku(skuGenerator.generateNewSKU(productSku));
+
+                        productRepository.save(product);
                     }
+
 
                     Component component = componentRepository.findBySku(componentSku)
                             .orElseThrow(() -> new RuntimeException("Component not found: " + componentSku));
