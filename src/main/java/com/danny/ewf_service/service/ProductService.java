@@ -6,11 +6,13 @@ import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.projection.ProductComponentDto;
 import com.danny.ewf_service.payload.projection.ProductManagementDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
+import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ProductService {
@@ -34,4 +36,6 @@ public interface ProductService {
     List<ProductComponentDto> getAllProductComponentDtos();
 
     void updateSubProduct();
+
+    LocalDateTime updateProductFromSheet(List<ProductSheetRequestDto> products);
 }

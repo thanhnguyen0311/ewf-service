@@ -189,4 +189,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             WHERE p.isDeleted = false
         """)
     List<ProductComponentDto> getAllProductComponents();
+
+    List<Product> findProductsBySkuIn(List<String> skus);
 }
