@@ -55,27 +55,21 @@ public class ProductDetail {
     @Column(name = "material")
     private String material;
 
-    @Column(name = "feature1")
-    private String feature1;
+    @Column(name = "bullet_point_1")
+    private String bulletPoint1;
 
-    @Column(name = "feature2")
-    private String feature2;
+    @Column(name = "bullet_point_2")
+    private String bulletPoint2;
 
-    @Column(name = "feature3")
-    private String feature3;
+    @Column(name = "bullet_point_3")
+    private String bulletPoint3;
 
-    @Column(name = "feature4")
-    private String feature4;
+    @Column(name = "bullet_point_4")
+    private String bulletPoint4;
 
-    @Column(name = "feature5")
-    private String feature5;
+    @Column(name = "bullet_point_5")
+    private String bulletPoint5;
 
-    @Column(name = "feature6")
-    private String feature6;
-
-    @Column(name = "feature7")
-    private String feature7;
-
-    @Column(name = "feature8")
-    private String feature8;
+    @Column(name = "short_title")
+    private String shortTitle;
 }
