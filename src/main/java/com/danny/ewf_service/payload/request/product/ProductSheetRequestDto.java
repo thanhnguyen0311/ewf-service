@@ -19,4 +19,5 @@ public class ProductSheetRequestDto {
     private String amzVariationID;
     private String wayfairVariationID;
     private String shipping;
+    private Boolean discontinued;
 }

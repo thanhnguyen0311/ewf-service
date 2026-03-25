@@ -122,8 +122,10 @@ public class ProductServiceImpl implements ProductService {
             product.setAmzVariationID(dto.getAmzVariationID());
             product.setWayfairVariationID(dto.getWayfairVariationID());
             product.setShippingMethod(dto.getShipping());
+            product.setDiscontinued(dto.getDiscontinued());
             productDetail.setMainCategory(dto.getMainCategory());
             productDetail.setSubCategory(dto.getSubCategory());
+
 
             product.setProductDetail(productDetail);
             // Add to the save list
