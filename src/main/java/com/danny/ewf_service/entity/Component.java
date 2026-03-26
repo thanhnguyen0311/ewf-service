@@ -107,4 +107,7 @@ public class Component {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
+
+    @Column(name = "image_link")
+    private String imageLink;
 }

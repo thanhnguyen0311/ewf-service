@@ -34,4 +34,6 @@ public class ComponentSheetRequestDto {
     private String boxHeight;
     private String boxWeight;
     private Boolean isDeleted;
+    private String inventory;
+    private String imageLink;
 }

@@ -39,4 +39,6 @@ public class ComponentSheetResponseDto {
     private Double boxHeight;
     private Boolean discontinue;
     private Boolean isDeleted;
+    private Long inventory;
+    private String imageLink;
 }

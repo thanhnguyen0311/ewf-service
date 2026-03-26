@@ -41,6 +41,8 @@ public interface IComponentMapper {
     @Mapping(target = "boxHeight", source = "component.dimension.boxHeight")
     @Mapping(target = "discontinue", source = "component.discontinue")
     @Mapping(target = "isDeleted", source = "component.isDeleted")
+    @Mapping(target = "inventory", source = "component.inventory")
+    @Mapping(target = "imageLink", source = "component.imageLink")
     ComponentSheetResponseDto componentToComponentSheetResponseDto(Component component);
     List<ComponentSheetResponseDto> componentListToComponentSheetResponseDtoList(List<Component> components);
 
