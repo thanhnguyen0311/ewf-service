@@ -14,6 +14,7 @@ import com.danny.ewf_service.payload.response.component.ComponentSheetResponseDt
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ReportRepository;
 import com.danny.ewf_service.service.ComponentService;
+import com.danny.ewf_service.utils.ValidationUtils;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class ComponentServiceImpl implements ComponentService {
 
     @Autowired
     private final ReportRepository reportRepository;
+
+    @Autowired
+    private final ValidationUtils validationUtils;
 
     @Override
     public List<ComponentResponseDto> findComponents(Product product) {
@@ -151,13 +155,16 @@ public class ComponentServiceImpl implements ComponentService {
             dimension.setLength(dto.getLength());
             dimension.setWidth(dto.getWidth());
             dimension.setHeight(dto.getHeight());
-            if (!dto.getWeight().isEmpty()) dimension.setWeight(Double.valueOf(dto.getWeight()));
-            if (!dto.getBoxLength().isEmpty()) dimension.setBoxLength(Double.valueOf(dto.getBoxLength()));
-            if (!dto.getBoxWidth().isEmpty()) dimension.setBoxWidth(Double.valueOf(dto.getBoxWidth()));
-            if (!dto.getBoxHeight().isEmpty()) dimension.setBoxHeight(Double.valueOf(dto.getBoxHeight()));
-            if (!dto.getBoxWeight().isEmpty()) dimension.setBoxWeight(Double.valueOf(dto.getBoxWeight()));
+            if (validationUtils.isValidNumber(dto.getWeight())) dimension.setWeight(Double.valueOf(dto.getWeight()));
+            if (validationUtils.isValidNumber(dto.getBoxLength())) dimension.setBoxLength(Double.valueOf(dto.getBoxLength()));
+            if (validationUtils.isValidNumber(dto.getBoxWidth())) dimension.setBoxWidth(Double.valueOf(dto.getBoxWidth()));
+            if (validationUtils.isValidNumber(dto.getBoxHeight())) dimension.setBoxHeight(Double.valueOf(dto.getBoxHeight()));
+            if (validationUtils.isValidNumber(dto.getBoxWeight())) dimension.setBoxWeight(Double.valueOf(dto.getBoxWeight()));
             component.setDimension(dimension);
             component.setIsDeleted(dto.getIsDeleted());
+            if(validationUtils.isValidNumber(dto.getInventory())) component.setInventory(Long.valueOf(dto.getInventory()));
+            component.setImageLink(dto.getImageLink());
+
             // Add to the save list
             componentsToSave.add(component);
         }
