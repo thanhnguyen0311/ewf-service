@@ -23,8 +23,6 @@ public interface ProductManagementDto {
     String getTitle();
     String getDescription();
     String getHtmlDescription();
-
-
     List<String> getSubProducts();
 
 }
