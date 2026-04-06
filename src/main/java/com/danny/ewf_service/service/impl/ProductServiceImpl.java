@@ -342,7 +342,6 @@ public class ProductServiceImpl implements ProductService {
         if (totalQB1 > 2000.0) totalQB1 = totalQB1*0.90;
 
         productPrice = totalQB1 + totalShipCost;
-//        productPrice = productPrice * 1.03;
 
         Price price = product.getPrice();
         if (price != null) {
@@ -364,11 +363,12 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
 
+            productPrice = productPrice * 1.05;
+
             if (price.getEwfdirectManualPrice() != null && price.getEwfdirectManualPrice() > 0) {
                 productPrice = price.getEwfdirectManualPrice();
             }
 
-            productPrice = productPrice * 1.05;
 
 //            if (price.getAmazonPrice() != null) {
 //                if (productPrice < 250.0) {

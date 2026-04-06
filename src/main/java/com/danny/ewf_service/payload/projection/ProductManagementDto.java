@@ -16,6 +16,20 @@ public interface ProductManagementDto {
     String getSubCategory();
     String getMainCategory();
     String getCategory();
+    String getFinish();
+    String getSizeShape();
+    String getCollection();
+    String getShortTitle();
+    String getTitle();
+    String getBulletPoint1();
+    String getBulletPoint2();
+    String getBulletPoint3();
+    String getBulletPoint4();
+    String getBulletPoint5();
+    String getDescription();
+    String getHtmlDescription();
+
+
     List<String> getSubProducts();
     Boolean getEwfDirect();
     Boolean getEwfMain();
