@@ -170,18 +170,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             pd.collection as collection,
             pd.shortTitle as shortTitle,
             p.title as title,
-            pd.bulletPoint1 as bulletPoint1,
-            pd.bulletPoint2 as bulletPoint2,
-            pd.bulletPoint3 as bulletPoint3,
-            pd.bulletPoint4 as bulletPoint4,
-            pd.bulletPoint5 as bulletPoint5,
             pd.description as description,
             pd.htmlDescription as htmlDescription,    
                         
             p.subProducts as subProducts,
-            pw.ewfdirect as ewfDirect,
-            pw.ewfmain as ewfMain,
-            pw.houstonDirect as houstonDirect
             
         FROM Product p
         LEFT JOIN p.productDetail pd
