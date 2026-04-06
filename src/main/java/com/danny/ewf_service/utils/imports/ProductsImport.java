@@ -91,7 +91,6 @@ public class ProductsImport {
                     .withEscapeChar('\\')
                     .withStrictQuotes(false)
                     .withIgnoreLeadingWhiteSpace(true)
-                    .withIgnoreQuotations(false)
                     .withFieldAsNull(CSVReaderNullFieldIndicator.EMPTY_SEPARATORS);
 
             CSVParser parser = parserBuilder.build();
@@ -99,48 +98,43 @@ public class ProductsImport {
             // Create reader with the configured parser
             CSVReaderBuilder readerBuilder = new CSVReaderBuilder(reader)
                     .withCSVParser(parser)
-                    .withMultilineLimit(-1); // No limit on multiline fields
+                    .withMultilineLimit(-1) // No limit on multiline fields
+                    .withKeepCarriageReturn(false); // ← thêm dòng này
 
             Map<String, Product> productMap = new HashMap<>();
-//            List<Product> products = productRepository.findAllProducts();
-//            System.out.println("Total Products: " + products.size());
-//            for (Product product : products) {
-//                String normalizedSku = product.getSku().replaceAll("[\\p{C}]", "").trim();
-//                productMap.put(normalizedSku, product);
-//            }
             Product product;
             try (CSVReader csvReader = readerBuilder.build()) {
                 String productSku;
-                String title;
-                String shippingMethod;
-                String asin;
-                String description;
-                String html;
-                String mainCategory;
-                String subCategory;
-                String chairType;
-                String finish;
-                String sizeShape;
                 String style;
-                String pieces;
                 String collection;
+                String sizeShape;
+                String finish;
+                String title;
+                String shortTitle;
+                String bulletPoint1;
+                String bulletPoint2;
+                String bulletPoint3;
+                String bulletPoint4;
+                String bulletPoint5;
+                String description;
+                String htmlDescription;
                 String[] columns;
 
                 while ((columns = csvReader.readNext()) != null) {
                     productSku = getValueByIndex(columns, 0);
-                    title = getValueByIndex(columns, 1);
-                    shippingMethod = getValueByIndex(columns, 2);
-                    asin = getValueByIndex(columns, 3);
-                    description = getValueByIndex(columns, 4);
-                    html = getValueByIndex(columns, 5);
-                    mainCategory = getValueByIndex(columns, 6);
-                    subCategory = getValueByIndex(columns, 7);
-                    chairType = getValueByIndex(columns, 8);
-                    finish = getValueByIndex(columns, 9);
-                    sizeShape = getValueByIndex(columns, 10);
-                    style = getValueByIndex(columns, 11);
-                    pieces = getValueByIndex(columns, 12);
-                    collection = getValueByIndex(columns, 13);
+                    style = getValueByIndex(columns, 1);
+                    collection = getValueByIndex(columns, 2);
+                    sizeShape = getValueByIndex(columns, 3);
+                    finish = getValueByIndex(columns, 4);
+                    title = getValueByIndex(columns, 5);
+                    shortTitle = getValueByIndex(columns, 6);
+                    bulletPoint1 = getValueByIndex(columns, 7);
+                    bulletPoint2 = getValueByIndex(columns, 8);
+                    bulletPoint3 = getValueByIndex(columns, 9);
+                    bulletPoint4 = getValueByIndex(columns, 10);
+                    bulletPoint5 = getValueByIndex(columns, 11);
+                    description = getValueByIndex(columns, 12);
+                    htmlDescription = getValueByIndex(columns, 13);
 
 
                     if (productSku.isEmpty()) {
@@ -154,32 +148,32 @@ public class ProductsImport {
                         product = new Product();
                         product.setSku(normalizedSku.toUpperCase());
                         System.out.println("Inserted new SKU: " + normalizedSku);
-
                     }
                     if (product.getLocalSku() == null) product.setLocalSku(skuGenerator.generateNewSKU(normalizedSku.toUpperCase()));
 
-                    if (!title.isEmpty()) product.setTitle(title);
-                    if (!shippingMethod.isEmpty()) product.setShippingMethod(shippingMethod);
-                    if (!asin.isEmpty()) product.setAsin(asin);
+
+                    if (!title.equals("x")) product.setTitle(title);
 
                     ProductDetail productDetail = product.getProductDetail();
                     if (productDetail == null) productDetail = new ProductDetail();
 
-                    if(!description.isEmpty()) productDetail.setDescription(description);
-                    if (!html.isEmpty()) productDetail.setHtmlDescription(html);
-                    if (!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
-                    if (!subCategory.isEmpty()) productDetail.setSubCategory(subCategory);
-                    if (!chairType.isEmpty()) productDetail.setChairType(chairType);
-                    if (!finish.isEmpty()) productDetail.setFinish(finish);
-                    if (!sizeShape.isEmpty()) productDetail.setSizeShape(sizeShape);
-                    if (!style.isEmpty()) productDetail.setStyle(style);
-                    if (!pieces.isEmpty()) productDetail.setPieces(pieces);
-                    if (!collection.isEmpty()) productDetail.setCollection(collection);
+                    if (!style.equals("x")) productDetail.setStyle(style);
+                    if (!collection.equals("x")) productDetail.setCollection(collection);
+                    if (!sizeShape.equals("x")) productDetail.setSizeShape(sizeShape);
+                    if (!finish.equals("x")) productDetail.setFinish(finish);
+                    if (!shortTitle.equals("x")) productDetail.setShortTitle(shortTitle);
+                    if (!bulletPoint1.equals("x")) productDetail.setBulletPoint1(bulletPoint1);
+                    if (!bulletPoint2.equals("x")) productDetail.setBulletPoint2(bulletPoint2);
+                    if (!bulletPoint3.equals("x")) productDetail.setBulletPoint3(bulletPoint3);
+                    if (!bulletPoint4.equals("x")) productDetail.setBulletPoint4(bulletPoint4);
+                    if (!bulletPoint5.equals("x")) productDetail.setBulletPoint5(bulletPoint5);
+                    if (!description.equals("x")) productDetail.setDescription(description);
+                    if (!htmlDescription.equals("x")) productDetail.setHtmlDescription(htmlDescription);
 
                     product.setProductDetail(productDetail);
 
                     productRepository.save(product);
-                    System.out.println("Updated SKU: " + normalizedSku);
+                    System.out.println("Updated SKU: " + normalizedSku + " | " + htmlDescription.substring(0, Math.min(50, htmlDescription.length())));
                 }
             }
 

@@ -68,6 +68,7 @@ public class ImportController {
         try {
 //            String filepath = "D:\\ewf-app\\ewf-service\\src\\main\\resources\\data\\skus.csv";
             String filepath = "/data/product_report_day.csv";
+            String filepath2 = "/data/keyword_report_day.csv";
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing(products, "products.csv", true);
 //            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
@@ -78,13 +79,13 @@ public class ImportController {
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
 //            productExport.exportComponent("components.csv");
 //            amazonDataExport.extractDataFromAmazon();
-//            productsImport.updateSaleChannel(filepath);
+//            productsImport.importProductDetails();
 //            componentsImport.importDimensions();
 //            productExport.exportProductWithDimension("product_dimensions.csv");
 //            productExport.exportMergedProducts("merged_products.csv")
 //            productService.updateSubProduct();
-            wayfairReportImport.importWayfairReportDaily(filepath);
-//            wayfairReportImport.importWayfairReportKeywordDaily(filepath);
+//            wayfairReportImport.importWayfairReportDaily(filepath);
+            wayfairReportImport.importWayfairReportKeywordDaily(filepath2);
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {

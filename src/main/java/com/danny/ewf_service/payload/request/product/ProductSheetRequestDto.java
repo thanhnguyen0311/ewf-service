@@ -32,4 +32,5 @@ public class ProductSheetRequestDto {
     private String bulletPoint5;
     private String description;
     private String htmlDescription;
+    private String type;
 }
