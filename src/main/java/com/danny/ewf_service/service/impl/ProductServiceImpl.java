@@ -131,11 +131,6 @@ public class ProductServiceImpl implements ProductService {
             productDetail.setSizeShape(dto.getSizeShape());
             productDetail.setCollection(dto.getCollection());
             productDetail.setShortTitle(dto.getShortTitle());
-            productDetail.setBulletPoint1(dto.getBulletPoint1());
-            productDetail.setBulletPoint2(dto.getBulletPoint2());
-            productDetail.setBulletPoint3(dto.getBulletPoint3());
-            productDetail.setBulletPoint4(dto.getBulletPoint4());
-            productDetail.setBulletPoint5(dto.getBulletPoint5());
             productDetail.setDescription(dto.getDescription());
             productDetail.setHtmlDescription(dto.getHtmlDescription());
 

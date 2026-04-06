@@ -162,11 +162,6 @@ public class ProductsImport {
                     if (!sizeShape.equals("x")) productDetail.setSizeShape(sizeShape);
                     if (!finish.equals("x")) productDetail.setFinish(finish);
                     if (!shortTitle.equals("x")) productDetail.setShortTitle(shortTitle);
-                    if (!bulletPoint1.equals("x")) productDetail.setBulletPoint1(bulletPoint1);
-                    if (!bulletPoint2.equals("x")) productDetail.setBulletPoint2(bulletPoint2);
-                    if (!bulletPoint3.equals("x")) productDetail.setBulletPoint3(bulletPoint3);
-                    if (!bulletPoint4.equals("x")) productDetail.setBulletPoint4(bulletPoint4);
-                    if (!bulletPoint5.equals("x")) productDetail.setBulletPoint5(bulletPoint5);
                     if (!description.equals("x")) productDetail.setDescription(description);
                     if (!htmlDescription.equals("x")) productDetail.setHtmlDescription(htmlDescription);
 
