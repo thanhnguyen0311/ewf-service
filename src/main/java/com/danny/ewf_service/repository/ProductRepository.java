@@ -173,7 +173,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             pd.description as description,
             pd.htmlDescription as htmlDescription,    
                         
-            p.subProducts as subProducts,
+            p.subProducts as subProducts
             
         FROM Product p
         LEFT JOIN p.productDetail pd
