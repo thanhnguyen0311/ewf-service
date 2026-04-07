@@ -25,12 +25,5 @@ public class ProductSheetRequestDto {
     private String sizeShape;
     private String collection;
     private String shortTitle;
-    private String bulletPoint1;
-    private String bulletPoint2;
-    private String bulletPoint3;
-    private String bulletPoint4;
-    private String bulletPoint5;
-    private String description;
-    private String htmlDescription;
     private String type;
 }

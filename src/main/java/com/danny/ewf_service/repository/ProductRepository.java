@@ -170,8 +170,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             pd.collection as collection,
             pd.shortTitle as shortTitle,
             p.title as title,
-            pd.description as description,
-            pd.htmlDescription as htmlDescription,    
+            p.type as type,
                         
             p.subProducts as subProducts
             
