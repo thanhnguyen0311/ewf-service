@@ -115,25 +115,23 @@ public class ProductServiceImpl implements ProductService {
             if (productDetail == null) productDetail = new ProductDetail();
 
             // Update component fields from DTO
-            product.setUpc(dto.getUpc());
-            product.setCategory(dto.getCategory());
-            product.setAsin(dto.getAsin());
-            product.setParentAsin(dto.getParentAsin());
-            product.setAmzVariationID(dto.getAmzVariationID());
-            product.setWayfairVariationID(dto.getWayfairVariationID());
-            product.setShippingMethod(dto.getShipping());
+            if (!dto.getUpc().isEmpty()) product.setUpc(dto.getUpc());
+            if (!dto.getCategory().isEmpty())product.setCategory(dto.getCategory());
+            if (!dto.getAsin().isEmpty()) product.setAsin(dto.getAsin());
+            if (!dto.getParentAsin().isEmpty()) product.setParentAsin(dto.getParentAsin());
+            if (!dto.getAmzVariationID().isEmpty()) product.setAmzVariationID(dto.getAmzVariationID());
+            if (!dto.getWayfairVariationID().isEmpty()) product.setWayfairVariationID(dto.getWayfairVariationID());
+            if (!dto.getShipping().isEmpty()) product.setShippingMethod(dto.getShipping());
             product.setDiscontinued(dto.getDiscontinued());
-            product.setTitle(dto.getTitle());
+            if (!dto.getTitle().isEmpty()) product.setTitle(dto.getTitle());
+            if (!dto.getType().isEmpty()) product.setType(dto.getType());
 
-            productDetail.setMainCategory(dto.getMainCategory());
-            productDetail.setSubCategory(dto.getSubCategory());
-            productDetail.setFinish(dto.getFinish());
-            productDetail.setSizeShape(dto.getSizeShape());
-            productDetail.setCollection(dto.getCollection());
-            productDetail.setShortTitle(dto.getShortTitle());
-            productDetail.setDescription(dto.getDescription());
-            productDetail.setHtmlDescription(dto.getHtmlDescription());
-
+            if (!dto.getMainCategory().isEmpty()) productDetail.setMainCategory(dto.getMainCategory());
+            if (!dto.getSubCategory().isEmpty()) productDetail.setSubCategory(dto.getSubCategory());
+            if (!dto.getFinish().isEmpty()) productDetail.setFinish(dto.getFinish());
+            if (!dto.getSizeShape().isEmpty()) productDetail.setSizeShape(dto.getSizeShape());
+            if (!dto.getCollection().isEmpty()) productDetail.setCollection(dto.getCollection());
+            if (!dto.getShortTitle().isEmpty()) productDetail.setShortTitle(dto.getShortTitle());
             product.setProductDetail(productDetail);
             // Add to the save list
             productsToSave.add(product);

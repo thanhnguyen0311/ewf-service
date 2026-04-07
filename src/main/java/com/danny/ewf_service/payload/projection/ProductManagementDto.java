@@ -21,8 +21,7 @@ public interface ProductManagementDto {
     String getCollection();
     String getShortTitle();
     String getTitle();
-    String getDescription();
-    String getHtmlDescription();
+    String getType();
     List<String> getSubProducts();
 
 }
