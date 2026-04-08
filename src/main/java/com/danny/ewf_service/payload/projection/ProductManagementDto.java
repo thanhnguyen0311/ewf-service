@@ -20,6 +20,7 @@ public interface ProductManagementDto {
     String getSizeShape();
     String getCollection();
     String getShortTitle();
+    String getStyle();
     String getTitle();
     String getType();
     List<String> getSubProducts();

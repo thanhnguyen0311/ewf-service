@@ -132,6 +132,7 @@ public class ProductServiceImpl implements ProductService {
             if (!dto.getSizeShape().isEmpty()) productDetail.setSizeShape(dto.getSizeShape());
             if (!dto.getCollection().isEmpty()) productDetail.setCollection(dto.getCollection());
             if (!dto.getShortTitle().isEmpty()) productDetail.setShortTitle(dto.getShortTitle());
+            if (!dto.getStyle().isEmpty()) productDetail.setStyle(dto.getStyle());
             product.setProductDetail(productDetail);
             // Add to the save list
             productsToSave.add(product);

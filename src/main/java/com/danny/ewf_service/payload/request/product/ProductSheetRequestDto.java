@@ -26,4 +26,5 @@ public class ProductSheetRequestDto {
     private String collection;
     private String shortTitle;
     private String type;
+    private String style;
 }
