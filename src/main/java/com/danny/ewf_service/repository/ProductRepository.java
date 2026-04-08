@@ -169,8 +169,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             pd.sizeShape as sizeShape,
             pd.collection as collection,
             pd.shortTitle as shortTitle,
+            pd.style as style,
             p.title as title,
             p.type as type,
+                    
                         
             p.subProducts as subProducts
             
