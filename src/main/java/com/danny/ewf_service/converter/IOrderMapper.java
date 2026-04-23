@@ -11,28 +11,22 @@ import java.util.Map;
 @Mapper(componentModel = "spring")
 public interface IOrderMapper {
 
-    @Mapping(target = "id", source="order.id")
-    @Mapping(target = "invoiceNumber", source="order.invoiceNumber")
-    @Mapping(target = "type", source="order.type")
-    @Mapping(target = "orderDate", source="order.orderDate")
-    @Mapping(target = "shipDate", source="order.shipDate")
-    @Mapping(target = "paymentStatus", source="order.paymentStatus")
-    @Mapping(target = "price", source="order.orderPrices.price")
-    @Mapping(target = "customerName", source="order.customer.name")
-    @Mapping(target = "customerPhone", source="order.customer.phone")
-    @Mapping(target = "tracking", expression = "java(extractTracking(order))")
-    @Mapping(target = "PONumber", expression = "java(extractPONumber(order))")
-    OrderListResponseDto orderToOrderResponseDto(Order order);
-    List<OrderListResponseDto> ordersToOrderResponseDTOs(List<Order> orders);
-
-    default String extractTracking(Order order) {
-        Map<String, Object> metadata = order.getMetadataAsMap();
-        return metadata.containsKey("Tracking") ? metadata.get("Tracking").toString() : null;
-    }
-
-    default String extractPONumber(Order order) {
-        Map<String, Object> metadata = order.getMetadataAsMap();
-        return metadata.containsKey("PONumber") ? metadata.get("PONumber").toString() : null;
-    }
-
+    @Mapping(target = "customer", source = "order.customer")
+    @Mapping(target = "accountNumber", source = "order.accountNumber")
+    @Mapping(target = "poNumber", source = "order.poNumber")
+    @Mapping(target = "masterTrackingNumber", source = "order.masterTrackingNumber")
+    @Mapping(target = "trackingNumber", source = "order.trackingNumber")
+    @Mapping(target = "status", source = "order.status")
+    @Mapping(target = "groupSku", source = "order.groupSku")
+    @Mapping(target = "contactName", source = "order.contactName")
+    @Mapping(target = "address1", source = "order.address1")
+    @Mapping(target = "address2", source = "order.address2")
+    @Mapping(target = "zipcode", source = "order.zipcode")
+    @Mapping(target = "phone", source = "order.phone")
+    @Mapping(target = "city", source = "order.city")
+    @Mapping(target = "state", source = "order.state")
+    @Mapping(target = "createdAt", source = "order.createdAt")
+    @Mapping(target = "updatedAt", source = "order.updatedAt")
+    OrderListResponseDto orderToOrderListResponseDto(Order order);
+    List<OrderListResponseDto> orderToOrderListResponseDtos(List<Order> orders);
 }
