@@ -24,69 +24,62 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "invoice_number")
-    private String invoiceNumber;
+    @Column(name = "customer")
+    private String customer;
 
-    @Column(name = "type")
-    private String type;
+    @Column(name = "po_number", unique = true)
+    private String poNumber;
 
-    @Column(name = "order_date")
-    private LocalDateTime orderDate;
+    @Column(name = "master_tracking_number")
+    private String masterTrackingNumber;
 
-    @Column(name = "ship_date")
-    private LocalDateTime shipDate;
+    @Column(name = "tracking_number", columnDefinition = "TEXT")
+    private String trackingNumber;
 
-    @Column(name = "date_created")
-    private LocalDateTime dataCreated;
-
-    @Column(name = "carrier")
-    private String carrier;
-
-    @Column(name = "order_status")
+    @Column(name = "status")
     private String status;
 
-    @Column(name = "payment_method")
-    private String paymentMethod;
+    @Column(name = "group_sku")
+    private String groupSku;
 
-    @Column(name = "payment_status")
-    private String paymentStatus;
+    @Column(name = "contact_name")
+    private String contactName;
 
-    @Column(name = "metadata", columnDefinition = "JSON")
-    private String metadata;
+    @Column(name = "address_1")
+    private String address1;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "prices_id", referencedColumnName = "id") // FK column in Order table
-    private OrderPrices orderPrices ;
+    @Column(name = "address_2")
+    private String address2;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    @Column(name = "zipcode", length = 50)
+    private String zipcode;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<OrderProduct> orderProducts = new ArrayList<>();
+    @Column(name = "phone", length = 50)
+    private String phone;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @Column(name = "city", length = 100)
+    private String city;
 
-    public void addToMetadata(String key, Object value) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            Map<String, Object> metadataMap = this.getMetadataAsMap();
-            metadataMap.put(key, value);
-            this.metadata = objectMapper.writeValueAsString(metadataMap); // Convert map back to JSON string
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to add metadata key-value pair", e);
-        }
+    @Column(name = "state", length = 100)
+    private String state;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "account_number", length = 100)
+    private String accountNumber;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
-    public Map<String, Object> getMetadataAsMap() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return this.metadata == null ? new HashMap<>() : objectMapper.readValue(this.metadata, new TypeReference<Map<String, Object>>() { });
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse metadata JSON", e);
-        }
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
-
-
 }
