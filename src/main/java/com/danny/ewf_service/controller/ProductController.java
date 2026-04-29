@@ -1,9 +1,10 @@
 package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.payload.projection.ProductComponentDto;
-import com.danny.ewf_service.payload.request.ComponentSheetRequestDto;
+import com.danny.ewf_service.payload.request.product.ProductComponentRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
+import com.danny.ewf_service.payload.request.sheet.SkuComponentsDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
@@ -131,6 +132,18 @@ public class ProductController {
     public ResponseEntity<?> updateProductFromSheet(@RequestBody List<ProductSheetRequestDto> productSheetRequestDtos) {
         try {
             LocalDateTime updated = productService.updateProductFromSheet(productSheetRequestDtos);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching product");
+        }
+    }
+
+    @PostMapping("/pc")
+    public ResponseEntity<?> updateProductComponentFromSheet(@RequestBody List<SkuComponentsDto> skuComponentsDtos) {
+        try {
+            LocalDateTime updated = productService.updateProductComponentFromSheet(skuComponentsDtos);
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

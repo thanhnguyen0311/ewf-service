@@ -14,6 +14,8 @@ import com.danny.ewf_service.payload.request.product.ProductComponentRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
+import com.danny.ewf_service.payload.request.sheet.ComponentItemDto;
+import com.danny.ewf_service.payload.request.sheet.SkuComponentsDto;
 import com.danny.ewf_service.payload.response.component.ComponentProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
@@ -142,6 +144,53 @@ public class ProductServiceImpl implements ProductService {
         productRepository.saveAll(productsToSave);
 
         // Return the timestamp of the operation
+        return LocalDateTime.now();
+    }
+
+    @Override
+    public LocalDateTime updateProductComponentFromSheet(List<SkuComponentsDto> skuComponentsDtos) {
+        if (skuComponentsDtos == null || skuComponentsDtos.isEmpty()) return LocalDateTime.now();
+        for (SkuComponentsDto dto : skuComponentsDtos) {
+            Optional<Product> optionalProduct = productRepository.findProductBySku(dto.getProductSku().toUpperCase());
+            if (optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                // Step 1: Retrieve and clear the current components list
+                List<ProductComponent> productComponents = product.getComponents();
+                productComponents.clear();
+
+                // Persist clearing to avoid duplicate entries
+                productRepository.save(product);
+
+                // Step 2: Create and add new ProductComponents from dto
+                List<ProductComponent> newComponents = new ArrayList<>();
+                for (ComponentItemDto componentDto : dto.getComponents()) {
+                    if (componentDto.getPcs() < 1) continue;
+                    // Retrieve the Component entity by SKU
+                    Optional<Component> optionalComponent = componentRepository.findBySku(componentDto.getSku());
+                    if (optionalComponent.isPresent()) {
+                        Component component = optionalComponent.get();
+
+                        // Create a new ProductComponent and set its properties
+                        ProductComponent productComponent = ProductComponent.builder()
+                                .product(product)
+                                .component(component)
+                                .quantity(componentDto.getPcs())
+                                .build();
+
+                        newComponents.add(productComponent);
+                    }
+                }
+                // Add all new components to the product's component list
+                productComponents.addAll(newComponents);
+                // Step 3: Save the updated product
+                productRepository.save(product);
+
+
+            } else {
+                return LocalDateTime.now();
+            }
+        }
+
         return LocalDateTime.now();
     }
 
