@@ -41,7 +41,7 @@ public class AmazonDataExport {
     }
 
     public void extractDataFromAmazon(){
-        List<Product> products = productRepository.findProductsByPriceEwfdirectBetweenZeroAndFiveHundred();
+        List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
 
         System.out.println("Found " + products.size() + " products with ASIN");
         String searchApiRequest = "https://www.searchapi.io/api/v1/search?api_key=" + searchApiToken + "&asin=";
@@ -50,9 +50,7 @@ public class AmazonDataExport {
 
 
         for (Product product : products) {
-//            if (product.getProductDetail() != null) {
-//                if (Objects.equals(product.getProductDetail().getMainCategory(), "Outdoor")) continue;
-//            }
+            if (product.getAsin().isEmpty()) continue;
 
             metadata = product.getMetadata();
             if (metadata == null) metadata = new ProductMetadata();
