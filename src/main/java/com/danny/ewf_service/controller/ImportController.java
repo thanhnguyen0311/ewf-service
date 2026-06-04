@@ -72,19 +72,20 @@ public class ImportController {
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing(products, "products.csv", true);
 //            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
-//            shopifyExport.exportShopifyProductsPrice("product_prices_02-18.csv");
+
+//            productsImport.importProductPrice();
+            shopifyExport.exportShopifyProductsPrice("product_prices_06-04.csv");
 //            componentsImport.importProductComponentMapping();
 //            shopifyExport.exportAmazonReviews();
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
 //            productExport.exportComponent("components.csv");
 //            amazonDataExport.extractDataFromAmazon();
-//            productsImport.importProductDetails();
 //            componentsImport.importDimensions();
 //            productExport.exportProductWithDimension("product_dimensions.csv");
 //            productExport.exportMergedProducts("merged_products.csv")
 //            productService.updateSubProduct();
-            wayfairReportImport.importWayfairReportDaily(filepath);
+//            wayfairReportImport.importWayfairReportDaily(filepath);
 //            wayfairReportImport.importWayfairReportKeywordDaily(filepath2);
 
             return ResponseEntity.ok().body("SUCCESS");

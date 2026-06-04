@@ -5,6 +5,7 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.entity.product.ProductComponent;
 import com.danny.ewf_service.payload.projection.ProductComponentDto;
 import com.danny.ewf_service.payload.projection.ProductManagementDto;
+import com.danny.ewf_service.payload.projection.ProductPriceDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
 import com.danny.ewf_service.payload.request.sheet.SkuComponentsDto;
@@ -41,4 +42,6 @@ public interface ProductService {
     LocalDateTime updateProductFromSheet(List<ProductSheetRequestDto> products);
 
     LocalDateTime updateProductComponentFromSheet(List<SkuComponentsDto> skuComponentsDtos);
+
+    List<ProductPriceDto> getAllProductPrice();
 }

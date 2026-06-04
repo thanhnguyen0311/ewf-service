@@ -3,6 +3,7 @@ package com.danny.ewf_service.repository;
 import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.payload.projection.ProductComponentDto;
 import com.danny.ewf_service.payload.projection.ProductManagementDto;
+import com.danny.ewf_service.payload.projection.ProductPriceDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -183,6 +184,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         WHERE p.isDeleted = false
         """)
     List<ProductManagementDto> getAllProduct();
+
+    @Query("""
+        SELECT
+            p.sku as sku, 
+            pr.totalQB3 as totalQB,
+            pr.shippingCost as shippingCost,
+            pr.manualShippingCost as manualShippingCost,
+            pr.promotion as promotion,
+            pr.ewfdirectManualPrice as ewfdirectManualPrice
+            
+        FROM Product p
+        LEFT JOIN p.price pr
+        WHERE p.isDeleted = false
+        """)
+    List<ProductPriceDto> getAllProductPriceList();
 
     @Query("""
         SELECT

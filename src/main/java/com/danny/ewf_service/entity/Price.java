@@ -50,10 +50,18 @@ public class Price {
     @Column(name = "ewfdirect_manual_price")
     private Double ewfdirectManualPrice;
 
+    @Column(name = "manual_shipping_cost")
+    private Double manualShippingCost;
+
     @Column(name = "promotion")
     private Long promotion;
 
     @Column(name = "shipping_cost")
     private Double shippingCost;
+
+    @Column(name = "totalQB3")
+    private Double totalQB3;
+
+
 
 }
