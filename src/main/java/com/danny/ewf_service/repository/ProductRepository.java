@@ -192,7 +192,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             pr.shippingCost as shippingCost,
             pr.manualShippingCost as manualShippingCost,
             pr.promotion as promotion,
-            pr.ewfdirectManualPrice as ewfdirectManualPrice
+            pr.ewfdirectManualPrice as ewfdirectManualPrice,
+            pr.amazonPrice as amazonPrice
             
         FROM Product p
         LEFT JOIN p.price pr
