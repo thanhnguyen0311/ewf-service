@@ -7,4 +7,6 @@ public interface ProductPriceDto {
     Double getManualShippingCost();
     Double getPromotion();
     Double getEwfdirectManualPrice();
+
+    Double getAmazonPrice();
 }
