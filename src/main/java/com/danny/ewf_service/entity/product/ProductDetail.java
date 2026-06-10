@@ -57,4 +57,11 @@ public class ProductDetail {
 
     @Column(name = "short_title")
     private String shortTitle;
+
+    @Column(name = "is_luxe")
+    private Boolean isLuxe;
+
+    @Column(name = "group_id")
+    private String groupID;
+
 }

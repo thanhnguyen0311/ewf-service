@@ -314,19 +314,19 @@ public class ProductServiceImpl implements ProductService {
 
                 } else {
                     if (componentWeight <= 20) {
-                        shippingCost = 20;
-                    } else if (componentWeight <= 40) {
                         shippingCost = 22;
+                    } else if (componentWeight <= 40) {
+                        shippingCost = 24;
                     } else if (componentWeight <= 50) {
-                        shippingCost = 25;
+                        shippingCost = 26;
                     } else if (componentWeight <= 60) {
-                        shippingCost = 28;
-                    } else if (componentWeight <= 70) {
                         shippingCost = 30;
+                    } else if (componentWeight <= 70) {
+                        shippingCost = 32;
                     } else if (componentWeight <= 80) {
-                        shippingCost = 31;
-                    } else {
                         shippingCost = 35;
+                    } else {
+                        shippingCost = 38;
                     }
 
                     if (girth > 160) {

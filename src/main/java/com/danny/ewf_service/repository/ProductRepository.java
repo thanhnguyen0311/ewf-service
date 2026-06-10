@@ -173,6 +173,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             pd.style as style,
             p.title as title,
             p.type as type,
+            pd.productType as productType,
+            pd.isLuxe as isLuxe,
+            pd.groupID as groupID,
+            pd.pieces as pieces,
+            pd.chairType as chairType,   
                     
                         
             p.subProducts as subProducts

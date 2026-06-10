@@ -73,10 +73,10 @@ public class ImportController {
 //            shopifyExport.exportProductListing(products, "products.csv", true);
 //            shopifyExport.exportProductCustomfields(products, "products_customsfield.csv");
 
-//            productsImport.importProductPrice();
-            shopifyExport.exportShopifyProductsPrice("product_prices_06-04.csv");
+            productsImport.importProductDetails();
+//            shopifyExport.exportShopifyProductsPrice("product_prices_06-04.csv");
 //            componentsImport.importProductComponentMapping();
-//            shopifyExport.exportAmazonReviews();
+//            shopifyExport.exportProductTags("product_tags.csv");
 //            wmsExport.exportSKU("wms.csv");
 //            wayfairReportImport.importWayfairParentSkuProduct(filepath);
 //            productExport.exportComponent("components.csv");

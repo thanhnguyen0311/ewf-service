@@ -23,6 +23,11 @@ public interface ProductManagementDto {
     String getStyle();
     String getTitle();
     String getType();
+    String getProductType();
+    String getIsLuxe();
+    String getGroupID();
+    String getPieces();
+    String getChairType();
     List<String> getSubProducts();
 
 }
