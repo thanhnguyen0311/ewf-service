@@ -105,41 +105,47 @@ public class ProductsImport {
             Product product;
             try (CSVReader csvReader = readerBuilder.build()) {
                 String productSku;
+                String type;
+                String category;
+                String shipping;
+                String mainCategory;
+                String isLuxe;
+                String productType;
+                String groupID;
+                String upc;
+                String finish;
+                String pieces;
+                String chairTypes;
+                String sizeShape;
                 String style;
                 String collection;
-                String sizeShape;
-                String finish;
-                String title;
-                String shortTitle;
-                String bulletPoint1;
-                String bulletPoint2;
-                String bulletPoint3;
-                String bulletPoint4;
-                String bulletPoint5;
-                String description;
-                String htmlDescription;
+                String asin;
+
                 String[] columns;
 
                 while ((columns = csvReader.readNext()) != null) {
                     productSku = getValueByIndex(columns, 0);
-                    style = getValueByIndex(columns, 1);
-                    collection = getValueByIndex(columns, 2);
-                    sizeShape = getValueByIndex(columns, 3);
-                    finish = getValueByIndex(columns, 4);
-                    title = getValueByIndex(columns, 5);
-                    shortTitle = getValueByIndex(columns, 6);
-                    bulletPoint1 = getValueByIndex(columns, 7);
-                    bulletPoint2 = getValueByIndex(columns, 8);
-                    bulletPoint3 = getValueByIndex(columns, 9);
-                    bulletPoint4 = getValueByIndex(columns, 10);
-                    bulletPoint5 = getValueByIndex(columns, 11);
-                    description = getValueByIndex(columns, 12);
-                    htmlDescription = getValueByIndex(columns, 13);
+                    type = getValueByIndex(columns, 1);
+                    category = getValueByIndex(columns, 2);
+                    shipping = getValueByIndex(columns, 3);
+                    mainCategory = getValueByIndex(columns, 4);
+                    isLuxe = getValueByIndex(columns, 5);
+                    productType = getValueByIndex(columns, 6);
+                    groupID = getValueByIndex(columns, 7);
+                    upc = getValueByIndex(columns, 8);
+                    finish = getValueByIndex(columns, 9);
+                    pieces = getValueByIndex(columns, 10);
+                    chairTypes = getValueByIndex(columns, 11);
+                    sizeShape = getValueByIndex(columns, 12);
+                    style = getValueByIndex(columns, 13);
+                    collection = getValueByIndex(columns, 14);
+                    asin = getValueByIndex(columns, 15);
 
 
                     if (productSku.isEmpty()) {
                         continue;
                     }
+                    System.out.println("Processing SKU: " + productSku);
                     String normalizedSku = productSku.replaceAll("[\\p{C}]", "").trim();
 
                     Optional<Product> optionalProduct = productRepository.findProductBySku(normalizedSku);
@@ -152,23 +158,29 @@ public class ProductsImport {
                     if (product.getLocalSku() == null) product.setLocalSku(skuGenerator.generateNewSKU(normalizedSku.toUpperCase()));
 
 
-                    if (!title.equals("x")) product.setTitle(title);
-
                     ProductDetail productDetail = product.getProductDetail();
                     if (productDetail == null) productDetail = new ProductDetail();
 
-                    if (!style.equals("x")) productDetail.setStyle(style);
-                    if (!collection.equals("x")) productDetail.setCollection(collection);
-                    if (!sizeShape.equals("x")) productDetail.setSizeShape(sizeShape);
-                    if (!finish.equals("x")) productDetail.setFinish(finish);
-                    if (!shortTitle.equals("x")) productDetail.setShortTitle(shortTitle);
-                    if (!description.equals("x")) productDetail.setDescription(description);
-                    if (!htmlDescription.equals("x")) productDetail.setHtmlDescription(htmlDescription);
+                    if (!type.isEmpty()) product.setType(type);
+                    if (!category.isEmpty()) product.setCategory(category);
+                    if (!shipping.isEmpty()) product.setShippingMethod(shipping);
+                    if (!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
+                    if (!isLuxe.isEmpty()) productDetail.setIsLuxe(true);
+                    if (!productType.isEmpty()) productDetail.setProductType(productType);
+                    if (!groupID.isEmpty()) productDetail.setGroupID(groupID);
+                    if (!upc.isEmpty()) product.setUpc(upc);
+                    if (!finish.isEmpty()) productDetail.setFinish(finish);
+                    if (!pieces.isEmpty()) productDetail.setPieces(pieces);
+                    if (!chairTypes.isEmpty()) productDetail.setChairType(chairTypes);
+                    if (!sizeShape.isEmpty()) productDetail.setSizeShape(sizeShape);
+                    if (!style.isEmpty()) productDetail.setStyle(style);
+                    if (!collection.isEmpty()) productDetail.setCollection(collection);
+                    if (!asin.isEmpty()) product.setAsin(asin);
 
                     product.setProductDetail(productDetail);
 
                     productRepository.save(product);
-                    System.out.println("Updated SKU: " + normalizedSku + " | " + htmlDescription.substring(0, Math.min(50, htmlDescription.length())));
+                    System.out.println("Updated SKU: " + normalizedSku + " | " + product.getProductDetail().toString());
                 }
             }
 
@@ -497,4 +509,5 @@ public class ProductsImport {
             System.out.println("Updated SKU: " + product.getSku() + " VALUES : " + productWholesales.getEwfmain());
         }
     }
+
 }

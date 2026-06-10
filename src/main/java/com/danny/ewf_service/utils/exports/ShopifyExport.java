@@ -714,4 +714,59 @@ public class ShopifyExport {
         }
         return 0;
     }
+
+    public void exportProductTags(String filePath) {
+
+        String[] header = {
+                "Handle",
+                "Title",
+                "Tags"
+        };
+
+        List<String[]> rows = new ArrayList<>();
+        rows.add(header);
+
+        List<String[]> skuRows = new ArrayList<>();
+
+        List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
+        StringBuilder tags;
+        String[] row;
+        int newArrivalsStartIndex = products.size() - 1500;
+        int index = 0;
+        try {
+            for (Product product : products) {
+                index++;
+                System.out.println("Processing " + product.getSku());
+                ProductDetail productDetail = product.getProductDetail();
+                tags = new StringBuilder();
+                if (productDetail.getSizeShape() != null && !productDetail.getSizeShape().isEmpty()) tags.append(productDetail.getSizeShape()).append(",");
+                if (productDetail.getFinish() != null  && !productDetail.getFinish().isEmpty()) tags.append(productDetail.getFinish()).append(",");
+                if (productDetail.getMainCategory() != null && !productDetail.getMainCategory().isEmpty()) tags.append(productDetail.getMainCategory()).append(",");
+                if (productDetail.getSubCategory() != null && !productDetail.getSubCategory().isEmpty()) tags.append(productDetail.getSubCategory()).append(",");
+                if (productDetail.getCollection() != null && !productDetail.getCollection().isEmpty()) tags.append(productDetail.getCollection()).append(",");
+                if (productDetail.getStyle() != null && !productDetail.getStyle().isEmpty()) tags.append(productDetail.getStyle()).append(",");
+                if (productDetail.getPieces() != null && !productDetail.getPieces().isEmpty()) tags.append(productDetail.getPieces()).append(",");
+                if (productDetail.getChairType() != null && !productDetail.getChairType().isEmpty()) tags.append(productDetail.getChairType()).append(",");
+                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+
+
+                row = new String[]{
+                        product.getSku().toLowerCase(),
+                        product.getTitle() != null ? product.getTitle() : product.getName(),
+                        commaRemoval(tags.toString()),
+                };
+
+
+                rows.add(row);
+                skuRows.add(new String[]{product.getSku()});
+
+
+                System.out.println("Exported " + product.getSku() + " | " + tags);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        csvWriter.exportToCsv(rows, filePath);
+    }
 }
