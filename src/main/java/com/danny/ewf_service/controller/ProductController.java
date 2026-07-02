@@ -149,7 +149,7 @@ public class ProductController {
     public ResponseEntity<?> updateProductPriceSaleChannel(@RequestBody List<ProductPriceRequestDto> productPriceRequestDtos) {
         try {
             productService.updateProductPriceSaleChannel(productPriceRequestDtos);
-            return (ResponseEntity<?>) ResponseEntity.ok();
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
