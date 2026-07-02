@@ -66,6 +66,8 @@ public class ImagesImport {
                             }
                             if (columns[1].contains("/DIM/")) {
                                 imageUrls.getDim().add(columns[1]);
+                            } else if (columns[1].contains("/AI-CGI/")) {
+                                imageUrls.getCgi().add(columns[1]);
                             } else if (columns[1].contains("/CGI/")) {
                                 imageUrls.getCgi().add(columns[1]);
                             } else {
