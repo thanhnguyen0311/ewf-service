@@ -89,41 +89,6 @@ public class ShopifyExport {
                             }
                         }
                     } else title = result[1].toString();
-
-//                        if (product.getProductDetail() != null) {
-//                            List<ProductComponent> productComponents = product.getComponents();
-//                            for (ProductComponent productComponent : productComponents) {
-//                                Dimension dimension = productComponent.getComponent().getDimension();
-//                                if (dimension != null) {
-//                                    System.out.println(result[0].toString() + " " + dimension.getBoxLength());
-//                                    if (dimension.getBoxLength() > 40) {
-//                                        inventory = String.valueOf(0L);
-//                                        rows.add(new String[]{
-//                                                result[0].toString().toLowerCase(),
-//                                                title,
-//                                                "Title",
-//                                                "Default Title",
-//                                                "",
-//                                                "",
-//                                                "",
-//                                                "",
-//                                                result[0].toString(),
-//                                                "",
-//                                                "",
-//                                                "175 Southbelt Industrial Drive",
-//                                                "0",
-//                                                "0",
-//                                                "0",
-//                                                inventory,
-//                                                inventory
-//
-//                                        });
-//                                        System.out.println(result[0].toString());
-//                                        break;
-//                                    }
-//                                }
-//                            }
-//                        }
                     rows.add(new String[]{
                             result[0].toString().toLowerCase(),
                             title,
@@ -218,6 +183,13 @@ public class ShopifyExport {
                 "Published",
                 "Option1 Name",
                 "Option1 Value",
+                "Option1 Linked To",
+                "Option2 Name",
+                "Option2 Value",
+                "Option2 Linked To",
+                "Option3 Name",
+                "Option3 Value",
+                "Option3 Linked To",
                 "Variant SKU",
                 "Variant Grams",
                 "Variant Inventory Tracker",
@@ -330,15 +302,18 @@ public class ShopifyExport {
 //            }
 
                 tags = new StringBuilder();
-                if (productDetail.getSizeShape() != null) tags.append(productDetail.getSizeShape()).append(",");
-                if (productDetail.getFinish() != null) tags.append(productDetail.getFinish()).append(",");
-                if (productDetail.getMainCategory() != null) tags.append(productDetail.getMainCategory()).append(",");
-                if (productDetail.getSubCategory() != null) tags.append(productDetail.getSubCategory()).append(",");
-                if (productDetail.getCollection() != null) tags.append(productDetail.getCollection()).append(",");
-                if (productDetail.getStyle() != null) tags.append(productDetail.getStyle()).append(",");
-                if (productDetail.getPieces() != null) tags.append(productDetail.getPieces()).append(",");
-                if (productDetail.getChairType() != null) tags.append(productDetail.getChairType()).append(",");
-                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+                if (productDetail.getSizeShape() != null && !productDetail.getSizeShape().isEmpty()) tags.append(productDetail.getSizeShape()).append(",");
+                if (productDetail.getFinish() != null  && !productDetail.getFinish().isEmpty()) tags.append(productDetail.getFinish()).append(",");
+                if (productDetail.getMainCategory() != null && !productDetail.getMainCategory().isEmpty()) tags.append(productDetail.getMainCategory()).append(",");
+                if (productDetail.getSubCategory() != null && !productDetail.getSubCategory().isEmpty()) tags.append(productDetail.getSubCategory()).append(",");
+                if (productDetail.getCollection() != null && !productDetail.getCollection().isEmpty()) tags.append(productDetail.getCollection()).append(",");
+                if (productDetail.getStyle() != null && !productDetail.getStyle().isEmpty()) tags.append(productDetail.getStyle()).append(",");
+                if (productDetail.getPieces() != null && !productDetail.getPieces().isEmpty()) tags.append(productDetail.getPieces()).append(",");
+                if (productDetail.getChairType() != null && !productDetail.getChairType().isEmpty()) tags.append(productDetail.getChairType()).append(",");
+                if (productDetail.getMaterial() != null && !productDetail.getMaterial().isEmpty()) tags.append(productDetail.getMaterial()).append(",");
+                if (productDetail.getIsLuxe() != null && productDetail.getIsLuxe()) tags.append("Luxe,");
+                if (productDetail.getBedType() != null && !productDetail.getBedType().isEmpty()) tags.append(productDetail.getBedType()).append(",");
+//                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
 
                 Price price = product.getPrice();
                 if (price != null ) {
@@ -364,6 +339,13 @@ public class ShopifyExport {
                         "TRUE",
                         "Title",
                         "Default Title",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
                         product.getSku(),
                         Objects.equals(product.getShippingMethod(), "LTL") ? "22679.6185" : "0.00",
                         "shopify",
@@ -396,6 +378,13 @@ public class ShopifyExport {
                 for (int i = 1; i < images.size(); i++) {
                     rows.add(new String[]{
                             product.getSku().toLowerCase(),
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
                             "",
                             "",
                             "",
@@ -720,7 +709,19 @@ public class ShopifyExport {
         String[] header = {
                 "Handle",
                 "Title",
-                "Tags"
+                "Option1 Name",
+                "Option1 Value",
+                "Option1 Linked To",
+                "Option2 Name",
+                "Option2 Value",
+                "Option2 Linked To",
+                "Option3 Name",
+                "Option3 Value",
+                "Option3 Linked To",
+//                "Variant SKU",
+                "Variant Grams",
+                "Tags",
+//                "Google Shopping / Custom Label 0"
         };
 
         List<String[]> rows = new ArrayList<>();
@@ -747,13 +748,32 @@ public class ShopifyExport {
                 if (productDetail.getStyle() != null && !productDetail.getStyle().isEmpty()) tags.append(productDetail.getStyle()).append(",");
                 if (productDetail.getPieces() != null && !productDetail.getPieces().isEmpty()) tags.append(productDetail.getPieces()).append(",");
                 if (productDetail.getChairType() != null && !productDetail.getChairType().isEmpty()) tags.append(productDetail.getChairType()).append(",");
-                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+                if (productDetail.getMaterial() != null && !productDetail.getMaterial().isEmpty()) tags.append(productDetail.getMaterial()).append(",");
+                if (productDetail.getIsLuxe() != null && productDetail.getIsLuxe()) tags.append("Luxe,");
+                if (productDetail.getBedType() != null && !productDetail.getBedType().isEmpty()) tags.append(productDetail.getBedType()).append(",");
+
+                if (!Objects.equals(product.getCategory2(), "2Comp")) {
+                    if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+                }
+
 
 
                 row = new String[]{
                         product.getSku().toLowerCase(),
                         product.getTitle() != null ? product.getTitle() : product.getName(),
+                        "Title",
+                        "Default Title",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+//                        product.getSku(),
+                        product.getShippingMethod().equals("LTL") ? "22679.6185" : "0.00",
                         commaRemoval(tags.toString()),
+//                        productDetail.getSizeShape()
                 };
 
 
@@ -768,5 +788,79 @@ public class ShopifyExport {
         }
 
         csvWriter.exportToCsv(rows, filePath);
+    }
+
+    public void exportProductCustomLabel(String filePath) {
+        String[] header = {
+                "Handle",
+                "Title",
+                "Option1 Name",
+                "Option1 Value",
+                "Option1 Linked To",
+                "Option2 Name",
+                "Option2 Value",
+                "Option2 Linked To",
+                "Option3 Name",
+                "Option3 Value",
+                "Option3 Linked To",
+                "Google Shopping / Custom Label 0"
+        };
+
+        List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
+        List<String[]> rows = new ArrayList<>();
+        rows.add(header);
+        String[] row;
+
+        for (Product product : products) {
+            row = new String[]{
+                    product.getSku().toLowerCase(),
+                    product.getTitle() != null ? product.getTitle() : product.getName(),
+                    "Title",
+                    "Default Title",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+            };
+            rows.add(row);
+        }
+
+
+        csvWriter.exportToCsv(rows, filePath);
+
+    }
+
+    public void exportProductType(String filePath) {
+        String[] header = {
+                "Handle",
+                "Title",
+                "Type",
+                "Variant Barcode"
+        };
+
+        List<Product> products = productRepository.findProductsByWholesalesEwfdirect();
+        List<String[]> rows = new ArrayList<>();
+        rows.add(header);
+        String[] row;
+
+        for (Product product : products) {
+            row = new String[]{
+                    product.getSku().toLowerCase(),
+                    product.getTitle() != null ? product.getTitle() : product.getName(),
+                    product.getProductDetail().getSubCategory(),
+                    product.getUpc()
+            };
+            rows.add(row);
+        }
+
+
+        csvWriter.exportToCsv(rows, filePath);
+
     }
 }

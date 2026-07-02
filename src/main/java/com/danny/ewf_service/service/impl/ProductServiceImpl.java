@@ -14,6 +14,7 @@ import com.danny.ewf_service.payload.request.ComponentSheetRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductComponentRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
 import com.danny.ewf_service.entity.product.ProductComponent;
+import com.danny.ewf_service.payload.request.product.ProductPriceRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
 import com.danny.ewf_service.payload.request.sheet.ComponentItemDto;
 import com.danny.ewf_service.payload.request.sheet.SkuComponentsDto;
@@ -249,7 +250,34 @@ public class ProductServiceImpl implements ProductService {
         System.out.println(productDetailResponseDtos.size());
         return productDetailResponseDtos;
     }
+    @Override
+    public List<Product> getListProductFromCsvFile(String filePath) {
+        List<String> skus = csvWriter.skuListFromCsv(filePath);
+        return productRepository.findAllBySkus(skus);
+    }
 
+    @Override
+    public void updateProductPriceSaleChannel(List<ProductPriceRequestDto> productPriceRequestDtos) {
+        for (ProductPriceRequestDto productPriceRequestDto : productPriceRequestDtos) {
+            Optional<Product> optionalProduct = productRepository.findBySku(productPriceRequestDto.getSku().toUpperCase());
+            if (optionalProduct.isPresent()) {
+                Product product = optionalProduct.get();
+                Price price = product.getPrice();
+                if (product.getPrice() == null) price = new Price();
+                if (productPriceRequestDto.getManualShippingCost().isEmpty()) {
+                    price.setShippingCost(Double.valueOf(productPriceRequestDto.getManualShippingCost()));
+                    price.setEwfdirect(price.getTotalQB3() + price.getShippingCost());
+                }
+                if (!productPriceRequestDto.getManualPrice().isEmpty()) {
+                    price.setEwfdirectManualPrice(Double.valueOf(productPriceRequestDto.getManualPrice()));
+                    price.setEwfdirect(Double.valueOf(productPriceRequestDto.getManualPrice()));
+                }
+
+                product.setPrice(price);
+                productRepository.save(product);
+            }
+        }
+    }
 
     @Override
     public List<ProductSearchResponseDto> getAllProductsSearch() {
@@ -365,9 +393,9 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        if (totalQB3 > 2000) totalShipCost = totalShipCost*0.85;
-        else if (totalQB3 > 1500 && totalQB3 < 2000) totalShipCost = totalShipCost*0.9;
-        else if (totalQB3 > 1000 && totalQB3 < 1500) totalShipCost = totalShipCost*0.90;
+        if (totalQB3 > 2000) totalShipCost = totalShipCost*0.5;
+        else if (totalQB3 > 1500 && totalQB3 < 2000) totalShipCost = totalShipCost*0.7;
+        else if (totalQB3 > 1000 && totalQB3 < 1500) totalShipCost = totalShipCost*0.8;
 
 
         if (product.getShippingMethod().equals("LTL")) {

@@ -105,41 +105,49 @@ public class ProductsImport {
             Product product;
             try (CSVReader csvReader = readerBuilder.build()) {
                 String productSku;
-                String type;
-                String category;
-                String shipping;
+//                String type;
+//                String category;
+//                String shipping;
                 String mainCategory;
-                String isLuxe;
-                String productType;
-                String groupID;
-                String upc;
-                String finish;
-                String pieces;
-                String chairTypes;
+                String subCategory;
+                String bedType;
                 String sizeShape;
                 String style;
-                String collection;
-                String asin;
+//                String isLuxe;
+//                String productType;
+//                String groupID;
+//                String upc;
+//                String finish;
+//                String pieces;
+//                String chairTypes;
+//                String sizeShape;
+//                String style;
+//                String collection;
+//                String asin;
 
                 String[] columns;
 
                 while ((columns = csvReader.readNext()) != null) {
                     productSku = getValueByIndex(columns, 0);
-                    type = getValueByIndex(columns, 1);
-                    category = getValueByIndex(columns, 2);
-                    shipping = getValueByIndex(columns, 3);
-                    mainCategory = getValueByIndex(columns, 4);
-                    isLuxe = getValueByIndex(columns, 5);
-                    productType = getValueByIndex(columns, 6);
-                    groupID = getValueByIndex(columns, 7);
-                    upc = getValueByIndex(columns, 8);
-                    finish = getValueByIndex(columns, 9);
-                    pieces = getValueByIndex(columns, 10);
-                    chairTypes = getValueByIndex(columns, 11);
-                    sizeShape = getValueByIndex(columns, 12);
-                    style = getValueByIndex(columns, 13);
-                    collection = getValueByIndex(columns, 14);
-                    asin = getValueByIndex(columns, 15);
+//                    type = getValueByIndex(columns, 1);
+//                    category = getValueByIndex(columns, 2);
+//                    shipping = getValueByIndex(columns, 3);
+                    mainCategory = getValueByIndex(columns, 1);
+                    subCategory = getValueByIndex(columns, 2);
+                    bedType = getValueByIndex(columns, 3);
+                    sizeShape = getValueByIndex(columns, 4);
+                    style = getValueByIndex(columns, 5);
+//                    isLuxe = getValueByIndex(columns, 5);
+//                    productType = getValueByIndex(columns, 6);
+//                    groupID = getValueByIndex(columns, 7);
+//                    upc = getValueByIndex(columns, 8);
+//                    finish = getValueByIndex(columns, 9);
+//                    pieces = getValueByIndex(columns, 10);
+//                    chairTypes = getValueByIndex(columns, 11);
+//                    sizeShape = getValueByIndex(columns, 12);
+//                    style = getValueByIndex(columns, 13);
+//                    collection = getValueByIndex(columns, 14);
+//                    asin = getValueByIndex(columns, 15);
 
 
                     if (productSku.isEmpty()) {
@@ -161,21 +169,26 @@ public class ProductsImport {
                     ProductDetail productDetail = product.getProductDetail();
                     if (productDetail == null) productDetail = new ProductDetail();
 
-                    if (!type.isEmpty()) product.setType(type);
-                    if (!category.isEmpty()) product.setCategory(category);
-                    if (!shipping.isEmpty()) product.setShippingMethod(shipping);
                     if (!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
-                    if (!isLuxe.isEmpty()) productDetail.setIsLuxe(true);
-                    if (!productType.isEmpty()) productDetail.setProductType(productType);
-                    if (!groupID.isEmpty()) productDetail.setGroupID(groupID);
-                    if (!upc.isEmpty()) product.setUpc(upc);
-                    if (!finish.isEmpty()) productDetail.setFinish(finish);
-                    if (!pieces.isEmpty()) productDetail.setPieces(pieces);
-                    if (!chairTypes.isEmpty()) productDetail.setChairType(chairTypes);
+                    if (!subCategory.isEmpty()) productDetail.setSubCategory(subCategory);
+                    if (!bedType.isEmpty()) productDetail.setBedType(bedType);
                     if (!sizeShape.isEmpty()) productDetail.setSizeShape(sizeShape);
                     if (!style.isEmpty()) productDetail.setStyle(style);
-                    if (!collection.isEmpty()) productDetail.setCollection(collection);
-                    if (!asin.isEmpty()) product.setAsin(asin);
+//                    if (!type.isEmpty()) product.setType(type);
+//                    if (!category.isEmpty()) product.setCategory(category);
+//                    if (!shipping.isEmpty()) product.setShippingMethod(shipping);
+//                    if (!mainCategory.isEmpty()) productDetail.setMainCategory(mainCategory);
+//                    if (!isLuxe.isEmpty()) productDetail.setIsLuxe(true);
+//                    if (!productType.isEmpty()) productDetail.setProductType(productType);
+//                    if (!groupID.isEmpty()) productDetail.setGroupID(groupID);
+//                    if (!upc.isEmpty()) product.setUpc(upc);
+//                    if (!finish.isEmpty()) productDetail.setFinish(finish);
+//                    if (!pieces.isEmpty()) productDetail.setPieces(pieces);
+//                    if (!chairTypes.isEmpty()) productDetail.setChairType(chairTypes);
+//                    if (!sizeShape.isEmpty()) productDetail.setSizeShape(sizeShape);
+//                    if (!style.isEmpty()) productDetail.setStyle(style);
+//                    if (!collection.isEmpty()) productDetail.setCollection(collection);
+//                    if (!asin.isEmpty()) product.setAsin(asin);
 
                     product.setProductDetail(productDetail);
 
@@ -225,7 +238,8 @@ public class ProductsImport {
                     if (productWholesales == null) {
                         productWholesales = new ProductWholesales();
                     }
-                    productWholesales.setEwfmain(true);
+                    productWholesales.setEwfmain(false);
+                    product.setDiscontinued(true);
                     product.setWholesales(productWholesales);
                     productRepository.save(product);
                 } else {
@@ -502,7 +516,7 @@ public class ProductsImport {
         for (Product product : products) {
             ProductWholesales productWholesales = product.getWholesales();
             if (productWholesales == null) productWholesales = new ProductWholesales();
-            productWholesales.setEwfdirect(false);
+            productWholesales.setEwfdirect(true);
             if (skuList.contains(product.getSku())) productWholesales.setEwfdirect(true);
             product.setWholesales(productWholesales);
             productRepository.save(product);

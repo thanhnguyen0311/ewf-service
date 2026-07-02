@@ -7,6 +7,7 @@ import com.danny.ewf_service.payload.projection.ProductComponentDto;
 import com.danny.ewf_service.payload.projection.ProductManagementDto;
 import com.danny.ewf_service.payload.projection.ProductPriceDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
+import com.danny.ewf_service.payload.request.product.ProductPriceRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
 import com.danny.ewf_service.payload.request.sheet.SkuComponentsDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
@@ -44,4 +45,9 @@ public interface ProductService {
     LocalDateTime updateProductComponentFromSheet(List<SkuComponentsDto> skuComponentsDtos);
 
     List<ProductPriceDto> getAllProductPrice();
+
+    List<Product> getListProductFromCsvFile(String filePath);
+
+    void updateProductPriceSaleChannel(List<ProductPriceRequestDto> productPriceRequestDtos);
+
 }

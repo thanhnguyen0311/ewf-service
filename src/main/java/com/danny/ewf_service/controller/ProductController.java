@@ -4,6 +4,7 @@ import com.danny.ewf_service.payload.projection.ProductComponentDto;
 import com.danny.ewf_service.payload.projection.ProductPriceDto;
 import com.danny.ewf_service.payload.request.product.ProductComponentRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
+import com.danny.ewf_service.payload.request.product.ProductPriceRequestDto;
 import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
 import com.danny.ewf_service.payload.request.sheet.SkuComponentsDto;
 import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
@@ -90,18 +91,7 @@ public class ProductController {
 
 
 
-    @GetMapping("/price/{sku}")
-    public ResponseEntity<?> getProductPrice(@PathVariable String sku) {
-        try {
-            ProductPriceResponseDto productPriceResponseDto = productService.getProductPrice(sku);
-            return ResponseEntity.ok(productPriceResponseDto);
 
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
-        }
-    }
 
     @GetMapping("")
     public ResponseEntity<List<ProductManagementDto>> getAllProduct() {
@@ -129,18 +119,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/price")
-    public ResponseEntity<List<ProductPriceDto>> getAllProductPrice() {
-        try {
-            List<ProductPriceDto> products = productService.getAllProductPrice();
-            return ResponseEntity.ok(products);
 
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(null);
-        }
-    }
 
     @PostMapping("")
     public ResponseEntity<?> updateProductFromSheet(@RequestBody List<ProductSheetRequestDto> productSheetRequestDtos) {
@@ -165,4 +144,44 @@ public class ProductController {
             return ResponseEntity.internalServerError().body("Error fetching product");
         }
     }
+
+    @PostMapping("/price")
+    public ResponseEntity<?> updateProductPriceSaleChannel(@RequestBody List<ProductPriceRequestDto> productPriceRequestDtos) {
+        try {
+            productService.updateProductPriceSaleChannel(productPriceRequestDtos);
+            return (ResponseEntity<?>) ResponseEntity.ok();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error fetching product");
+        }
+    }
+
+    @GetMapping("/price/{sku}")
+    public ResponseEntity<?> getProductPrice(@PathVariable String sku) {
+        try {
+            ProductPriceResponseDto productPriceResponseDto = productService.getProductPrice(sku);
+            return ResponseEntity.ok(productPriceResponseDto);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+    @GetMapping("/price")
+    public ResponseEntity<List<ProductPriceDto>> getAllProductPrice() {
+        try {
+            List<ProductPriceDto> products = productService.getAllProductPrice();
+            return ResponseEntity.ok(products);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
+
 }

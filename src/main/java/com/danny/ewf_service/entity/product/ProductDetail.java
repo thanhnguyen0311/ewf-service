@@ -64,4 +64,8 @@ public class ProductDetail {
     @Column(name = "group_id")
     private String groupID;
 
+
+    @Column(name = "bed_type")
+    private String bedType;
+
 }

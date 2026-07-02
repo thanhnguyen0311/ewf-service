@@ -2,7 +2,9 @@ package com.danny.ewf_service.utils.exports;
 
 import com.danny.ewf_service.entity.Component;
 import com.danny.ewf_service.entity.ImageUrls;
+import com.danny.ewf_service.entity.LPN;
 import com.danny.ewf_service.repository.ComponentRepository;
+import com.danny.ewf_service.repository.LpnRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.utils.CsvWriter;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,9 @@ public class WMSExport {
 
     @Autowired
     private final CsvWriter csvWriter;
+
+    @Autowired
+    private LpnRepository lpnRepository;
 
     public void exportSKU(String filePath){
         List<String[]> rows = new ArrayList<>();
@@ -51,5 +56,30 @@ public class WMSExport {
         }
 
         csvWriter.exportToCsv(rows, filePath);
+    }
+
+    public void exportLPN(String filepath) {
+        try {
+            List<String[]> rows = new ArrayList<>();
+            String[] header = {"TagID", "SKU", "Qty", "ContainerNumber", "BayCode", "Zone", "Date"};
+            rows.add(header);
+            List<LPN> lpns = lpnRepository.findAll();
+            for (LPN lpn : lpns) {
+                rows.add(new String[] {
+                        lpn.getTagID(),
+                        lpn.getComponent().getSku() != null ? lpn.getComponent().getSku() : "",
+                        lpn.getQuantity() != null ? String.valueOf(lpn.getQuantity()) : "",
+                        lpn.getContainerNumber() != null ? lpn.getContainerNumber() : "",
+                        lpn.getBayLocation() != null && lpn.getBayLocation().getBayCode() != null ? lpn.getBayLocation().getBayCode() : "",
+                        lpn.getBayLocation() != null && lpn.getBayLocation().getZone() != null ? lpn.getBayLocation().getZone()  : "",
+                        lpn.getDate() != null ? String.valueOf(lpn.getDate()) : "",
+                });
+
+            }
+            csvWriter.exportToCsv(rows, filepath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

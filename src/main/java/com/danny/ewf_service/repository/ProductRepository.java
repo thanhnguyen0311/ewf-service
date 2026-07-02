@@ -54,8 +54,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "LEFT JOIN FETCH p.dimension " +
            "LEFT JOIN FETCH p.productDetail " +
            "WHERE p.wholesales.ewfdirect = true " +
-           "AND p.isDeleted = false")
+           "AND p.discontinued = false " +
+           "AND p.isDeleted = false " +
+           "AND p.title IS NOT NULL AND p.title <> ''")
     List<Product> findProductsByWholesalesEwfdirect();
+
 
     Optional<Product> findBySku(String sku);
 
