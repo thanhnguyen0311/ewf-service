@@ -175,7 +175,6 @@ public class ProductController {
         try {
             List<ProductPriceDto> products = productService.getAllProductPrice();
             return ResponseEntity.ok(products);
-
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
