@@ -57,9 +57,6 @@ public class ComponentsImport {
     private final ProductRepository productRepository;
 
     @Autowired
-    private final ProductService productService;
-
-    @Autowired
     private final ComponentRepository componentRepository;
 
     @Autowired
