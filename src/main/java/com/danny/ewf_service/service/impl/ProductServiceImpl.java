@@ -264,7 +264,7 @@ public class ProductServiceImpl implements ProductService {
                 Product product = optionalProduct.get();
                 Price price = product.getPrice();
                 if (product.getPrice() == null) price = new Price();
-                if (productPriceRequestDto.getManualShippingCost().isEmpty()) {
+                if (!productPriceRequestDto.getManualShippingCost().isEmpty()) {
                     price.setManualShippingCost(Double.valueOf(productPriceRequestDto.getManualShippingCost()));
                     price.setEwfdirect(price.getTotalQB3() + price.getShippingCost());
                 }
