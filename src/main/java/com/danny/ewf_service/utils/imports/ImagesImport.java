@@ -45,6 +45,7 @@ public class ImagesImport {
 
         ImageUrls imageUrls;
         for (Product product : products) {
+            boolean isHasCGI = false;
             imageUrls = new ImageUrls();
             try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
                 String line;
@@ -67,8 +68,9 @@ public class ImagesImport {
                             if (columns[1].contains("/DIM/")) {
                                 imageUrls.getDim().add(columns[1]);
                             } else if (columns[1].contains("/AI-CGI/")) {
+                                isHasCGI = true;
                                 imageUrls.getCgi().add(columns[1]);
-                            } else if (columns[1].contains("/CGI/")) {
+                            } else if (columns[1].contains("/CGI/") && !isHasCGI) {
                                 imageUrls.getCgi().add(columns[1]);
                             } else {
                                 if (imageUrls.getImg().contains(columns[1])) continue;
@@ -91,6 +93,7 @@ public class ImagesImport {
         List<Component> components = componentRepository.findAll();
         ImageUrls imageUrls;
         for (Component component : components) {
+            boolean isHasCGI = false;
             imageUrls = new ImageUrls();
             try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
                 String line;
@@ -113,10 +116,12 @@ public class ImagesImport {
                                 }
                             }
 
-
                             if (columns[1].contains("/DIM/")) {
                                 imageUrls.getDim().add(columns[1]);
-                            } else if (columns[1].contains("/CGI/")) {
+                            } else if (columns[1].contains("/AI-CGI/")) {
+                                isHasCGI = true;
+                                imageUrls.getCgi().add(columns[1]);
+                            } else if (columns[1].contains("/CGI/") && !isHasCGI) {
                                 imageUrls.getCgi().add(columns[1]);
                             } else {
                                 if (imageUrls.getImg().contains(columns[1])) continue;

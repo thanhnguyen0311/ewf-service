@@ -30,11 +30,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderListResponseDto> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
-        List<OrderListResponseDto> orderDtoList = IOrderMapper.orderToOrderListResponseDtos(orders);
-        orderDtoList = sortOrdersByUpdatedAt(orderDtoList);
+        PageRequest pageRequest = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        Page<Order> orderPage = orderRepository.findAll(pageRequest);
 
-        return orderDtoList;
+        List<Order> orders = orderPage.getContent();
+
+
+        return IOrderMapper.orderToOrderListResponseDtos(orders);
 
 
 

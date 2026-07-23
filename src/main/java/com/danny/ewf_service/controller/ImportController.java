@@ -4,6 +4,7 @@ import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.repository.BayLocationRepository;
 import com.danny.ewf_service.service.LpnService;
 import com.danny.ewf_service.service.ProductService;
+import com.danny.ewf_service.service.SpreadsheetService;
 import com.danny.ewf_service.utils.CsvWriter;
 import com.danny.ewf_service.utils.exports.AmazonDataExport;
 import com.danny.ewf_service.utils.exports.ProductExport;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -62,21 +64,31 @@ public class ImportController {
     private final ProductExport productExport;
 
 
+    @Autowired
+    private final SpreadsheetService spreadsheetService;
+
+
 
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
             String filepath = "/data/product_report_day.csv";
             String filepath2 = "/data/product_report_day.csv";
+
+//            imagesImport.updateProductImages(new ArrayList<>());
+//            imagesImport.updateComponentImages();
 //            productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing();
-            wayfairReportImport.importWayfairReportDaily(filepath);
-
+//            wayfairReportImport.importWayfairReportDaily(filepath);
+//            spreadsheetService.updateProductData(new String[]{
+//                    "Title","Description", "HTML Description"
+//
+//            });
 //            productsImport.updateSaleChannel("src/main/resources/data/skus.csv");
-//            shopifyExport.exportProductCustomLabel("custome_label.csv");
-
+//            shopifyExport.exportProductCustomLabel("custom_label.csv");
 //            shopifyExport.exportShopifyProductsPrice("shopify_products_price_06_23.csv");
-//                shopifyExport.exportProductType("product_type.csv");
+//            shopifyExport.exportProductType("product_type.csv");
+
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
