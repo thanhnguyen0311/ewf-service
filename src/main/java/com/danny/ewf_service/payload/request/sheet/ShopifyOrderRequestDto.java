@@ -14,4 +14,5 @@ public class ShopifyOrderRequestDto {
     private String orderID;
     private String note;
     private String saleReceipt;
+    private String shippingCost;
 }

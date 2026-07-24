@@ -26,6 +26,7 @@ public class ShopifyOrderServiceImpl implements ShopifyOrderService {
         }
         shopifyOrder.setNote(shopifyOrderRequestDto.getNote().trim());
         shopifyOrder.setSaleReceipt(shopifyOrderRequestDto.getSaleReceipt().trim());
+        shopifyOrder.setShippingCost(Double.valueOf(shopifyOrderRequestDto.getShippingCost()));
         shopifyOrderRepository.save(shopifyOrder);
     }
 
