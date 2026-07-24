@@ -25,4 +25,7 @@ public class ShopifyOrder {
 
     @Column(name = "sale_receipt")
     private String saleReceipt;
+
+    @Column(name = "shipping_cost")
+    private Double shippingCost;
 }
