@@ -35,9 +35,6 @@ public class ProductsImport {
     private final ProductRepository productRepository;
 
     @Autowired
-    private final ProductComponentRepository productComponentRepository;
-
-    @Autowired
     private final ComponentRepository componentRepository;
 
     @Autowired
