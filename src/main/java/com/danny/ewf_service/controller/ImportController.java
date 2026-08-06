@@ -72,14 +72,19 @@ public class ImportController {
     @GetMapping("/data")
     public ResponseEntity<?> importData() {
         try {
-            String filepath = "/data/product_report_day.csv";
+            String filepath = "/data/skus.csv";
             String filepath2 = "/data/product_report_day.csv";
 
+            productService.updateSubProduct();
+//            imagesImport.updateProductImages(new ArrayList<>());
+//
+            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
+            shopifyExport.exportProductListing(products,"new_product.csv",true);
 //            imagesImport.updateProductImages(new ArrayList<>());
 //            imagesImport.updateComponentImages();
 //            productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing();
-//            wayfairReportImport.importWayfairReportDaily(filepath);
+//            wayfairReportImport.importWayfairReportDaily(filepath2);
 //            spreadsheetService.updateProductData(new String[]{
 //                    "Title","Description", "HTML Description"
 //

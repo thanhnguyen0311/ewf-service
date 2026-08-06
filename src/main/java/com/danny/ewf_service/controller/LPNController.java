@@ -61,13 +61,13 @@ public class LPNController {
         return ResponseEntity.ok(lpnResponseDtos);
     }
 
-    @GetMapping("/tag")
-    public ResponseEntity<?> getLpnByTagId(@RequestParam String tagID) {
-        LpnResponseDto lpnResponseDto = lpnService.getLpnById(tagID);
-        if (lpnResponseDto != null) {
-            return ResponseEntity.ok(lpnResponseDto);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+//    @GetMapping("/tag")
+//    public ResponseEntity<?> getLpnByTagId(@RequestParam String tagID) {
+//        LpnResponseDto lpnResponseDto = lpnService.getLpnById(tagID);
+//        if (lpnResponseDto != null) {
+//            return ResponseEntity.ok(lpnResponseDto);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 }

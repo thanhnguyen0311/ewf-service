@@ -2,7 +2,7 @@ package com.danny.ewf_service.converter;
 
 
 import com.danny.ewf_service.entity.LPN;
-import com.danny.ewf_service.payload.request.LpnEditRequestDto;
+import com.danny.ewf_service.wms.entity.WmsLPN;
 import com.danny.ewf_service.payload.request.LpnRequestDto;
 import com.danny.ewf_service.payload.response.LpnResponseDto;
 import org.mapstruct.Mapper;
@@ -21,12 +21,12 @@ public interface ILpnMapper {
 
     @Mapping(target = "tagID", source = "lpn.tagID")
     @Mapping(target = "quantity", source = "lpn.quantity")
-    @Mapping(target = "sku", source = "lpn.component.sku")
+    @Mapping(target = "sku", source = "lpn.sku")
     @Mapping(target = "containerNumber", source = "lpn.containerNumber")
-    @Mapping(target = "bayCode", source = "lpn.bayLocation.bayCode")
-    @Mapping(target = "zone", source = "lpn.bayLocation.zone")
+    @Mapping(target = "bayCode", source = "lpn.bayLocation")
+    @Mapping(target = "zone", source = "lpn.bayLocation")
     @Mapping(target = "status", source = "lpn.status")
     @Mapping(target = "date", source = "lpn.date")
-    LpnResponseDto lpnToLpnResponseDto(LPN lpn);
-    List<LpnResponseDto> lpnListToLpnResponseDtoList(List<LPN> lpnList);
+    LpnResponseDto lpnToLpnResponseDto(WmsLPN lpn);
+    List<LpnResponseDto> lpnListToLpnResponseDtoList(List<WmsLPN> lpnList);
 }
