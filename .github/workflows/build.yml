@@ -42,9 +42,9 @@ jobs:
           spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
           spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
           
-          wms.datasource.url=jdbc:mysql://ewf-db-do-user-19202114-0.k.db.ondigitalocean.com:25060/wms?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-          wms.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
-          wms.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
+          wms.datasource.url=jdbc:${ secrets.WMS_DATASOURCE_URL }
+          wms.datasource.username=${ secrets.DATASOURCE_USERNAME }
+          wms.datasource.password=${ secrets.DATASOURCE_PASSWORD }
           
           jwt.secret=${JWT_SECRET}
           searchapi.token=${SEARCHAPI_TOKEN}
@@ -167,7 +167,7 @@ jobs:
           spring.datasource.url=${{ secrets.DATASOURCE_URL }}
           spring.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
           spring.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
-          wms.datasource.url=jdbc:mysql://ewf-db-do-user-19202114-0.k.db.ondigitalocean.com:25060/wms?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+          wms.datasource.url=jdbc:${{ secrets.WMS_DATASOURCE_URL }}
           wms.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
           wms.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
   
