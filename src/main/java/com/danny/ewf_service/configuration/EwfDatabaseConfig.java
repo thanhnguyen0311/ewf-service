@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +19,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableConfigurationProperties(EwfDatasourceProperties.class)
+@EnableJpaRepositories(
+        basePackages = "com.danny.ewf_service.repository", // EWF repositories package
+        entityManagerFactoryRef = "ewfEntityManagerFactory",
+        transactionManagerRef = "ewfTransactionManager"
+)
 @AllArgsConstructor
 public class EwfDatabaseConfig {
 
