@@ -5,6 +5,8 @@ import jakarta.persistence.EntityManagerFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -18,11 +20,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableJpaRepositories(
-        basePackages = "com.danny.ewf_service.repository", // EWF repositories package
-        entityManagerFactoryRef = "ewfEntityManagerFactory",
-        transactionManagerRef = "ewfTransactionManager"
-)
+@EnableConfigurationProperties(EwfDatasourceProperties.class)
 @AllArgsConstructor
 public class EwfDatabaseConfig {
 
