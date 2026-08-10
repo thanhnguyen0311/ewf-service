@@ -2,6 +2,8 @@ package com.danny.ewf_service.configuration;
 
 
 import jakarta.persistence.EntityManagerFactory;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -21,15 +23,19 @@ import javax.sql.DataSource;
         entityManagerFactoryRef = "ewfEntityManagerFactory",
         transactionManagerRef = "ewfTransactionManager"
 )
-
+@AllArgsConstructor
 public class EwfDatabaseConfig {
+
+    @Autowired
+    private final EwfDatasourceProperties ewfDatasourceProperties;
+
     @Primary  // Marks this as the default datasource
     @Bean(name = "ewfDataSource")
     public DataSource ewfDataSource() {
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://ewf-db-do-user-19202114-0.k.db.ondigitalocean.com:25060/ewf?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC")
-                .username("doadmin")
-                .password("AVNS_xa9U9s11Y893qTAmtph")
+                .url(ewfDatasourceProperties.getUrl())
+                .username(ewfDatasourceProperties.getUsername())
+                .password(ewfDatasourceProperties.getPassword())
                 .driverClassName("com.mysql.cj.jdbc.Driver")
                 .build();
     }

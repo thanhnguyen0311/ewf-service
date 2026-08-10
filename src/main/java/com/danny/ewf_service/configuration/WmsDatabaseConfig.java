@@ -1,6 +1,8 @@
 package com.danny.ewf_service.configuration;
 
 import jakarta.persistence.EntityManagerFactory;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -20,14 +22,21 @@ import javax.sql.DataSource;
         transactionManagerRef = "wmsTransactionManager"
 )
 
+
+@AllArgsConstructor
 public class WmsDatabaseConfig {
+
+    @Autowired
+    private final WmsDatasourceProperties wmsProperties;
+
+
     @Bean(name = "wmsDataSource")
     public DataSource wmsDataSource() {
         return DataSourceBuilder.create()
-                .url("jdbc:mysql://ewf-db-do-user-19202114-0.k.db.ondigitalocean.com:25060/wms?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC")
-                .username("doadmin")
-                .password("AVNS_xa9U9s11Y893qTAmtph")
-                .driverClassName("com.mysql.cj.jdbc.Driver")
+                .url(wmsProperties.getUrl())
+                .username(wmsProperties.getUsername())
+                .password(wmsProperties.getPassword())
+                .driverClassName(wmsProperties.getDriverClassName())
                 .build();
     }
 
