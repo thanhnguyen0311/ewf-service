@@ -237,18 +237,27 @@ public class ShopifyExport {
         try {
             for (Product product : products) {
                 if (product.getWholesales() != null) {
-                    if (!product.getWholesales().getEwfdirect()) continue;
+                    if (!product.getWholesales().getEwfdirect()) {
+                        System.out.println("Skipping " + product.getSku() + " |  Wholesales is False");
+                        continue;
+                    }
                 }
                 index++;
                 System.out.println("Processing " + product.getSku());
-                if (product.getWholesales() != null) {
-                    if (!product.getWholesales().getEwfdirect()) continue;
-                }
 
-                if (product.getComponents().isEmpty()) continue;
-                if (product.getTitle() == null) continue;
+                if (product.getComponents().isEmpty()) {
+                    System.out.println("Skipping " + product.getSku() + " |  No Components");
+                    continue;
+                }
+                if (product.getTitle() == null) {
+                    System.out.println("Skipping " + product.getSku() + " |  No Title");
+                    continue;
+                }
                 if (product.getProductDetail() != null) {
-                    if (product.getProductDetail().getDescription() == null) continue;
+                    if (product.getProductDetail().getDescription() == null) {
+                        System.out.println("Skipping " + product.getSku() + " |  No Description");
+                        continue;
+                    }
                     if (product.getProductDetail().getSubCategory() == null) {
                         ProductDetail productDetail = product.getProductDetail();
                         productDetail.setSubCategory("Bedroom Sets");
