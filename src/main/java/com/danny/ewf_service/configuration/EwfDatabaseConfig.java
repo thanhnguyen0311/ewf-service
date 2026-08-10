@@ -29,7 +29,7 @@ public class EwfDatabaseConfig {
     @Autowired
     private final EwfDatasourceProperties ewfDatasourceProperties;
 
-    @Primary  // Marks this as the default datasource
+    @Primary
     @Bean(name = "ewfDataSource")
     public DataSource ewfDataSource() {
         return DataSourceBuilder.create()

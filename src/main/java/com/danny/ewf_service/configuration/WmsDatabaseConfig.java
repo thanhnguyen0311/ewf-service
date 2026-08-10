@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.danny.ewf_service.wms.repository", // Replace with the package where WMS repositories are located
+        basePackages = "com.danny.ewf_service.wms.repository",
         entityManagerFactoryRef = "wmsEntityManagerFactory",
         transactionManagerRef = "wmsTransactionManager"
 )
