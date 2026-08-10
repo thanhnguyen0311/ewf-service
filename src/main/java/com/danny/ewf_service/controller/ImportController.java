@@ -75,19 +75,18 @@ public class ImportController {
             String filepath = "/data/skus.csv";
             String filepath2 = "/data/product_report_day.csv";
 
-            productService.updateSubProduct();
-//            imagesImport.updateProductImages(new ArrayList<>());
-//
-            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
+
+            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/chairs.csv");
             shopifyExport.exportProductListing(products,"new_product.csv",true);
+            shopifyExport.exportProductCustomfields(products,"new_product_customfields.csv");
+
 //            imagesImport.updateProductImages(new ArrayList<>());
 //            imagesImport.updateComponentImages();
 //            productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing();
 //            wayfairReportImport.importWayfairReportDaily(filepath2);
 //            spreadsheetService.updateProductData(new String[]{
-//                    "Title","Description", "HTML Description"
-//
+//                    "Type", "Category", "Shipping", "Main Category", "Luxe", "Group ID", "UPC", "Finish", "PIECES", "Chair Type", "Size & Shape", "Style", "Collection", "ASIN", "", "Sub Category","Title","Description", "HTML Description"
 //            });
 //            productsImport.updateSaleChannel("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductCustomLabel("custom_label.csv");
