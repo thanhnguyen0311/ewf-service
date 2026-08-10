@@ -3,8 +3,8 @@ package com.danny.ewf_service.service.impl;
 import com.danny.ewf_service.converter.ILpnMapper;
 import com.danny.ewf_service.entity.*;
 import com.danny.ewf_service.entity.auth.User;
+import com.danny.ewf_service.wms.entity.WmsLPN;
 import com.danny.ewf_service.exception.ValidationException;
-import com.danny.ewf_service.payload.request.CountingBySkuRequestDto;
 import com.danny.ewf_service.payload.request.LpnEditRequestDto;
 import com.danny.ewf_service.payload.request.LpnRequestDto;
 import com.danny.ewf_service.payload.response.LpnResponseDto;
@@ -12,6 +12,7 @@ import com.danny.ewf_service.repository.BayLocationRepository;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.LooseInventoryRepository;
 import com.danny.ewf_service.repository.LpnRepository;
+import com.danny.ewf_service.wms.repository.WmsLpnRepository;
 import com.danny.ewf_service.service.InventoryService;
 import com.danny.ewf_service.service.LogService;
 import com.danny.ewf_service.service.LpnService;
@@ -20,11 +21,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 
 import java.util.*;
@@ -50,6 +46,9 @@ public class LpnServiceImpl implements LpnService {
 
     @Autowired
     private final LpnRepository lpnRepository;
+
+    @Autowired
+    private final WmsLpnRepository wmsLpnRepository;
 
     @Autowired
     private final InventoryService inventoryService;
@@ -279,54 +278,17 @@ public class LpnServiceImpl implements LpnService {
 
     @Override
     public List<LpnResponseDto> getAllLpn() {
-        List<LPN> lpns = lpnRepository.findAllByOrderByUpdatedAtDesc();
+        List<WmsLPN> lpns = wmsLpnRepository.findAllByOrderByUpdatedAtDesc();
         return lpnMapper.lpnListToLpnResponseDtoList(lpns);
     }
 
-    @Override
-    public LpnResponseDto getLpnById(String tagID) {
-        Optional<LPN> optionalLpn = lpnRepository.findByTagID(tagID);
-        if (optionalLpn.isPresent()) {
-            LPN lpn = optionalLpn.get();
-            return lpnMapper.lpnToLpnResponseDto(lpn);
-        } else throw new ValidationException("lpn", "LPN with tag ID " + tagID + " not found");
-    }
-
-    @Override
-    public void transferLpn() {
-        String dbHost = "104.236.97.50";       // Example: "104.236.97.51"
-        String dbUser = "nct031194";       // Example: "another-user"
-        String dbPassword = "Thanh@123";        // Example: "Another@123"
-        String dbName = "wms";       // Example: "wms_backup"
-        // JDBC URL for the database
-        String url = "jdbc:mysql://" + dbHost + "/" + dbName;
-        String insertQuery = "INSERT INTO lpnmaster (assigned_location, epc, quantity, sku, status, upc) VALUES ( ?, ?, ?, ?, ?,?)";
-
-        List<LPN> lpns = lpnRepository.findAllByOrderByUpdatedAtDesc();
-        for (LPN lpn : lpns) {
-            // Your insert query
-            try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-                String baycode = "";
-                if (lpn.getBayLocation() != null) baycode = lpn.getBayLocation().getBayCode();
-                // Setting the values for the placeholders
-                preparedStatement.setString(1, baycode);
-                preparedStatement.setString(2, lpn.getTagID());
-                preparedStatement.setInt(3, Math.toIntExact(lpn.getQuantity()));
-                preparedStatement.setString(4, lpn.getComponent().getSku());
-                preparedStatement.setString(5, "Active");
-                preparedStatement.setString(6, lpn.getComponent().getUpc());
-
-                // Execute the insert
-                int rowsInserted = preparedStatement.executeUpdate();
-                if (rowsInserted > 0) {
-                    System.out.println("Insert successful! " + lpn.getTagID());
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
+//    @Override
+//    public LpnResponseDto getLpnById(String tagID) {
+//        Optional<LPN> optionalLpn = lpnRepository.findByTagID(tagID);
+//        if (optionalLpn.isPresent()) {
+//            LPN lpn = optionalLpn.get();
+//            return lpnMapper.lpnToLpnResponseDto(lpn);
+//        } else throw new ValidationException("lpn", "LPN with tag ID " + tagID + " not found");
+//    }
 }
 

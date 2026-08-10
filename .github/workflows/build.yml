@@ -42,10 +42,17 @@ jobs:
           spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
           spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
           
+          wms.datasource.url=jdbc:${ secrets.WMS_DATASOURCE_URL }
+          wms.datasource.username=${ secrets.DATASOURCE_USERNAME }
+          wms.datasource.password=${ secrets.DATASOURCE_PASSWORD }
+          
           jwt.secret=${JWT_SECRET}
           searchapi.token=${SEARCHAPI_TOKEN}
           spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
           spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+  
+          wms.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+          wms.jpa.database-platform=org.hibernate.dialect.MySQLDialect
           
           # Hibernate Configuration
           spring.jpa.show-sql=false
@@ -160,6 +167,12 @@ jobs:
           spring.datasource.url=${{ secrets.DATASOURCE_URL }}
           spring.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
           spring.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
+          wms.datasource.url=jdbc:${{ secrets.WMS_DATASOURCE_URL }}
+          wms.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
+          wms.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
+  
+          wms.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+          wms.jpa.database-platform=org.hibernate.dialect.MySQLDialect
           
           jwt.secret=${{ secrets.JWT_SECRET }}
           searchapi.token=${{ secrets.SEARCHAPI_TOKEN }}
