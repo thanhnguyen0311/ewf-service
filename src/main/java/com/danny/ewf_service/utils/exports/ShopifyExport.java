@@ -237,10 +237,7 @@ public class ShopifyExport {
         try {
             for (Product product : products) {
                 if (product.getWholesales() != null) {
-                    if (!product.getWholesales().getEwfdirect()) {
-                        System.out.println("Skipping " + product.getSku() + " |  Wholesales is False");
-                        continue;
-                    }
+                    product.getWholesales().setEwfdirect(true);
                 }
                 index++;
                 System.out.println("Processing " + product.getSku());
@@ -322,7 +319,7 @@ public class ShopifyExport {
                 if (productDetail.getMaterial() != null && !productDetail.getMaterial().isEmpty()) tags.append(productDetail.getMaterial()).append(",");
                 if (productDetail.getIsLuxe() != null && productDetail.getIsLuxe()) tags.append("Luxe,");
                 if (productDetail.getBedType() != null && !productDetail.getBedType().isEmpty()) tags.append(productDetail.getBedType()).append(",");
-//                if (index > newArrivalsStartIndex) tags.append("New Arrivals,");
+
 
                 Price price = product.getPrice();
                 if (price != null ) {
