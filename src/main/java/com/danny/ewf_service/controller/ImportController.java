@@ -77,10 +77,10 @@ public class ImportController {
 
 
             List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/chairs.csv");
+            imagesImport.updateProductImages(products);
             shopifyExport.exportProductListing(products,"new_product.csv",true);
             shopifyExport.exportProductCustomfields(products,"new_product_customfields.csv");
 
-//            imagesImport.updateProductImages(new ArrayList<>());
 //            imagesImport.updateComponentImages();
 //            productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing();
