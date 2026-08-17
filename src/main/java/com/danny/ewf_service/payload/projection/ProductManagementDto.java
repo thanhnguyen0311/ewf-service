@@ -28,6 +28,7 @@ public interface ProductManagementDto {
     String getGroupID();
     String getPieces();
     String getChairType();
+    String getDescription();
     List<String> getSubProducts();
 
 }
