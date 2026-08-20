@@ -47,6 +47,11 @@ jobs:
           wms.datasource.username=${SPRING_DATASOURCE_USERNAME}
           wms.datasource.password=${SPRING_DATASOURCE_PASSWORD}
           
+          spring.amz.client-id: ${AMZ_CLIENT_ID}
+          spring.amz.client-secret: ${AMZ_CLIENT_SECRET}
+          spring.amz.redirect-uri: https://ewfportal.com/api/v1/oauth/callback
+            
+      
           jwt.secret=${JWT_SECRET}
           searchapi.token=${SEARCHAPI_TOKEN}
           spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
@@ -171,6 +176,9 @@ jobs:
             wms.datasource.url=jdbc:${{ secrets.WMS_DATASOURCE_URL }}
             wms.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
             wms.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
+          
+            spring.amz.client-id: ${{ secrets.AMZ_CLIENT_ID }}
+            spring.amz.client-secret: ${{ secrets.AMZ_CLIENT_SECRET }}
             
             wms.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
             wms.jpa.database-platform=org.hibernate.dialect.MySQLDialect
