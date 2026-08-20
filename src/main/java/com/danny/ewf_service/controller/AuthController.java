@@ -4,6 +4,7 @@ import com.danny.ewf_service.configuration.security.JwtUtility;
 import com.danny.ewf_service.payload.request.user.RegisterRequest;
 import com.danny.ewf_service.payload.response.user.UserResponseDto;
 import com.danny.ewf_service.service.auth.AuthServiceImpl;
+import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
