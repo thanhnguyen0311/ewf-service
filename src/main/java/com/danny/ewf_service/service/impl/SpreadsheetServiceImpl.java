@@ -190,6 +190,8 @@ public class SpreadsheetServiceImpl implements SpreadsheetService {
                     if (header.equals("Title")) product.setTitle(value);
                     if (header.equals("Description")) productDetail.setDescription(value);
                     if (header.equals("HTML Description")) productDetail.setHtmlDescription(value);
+                    if (header.equals("Meta Description")) productDetail.setMetaDescription(value);
+                    if (header.equals("Meta Title")) productDetail.setMetaTitle(value);
                 }
 
                 sb.append(", ").append(header).append("=").append(value);
