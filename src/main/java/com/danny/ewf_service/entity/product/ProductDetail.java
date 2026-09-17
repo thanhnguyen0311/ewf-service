@@ -68,4 +68,10 @@ public class ProductDetail {
     @Column(name = "bed_type")
     private String bedType;
 
+    @Column(name = "meta_description")
+    private String metaDescription;
+
+    @Column(name = "meta_title")
+    private String metaTitle;
+
 }
