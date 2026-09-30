@@ -48,7 +48,7 @@ jobs:
           wms.datasource.url=jdbc:${WMS_DATASOURCE_URL}
           wms.datasource.username=${SPRING_DATASOURCE_USERNAME}
           wms.datasource.password=${SPRING_DATASOURCE_PASSWORD}
-          wms.datasource.anthropicApiKey=${ secrets.CLAUDEAPIKEY }
+          wms.datasource.anthropicApiKey=${CLAUDEAPIKEY}
           
           spring.amz.client-id: ${AMZ_CLIENT_ID}
           spring.amz.client-secret: ${AMZ_CLIENT_SECRET}
