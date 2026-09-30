@@ -11,18 +11,12 @@ import com.danny.ewf_service.entity.product.ProductWholesales;
 import com.danny.ewf_service.payload.projection.ProductComponentDto;
 import com.danny.ewf_service.payload.projection.ProductPriceDto;
 import com.danny.ewf_service.payload.request.ComponentSheetRequestDto;
-import com.danny.ewf_service.payload.request.product.ProductComponentRequestDto;
-import com.danny.ewf_service.payload.request.product.ProductDetailRequestDto;
+import com.danny.ewf_service.payload.request.product.*;
 import com.danny.ewf_service.entity.product.ProductComponent;
-import com.danny.ewf_service.payload.request.product.ProductPriceRequestDto;
-import com.danny.ewf_service.payload.request.product.ProductSheetRequestDto;
 import com.danny.ewf_service.payload.request.sheet.ComponentItemDto;
 import com.danny.ewf_service.payload.request.sheet.SkuComponentsDto;
 import com.danny.ewf_service.payload.response.component.ComponentProductDetailResponseDto;
-import com.danny.ewf_service.payload.response.product.ProductDetailResponseDto;
-import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
-import com.danny.ewf_service.payload.response.product.ProductResponseDto;
-import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
+import com.danny.ewf_service.payload.response.product.*;
 import com.danny.ewf_service.payload.projection.ProductManagementDto;
 import com.danny.ewf_service.repository.ComponentRepository;
 import com.danny.ewf_service.repository.ProductComponentRepository;
@@ -36,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -77,6 +72,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private CsvWriter csvWriter;
+
+    @Autowired
+    private final ClaudeService claudeService;
 
     public interface ProductMergedProjection {
         Long getId();
@@ -276,6 +274,34 @@ public class ProductServiceImpl implements ProductService {
                 product.setPrice(price);
                 productRepository.save(product);
             }
+        }
+    }
+
+    @Override
+    public void generateProductMetaData() throws IOException, InterruptedException {
+        List<Product> products = productRepository.findAllProducts();
+        for (Product product : products) {
+            System.out.println("Processing " + product.getSku());
+            if (product.getProductDetail() == null) product.setProductDetail(new ProductDetail());
+            ProductDetail productDetail = product.getProductDetail();
+            if (productDetail.getMetaTitle() != null && !productDetail.getMetaTitle().isEmpty()) {
+                System.out.println("Product " + product.getSku() + " already has meta title");
+                continue;
+            }
+
+            if (product.getTitle() == null || product.getTitle().isEmpty()) {
+                System.out.println("Product " + product.getSku() + " has no title");
+                continue;
+            }
+            ProductMetaDto productMetaDto = new ProductMetaDto();
+            productMetaDto.setSku(product.getSku());
+//            productMetaDto.setDescription(productDetail.getDescription());
+            productMetaDto.setTitle(product.getTitle());
+            ProductMetaResponseDto productMetaResponseDto = claudeService.getProductMeta(productMetaDto);
+            productDetail.setMetaTitle(productMetaResponseDto.getMetaTitle());
+            productDetail.setMetaDescription(productMetaResponseDto.getMetaDescription());
+            product.setProductDetail(productDetail);
+            productRepository.save(product);
         }
     }
 

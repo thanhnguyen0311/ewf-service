@@ -3,10 +3,12 @@ package com.danny.ewf_service.controller;
 
 import com.danny.ewf_service.entity.ShopifyOrder;
 import com.danny.ewf_service.exception.ResourceNotFoundException;
+import com.danny.ewf_service.payload.request.AmzRequestDto;
 import com.danny.ewf_service.payload.request.sheet.ShopifyOrderRequestDto;
 import com.danny.ewf_service.payload.response.OrderListResponseDto;
 import com.danny.ewf_service.service.OrderService;
 import com.danny.ewf_service.service.ShopifyOrderService;
+import com.danny.ewf_service.service.impl.DfShippingLabelService;
 import lombok.AllArgsConstructor;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,17 @@ public class OrderController {
         try {
             shopifyOrderService.updateShopifyOrder(shopifyOrderRequestDto);
             return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResourceNotFoundException("Failed to retrieve Orders: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/amz")
+    public ResponseEntity<?> getAMZOrderDetail(@RequestBody AmzRequestDto amzRequestDto) {
+        try {
+            List<DfShippingLabelService.LabelDetails> labelDetails = orderService.getLabels(amzRequestDto.getPoNumber(), amzRequestDto.getAccessToken());
+            return ResponseEntity.ok(labelDetails);
         } catch (Exception e) {
             e.printStackTrace();
             throw new ResourceNotFoundException("Failed to retrieve Orders: " + e.getMessage());
