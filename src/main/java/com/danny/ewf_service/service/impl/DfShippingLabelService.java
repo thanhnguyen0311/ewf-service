@@ -2,8 +2,9 @@ package com.danny.ewf_service.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jna.Pointer;
 import net.sourceforge.tess4j.ITessAPI;
-import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TessAPI;
 import net.sourceforge.tess4j.TesseractException;
 import net.sourceforge.tess4j.util.LoadLibs;
 
@@ -11,6 +12,7 @@ import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -18,6 +20,8 @@ import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -25,7 +29,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 public class DfShippingLabelService {
 
@@ -54,13 +57,40 @@ public class DfShippingLabelService {
         this.tessDataPath = tessDataPath;
     }
 
-    // Tesseract is NOT thread-safe: create one per OCR call so concurrent requests are safe.
-    private Tesseract newTesseract() {
-        Tesseract t = new Tesseract();
-        t.setDatapath(tessDataPath);
-        t.setLanguage("eng");
-        t.setPageSegMode(ITessAPI.TessPageSegMode.PSM_SINGLE_BLOCK); // psm 6
-        return t;
+    /**
+     * OCR a grayscale image through Tess4J's low-level TessAPI.
+     * This hands the raw pixels straight to the native Tesseract library and never loads
+     * Leptonica/Lept4j, so it works even when the server's Leptonica version doesn't match
+     * Lept4j ("undefined symbol: returnErrorFloat1").
+     * A new Tesseract handle per call keeps it safe for concurrent requests.
+     */
+    private String ocr(BufferedImage gray) throws TesseractException {
+        TessAPI api = TessAPI.INSTANCE;
+        ITessAPI.TessBaseAPI handle = api.TessBaseAPICreate();
+        try {
+            if (api.TessBaseAPIInit3(handle, tessDataPath, "eng") != 0) {
+                throw new TesseractException("Could not load 'eng' from tessdata folder: " + tessDataPath);
+            }
+            api.TessBaseAPISetPageSegMode(handle, ITessAPI.TessPageSegMode.PSM_SINGLE_BLOCK); // psm 6
+
+            // TYPE_BYTE_GRAY = 1 byte per pixel, rows packed with no padding
+            byte[] data = ((DataBufferByte) gray.getRaster().getDataBuffer()).getData();
+            ByteBuffer pixels = ByteBuffer.allocateDirect(data.length).order(ByteOrder.nativeOrder());
+            pixels.put(data).flip();
+
+            api.TessBaseAPISetImage(handle, pixels, gray.getWidth(), gray.getHeight(), 1, gray.getWidth());
+
+            Pointer textPtr = api.TessBaseAPIGetUTF8Text(handle);
+            if (textPtr == null) return "";
+            try {
+                return textPtr.getString(0, "UTF-8");
+            } finally {
+                api.TessDeleteText(textPtr);
+            }
+        } finally {
+            api.TessBaseAPIEnd(handle);
+            api.TessBaseAPIDelete(handle);
+        }
     }
 
     public record LabelDetails(
@@ -113,7 +143,7 @@ public class DfShippingLabelService {
         BufferedImage header = scale(label.getSubimage(0, 0, label.getWidth(),
                 (int) (label.getHeight() * 0.30)), 2);
 
-        String text = newTesseract().doOCR(header).toUpperCase();
+        String text = ocr(header).toUpperCase();
 
         String dwt = find(DWT, text);
         if (dwt != null) dwt = dwt.replaceAll("\\s", "").replace('.', ',');   // "25,9,6"
