@@ -1,5 +1,6 @@
 package com.danny.ewf_service.service.impl;
 
+import com.danny.ewf_service.utils.LabelTextParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jna.Pointer;
@@ -27,25 +28,21 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+/**
+ * PO number -> Amazon DF getShippingLabel -> tracking number + customer name / address / DWT
+ * read from the PNG label with Tess4J OCR (in memory, no files saved).
+ */
 public class DfShippingLabelService {
 
     private static final String BASE_URL =
             "https://sellingpartnerapi-na.amazon.com/vendor/directFulfillment/shipping/v1/shippingLabels/";
 
-    // Regexes tolerate OCR spacing quirks, e.g. "14LBS", "2 OF2", "25.9,6"
-    private static final Pattern DWT     = Pattern.compile("DWT\\s*:?\\s*(\\d+\\s*[,.]\\s*\\d+\\s*[,.]\\s*\\d+)");
-    private static final Pattern WEIGHT  = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*LBS?\\b");
-    private static final Pattern PKG     = Pattern.compile("\\b(\\d+)\\s*OF\\s*(\\d+)\\b");
-    private static final Pattern CITY_ST = Pattern.compile("^(.+?)\\s+([A-Z]{2})\\s+(\\d{5}(?:-\\d{4})?)$");
-
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private final ObjectMapper mapper = new ObjectMapper();
     private final String tessDataPath;
 
-    /** Reads the tessdata folder from TESSDATA_PREFIX (default: Ubuntu 24.04 path). */
+    /** Uses TESSDATA_PREFIX if set, otherwise the eng.traineddata bundled in resources/tessdata. */
     public DfShippingLabelService() {
         this(System.getenv("TESSDATA_PREFIX") != null
                 ? System.getenv("TESSDATA_PREFIX")
@@ -118,18 +115,29 @@ public class DfShippingLabelService {
         JsonNode payload = mapper.readTree(response.body()).path("payload");
         String po = payload.path("purchaseOrderNumber").asText(poNumber);
 
+        JsonNode labels = payload.path("labelData");
         List<LabelDetails> result = new ArrayList<>();
-        for (JsonNode label : payload.path("labelData")) {
+        for (int i = 0; i < labels.size(); i++) {
+            JsonNode label = labels.get(i);
             byte[] png = Base64.getMimeDecoder().decode(label.path("content").asText());
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(png));   // in memory, no file
             if (image == null) {
                 throw new IOException("Label for PO " + po + " is not a readable image (format: "
                                       + payload.path("labelFormat").asText() + ")");
             }
-            result.add(parseLabel(image, po,
+            LabelDetails d = parseLabel(image, po,
                     label.path("packageIdentifier").asText(),
                     label.path("trackingNumber").asText(),
-                    label.path("shipMethodName").asText()));
+                    label.path("shipMethodName").asText());
+
+            // Package count isn't always in the OCR'd area (e.g. AMZL "BOX 1 OF 1" is lower down):
+            // fall back to this label's position among the PO's labels.
+            if (d.packageOf() == null) {
+                d = new LabelDetails(d.poNumber(), d.packageId(), d.trackingNumber(), d.shipMethodName(),
+                        d.customerName(), d.addressLine(), d.city(), d.state(), d.zip(),
+                        d.dwt(), d.weightLbs(), (i + 1) + " of " + labels.size(), d.rawOcrText());
+            }
+            result.add(d);
         }
         return result;
     }
@@ -143,45 +151,12 @@ public class DfShippingLabelService {
         BufferedImage header = scale(label.getSubimage(0, 0, label.getWidth(),
                 (int) (label.getHeight() * 0.30)), 2);
 
-        String text = ocr(header).toUpperCase();
-
-        String dwt = find(DWT, text);
-        if (dwt != null) dwt = dwt.replaceAll("\\s", "").replace('.', ',');   // "25,9,6"
-
-        Matcher pkg = PKG.matcher(text);
-        String packageOf = pkg.find() ? pkg.group(1) + " of " + pkg.group(2) : null;
-
-        // Lines after "SHIP TO": name, street, then "CITY ST ZIP"
-        String name = null, address = null, city = null, state = null, zip = null;
-        List<String> lines = text.lines().map(String::trim).filter(l -> !l.isEmpty()).toList();
-        for (int i = 0; i < lines.size(); i++) {
-            if (!lines.get(i).startsWith("SHIP TO")) continue;
-
-            String afterLabel = lines.get(i).replaceFirst("SHIP TO\\s*:?", "").trim();
-            List<String> block = new ArrayList<>();
-            if (!afterLabel.isEmpty()) block.add(afterLabel);
-            block.addAll(lines.subList(i + 1, lines.size()));
-
-            if (!block.isEmpty()) name = block.get(0);
-            for (int j = 1; j < block.size(); j++) {
-                Matcher m = CITY_ST.matcher(block.get(j));
-                if (m.find()) {
-                    city = m.group(1); state = m.group(2); zip = m.group(3);
-                    address = String.join(", ", block.subList(1, j));
-                    break;
-                }
-            }
-            break;
-        }
+        String text = ocr(header);
+        LabelTextParser.Parsed p = LabelTextParser.parse(text);
 
         return new LabelDetails(po, packageId, tracking, shipMethodName,
-                name, address, city, state, zip,
-                dwt, find(WEIGHT, text), packageOf, text);
-    }
-
-    private static String find(Pattern p, String text) {
-        Matcher m = p.matcher(text);
-        return m.find() ? m.group(1) : null;
+                p.customerName(), p.addressLine(), p.city(), p.state(), p.zip(),
+                p.dwt(), p.weightLbs(), p.packageOf(), text);
     }
 
     private static BufferedImage scale(BufferedImage src, int factor) {
@@ -193,5 +168,4 @@ public class DfShippingLabelService {
         g.dispose();
         return out;
     }
-
 }
