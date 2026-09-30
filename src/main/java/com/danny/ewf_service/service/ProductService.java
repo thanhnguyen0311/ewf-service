@@ -15,6 +15,7 @@ import com.danny.ewf_service.payload.response.product.ProductPriceResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductResponseDto;
 import com.danny.ewf_service.payload.response.product.ProductSearchResponseDto;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -49,5 +50,7 @@ public interface ProductService {
     List<Product> getListProductFromCsvFile(String filePath);
 
     void updateProductPriceSaleChannel(List<ProductPriceRequestDto> productPriceRequestDtos);
+
+    void generateProductMetaData() throws IOException, InterruptedException;
 
 }

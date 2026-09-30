@@ -20,6 +20,7 @@ jobs:
       WMS_DATASOURCE_URL: ${{ secrets.WMS_DATASOURCE_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       SEARCHAPI_TOKEN: ${{ secrets.SEARCHAPI_TOKEN }}
+      CLAUDEAPIKEY: ${{ secrets.CLAUDEAPIKEY }}
 
     steps:
       - name: Checkout repository
@@ -43,9 +44,11 @@ jobs:
           spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
           spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
           
+          
           wms.datasource.url=jdbc:${WMS_DATASOURCE_URL}
           wms.datasource.username=${SPRING_DATASOURCE_USERNAME}
           wms.datasource.password=${SPRING_DATASOURCE_PASSWORD}
+          wms.datasource.anthropicApiKey=${ secrets.CLAUDEAPIKEY }
           
           spring.amz.client-id: ${AMZ_CLIENT_ID}
           spring.amz.client-secret: ${AMZ_CLIENT_SECRET}
@@ -176,6 +179,7 @@ jobs:
             wms.datasource.url=jdbc:${{ secrets.WMS_DATASOURCE_URL }}
             wms.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
             wms.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
+            wms.datasource.anthropicApiKey=${{ secrets.CLAUDEAPIKEY }}
           
             spring.amz.client-id: ${{ secrets.AMZ_CLIENT_ID }}
             spring.amz.client-secret: ${{ secrets.AMZ_CLIENT_SECRET }}

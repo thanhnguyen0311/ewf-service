@@ -1,7 +1,8 @@
 package com.danny.ewf_service.controller;
 
-import com.danny.ewf_service.entity.product.Product;
+import com.danny.ewf_service.service.impl.DfShippingLabelService;
 import com.danny.ewf_service.repository.BayLocationRepository;
+import com.danny.ewf_service.service.ClaudeService;
 import com.danny.ewf_service.service.LpnService;
 import com.danny.ewf_service.service.ProductService;
 import com.danny.ewf_service.service.SpreadsheetService;
@@ -18,9 +19,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @RequestMapping("/import")
@@ -67,6 +65,9 @@ public class ImportController {
     @Autowired
     private final SpreadsheetService spreadsheetService;
 
+    @Autowired
+    private final ClaudeService claudeService;
+
 
 
     @GetMapping("/data")
@@ -74,6 +75,8 @@ public class ImportController {
         try {
             String filepath = "/data/skus.csv";
             String filepath2 = "/data/product_report_day.csv";
+            String accessToken = "Atza|IwEBIAv3zFKyDx9YLqKoIdlTnHJkIUJ-FoW8Us1It148rC-44ReS3KnZ_BTbB5cB32b7v7feaNt-_PhvYer2dLfiOVoLYraya-mi6sz3Rrcism17dWNT1qR2lkAewym0T9UKO1_XQltAK4AHhp_b6Cq0adkDZpO_B3up5LEqpz4ZBbfles08nQWin8197zruMaV0Gh55Ni9rOlxlJGnPajU6qtTstHSe-g8M6lkkWMDH-fpG4I-mfJu1Bb-AF_3rh3W86TBofSRFQAdiFly-9dOdjB5LmZY3XEvm6zVHCJzU7ofzon-QL6JQl5g8oV_43McA_fl1nRwdjMnsQ6njjyV4aA0U";   // Atza|...
+
 
 
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/chairs.csv");
@@ -84,7 +87,8 @@ public class ImportController {
 //            imagesImport.updateComponentImages();
 //            productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductListing();
-            wayfairReportImport.importWayfairReportDaily(filepath2);
+//            wayfairReportImport.importWayfairReportDaily(filepath2);
+//            productService.generateProductMetaData();
 //            spreadsheetService.updateProductData(new String[]{
 //                    "Type", "Category", "Shipping", "Main Category", "Luxe", "Group ID", "UPC", "Finish", "PIECES", "Chair Type", "Size & Shape", "Style", "Collection", "ASIN", "", "Sub Category","Title","Description", "HTML Description"
 //            });
@@ -92,6 +96,7 @@ public class ImportController {
 //            shopifyExport.exportProductCustomLabel("custom_label.csv");
 //            shopifyExport.exportShopifyProductsPrice("shopify_products_price_06_23.csv");
 //            shopifyExport.exportProductType("product_type.csv");
+
 
             return ResponseEntity.ok().body("SUCCESS");
         } catch (RuntimeException e) {

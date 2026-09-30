@@ -14,6 +14,6 @@ public class WmsDatasourceProperties {
     private String username;
     private String password;
     private String driverClassName;
-
+    private String anthropicApiKey;
 
 }
