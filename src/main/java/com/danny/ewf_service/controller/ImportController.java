@@ -19,6 +19,14 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
+
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+
+import static com.danny.ewf_service.service.amz.TokenService.getAccessToken;
 
 
 @RequestMapping("/import")
@@ -75,8 +83,20 @@ public class ImportController {
         try {
             String filepath = "/data/skus.csv";
             String filepath2 = "/data/product_report_day.csv";
-            String accessToken = "Atza|IwEBIAv3zFKyDx9YLqKoIdlTnHJkIUJ-FoW8Us1It148rC-44ReS3KnZ_BTbB5cB32b7v7feaNt-_PhvYer2dLfiOVoLYraya-mi6sz3Rrcism17dWNT1qR2lkAewym0T9UKO1_XQltAK4AHhp_b6Cq0adkDZpO_B3up5LEqpz4ZBbfles08nQWin8197zruMaV0Gh55Ni9rOlxlJGnPajU6qtTstHSe-g8M6lkkWMDH-fpG4I-mfJu1Bb-AF_3rh3W86TBofSRFQAdiFly-9dOdjB5LmZY3XEvm6zVHCJzU7ofzon-QL6JQl5g8oV_43McA_fl1nRwdjMnsQ6njjyV4aA0U";   // Atza|...
+            String token = getAccessToken();
 
+            System.out.println("Access token: " + token.substring(0, 20) + "...");
+
+            // Example SP-API call (North America endpoint)
+            HttpRequest apiRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("https://sellingpartnerapi-na.amazon.com/vendor/directFulfillment/shipping/v1/shippingLabels/4B1VPRCV"))
+                    .header("x-amz-access-token", token)
+                    .GET()
+                    .build();
+
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpResponse<String> apiResponse = httpClient.send(apiRequest, HttpResponse.BodyHandlers.ofString());
+            System.out.println(apiResponse.statusCode() + " " + apiResponse.body());
 
 
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/chairs.csv");
