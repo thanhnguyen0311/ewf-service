@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface ProductService {
+public interface  ProductService {
 
     ProductResponseDto findBySku(String sku);
 
