@@ -6,13 +6,17 @@ on:
     branches:
       - master
 
+# Never run two deployments at the same time
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
 jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
 
-    # Add environment variables for database connection
     env:
       SPRING_DATASOURCE_URL: ${{ secrets.DATASOURCE_URL }}
       SPRING_DATASOURCE_USERNAME: ${{ secrets.DATASOURCE_USERNAME }}
@@ -21,87 +25,105 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       SEARCHAPI_TOKEN: ${{ secrets.SEARCHAPI_TOKEN }}
       CLAUDEAPIKEY: ${{ secrets.CLAUDEAPIKEY }}
+      AMZ_CLIENT_ID: ${{ secrets.AMZ_CLIENT_ID }}
+      AMZ_CLIENT_SECRET: ${{ secrets.AMZ_CLIENT_SECRET }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
           cache: maven
 
-      # Create application.properties for testing
       - name: Set up application properties
         run: |
           cat > src/main/resources/application.properties << EOF
           spring.application.name=ewf-service
           spring.cache.type=simple
-          
+
           spring.datasource.url=${SPRING_DATASOURCE_URL}
           spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
           spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
-          
-          
+
           wms.datasource.url=jdbc:${WMS_DATASOURCE_URL}
           wms.datasource.username=${SPRING_DATASOURCE_USERNAME}
           wms.datasource.password=${SPRING_DATASOURCE_PASSWORD}
           wms.datasource.anthropicApiKey=${CLAUDEAPIKEY}
-          
-          spring.amz.client-id: ${AMZ_CLIENT_ID}
-          spring.amz.client-secret: ${AMZ_CLIENT_SECRET}
-          spring.amz.redirect-uri: https://ewfportal.com/api/v1/oauth/callback
-            
-      
+
+          spring.amz.client-id=${AMZ_CLIENT_ID}
+          spring.amz.client-secret=${AMZ_CLIENT_SECRET}
+          spring.amz.redirect-uri=https://ewfportal.com/api/v1/oauth/callback
+
           jwt.secret=${JWT_SECRET}
           searchapi.token=${SEARCHAPI_TOKEN}
           spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
           spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-          
+
           wms.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
           wms.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-          
-          # Hibernate Configuration
+
           spring.jpa.show-sql=false
           spring.jpa.properties.hibernate.format_sql=true
-          
-          # Server Settings
+
           server.port=8080
           server.address=127.0.0.1
-          
-          
           EOF
 
       - name: Run unit tests
-        run: mvn test
+        run: mvn -B test
 
   build:
     name: Build Application
     runs-on: ubuntu-latest
     needs: test
     if: github.event.pull_request.merged == true
+    outputs:
+      jar_sha: ${{ steps.checksum.outputs.jar_sha }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: temurin
           cache: maven
 
       - name: Package the application
-        run: mvn -B package -DskipTests
+        run: mvn -B clean package -DskipTests
+
+      - name: Prepare app.jar.new
+        run: |
+          # Pick the Spring Boot fat jar, not the "-plain" jar
+          JAR_FILE=$(ls target/*.jar | grep -v -- '-plain.jar' | head -n1)
+          if [[ -z "$JAR_FILE" ]]; then
+            echo "No JAR file found!"
+            exit 1
+          fi
+          mkdir -p dist
+          cp "$JAR_FILE" dist/app.jar.new
+          echo "Using $JAR_FILE"
+          ls -la dist/
+
+      - name: Compute checksum
+        id: checksum
+        run: |
+          SHA=$(sha256sum dist/app.jar.new | awk '{print $1}')
+          echo "jar_sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "JAR sha256: $SHA"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-build
-          path: target/*.jar
+          path: dist/app.jar.new
+          retention-days: 7
 
   copy_jar:
     name: Copy JAR to Server
@@ -115,64 +137,80 @@ jobs:
         with:
           name: app-build
 
-      - name: Rename JAR file locally
+      - name: Verify artifact
         run: |
-          JAR_FILE=$(find . -name "*.jar" -type f | head -n1)
-          if [[ -n "$JAR_FILE" ]]; then
-            cp "$JAR_FILE" app.jar
-            echo "Created app.jar from $JAR_FILE"
-          else
-            echo "No JAR file found!"
+          ls -la app.jar.new
+          SHA=$(sha256sum app.jar.new | awk '{print $1}')
+          if [[ "$SHA" != "${{ needs.build.outputs.jar_sha }}" ]]; then
+            echo "Checksum mismatch after download!"
             exit 1
           fi
 
+      # Upload as app.jar.new so the running app's jar is never overwritten while in use
       - name: Copy JAR to server
-        uses: appleboy/scp-action@v0.1.4
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: 22
-          source: "app.jar"
+          source: "app.jar.new"
           target: "${{ secrets.PROD_DEPLOY_PATH }}"
           overwrite: true
 
   deploy:
     name: Deploy Application
     runs-on: ubuntu-latest
-    needs: copy_jar
+    needs: [ build, copy_jar ]
     if: github.event.pull_request.merged == true
 
     steps:
       - name: Deploy application
-        uses: appleboy/ssh-action@v1.0.0
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: 22
+          command_timeout: 15m
           script: |
             set -e
-            echo 'Starting deployment on Production VPS...'
-            
-            # Prepare deployment directory
-            mkdir -p ${{ secrets.PROD_DEPLOY_PATH }}
-            cd ${{ secrets.PROD_DEPLOY_PATH }}
-            
-            # Check if JAR file exists
-            if [[ ! -f app.jar ]]; then
-              echo "ERROR: app.jar not found in $(pwd)"
+
+            SERVICE=app.service
+            APP_PORT=8080
+            DEPLOY_DIR="${{ secrets.PROD_DEPLOY_PATH }}"
+            # Anchored at the start so it only matches real java processes,
+            # never this deploy shell (whose command line contains this script)
+            JAVA_PATTERN='^[^ ]*java .*app\.jar' 
+            EXPECTED_SHA="${{ needs.build.outputs.jar_sha }}"
+
+            # Use sudo only when not root
+            if [[ "$(id -u)" -eq 0 ]]; then SUDO=""; else SUDO="sudo"; fi
+
+            echo "=== Starting deployment on Production VPS ==="
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+
+            # ---------- 1. Check the new jar arrived and is the right build ----------
+            if [[ ! -f app.jar.new ]]; then
+              echo "ERROR: app.jar.new not found in $(pwd)"
               ls -la
               exit 1
             fi
-            
-            echo "JAR file found: $(ls -la app.jar)"
-            
-            # Create production application.properties
+            NEW_SHA=$(sha256sum app.jar.new | awk '{print $1}')
+            if [[ "$NEW_SHA" != "$EXPECTED_SHA" ]]; then
+              echo "ERROR: app.jar.new checksum mismatch"
+              echo "  expected: $EXPECTED_SHA"
+              echo "  got:      $NEW_SHA"
+              exit 1
+            fi
+            echo "New jar verified (sha256 $NEW_SHA)"
+
+            # ---------- 2. Write production application.properties ----------
             cat > application.properties << 'EOF'
             spring.application.name=ewf-service
             spring.cache.type=simple
-            
+
             spring.datasource.url=${{ secrets.DATASOURCE_URL }}
             spring.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
             spring.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
@@ -180,67 +218,114 @@ jobs:
             wms.datasource.username=${{ secrets.DATASOURCE_USERNAME }}
             wms.datasource.password=${{ secrets.DATASOURCE_PASSWORD }}
             wms.datasource.anthropicApiKey=${{ secrets.CLAUDEAPIKEY }}
-          
-            spring.amz.client-id: ${{ secrets.AMZ_CLIENT_ID }}
-            spring.amz.client-secret: ${{ secrets.AMZ_CLIENT_SECRET }}
-            
+
+            spring.amz.client-id=${{ secrets.AMZ_CLIENT_ID }}
+            spring.amz.client-secret=${{ secrets.AMZ_CLIENT_SECRET }}
+
             wms.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
             wms.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-            
+
             jwt.secret=${{ secrets.JWT_SECRET }}
             searchapi.token=${{ secrets.SEARCHAPI_TOKEN }}
             spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
             spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-            
-            # Hibernate Configuration
+
             spring.jpa.show-sql=false
             spring.jpa.properties.hibernate.format_sql=true
-            
-            # Server Settings for production
+
             server.port=8080
             server.address=0.0.0.0
-            
-            
-            
-            
             EOF
-            
-            
-            echo "Application properties created"
-            
-            # Stop the running application if it exists
-            if [[ -f app.pid ]]; then
-              if ps -p $(cat app.pid) > /dev/null; then
-                echo 'Stopping the current running application...'
-                kill -15 $(cat app.pid)
-                sleep 5
-                if ps -p $(cat app.pid) > /dev/null; then
-                  kill -9 $(cat app.pid)
-                fi
+            sed -i 's/^[[:space:]]*//' application.properties
+            chmod 600 application.properties
+            echo "application.properties written"
+
+            # ---------- 3. Stop the service ----------
+            OLD_PID=$($SUDO systemctl show -p MainPID --value $SERVICE || echo 0)
+            echo "Stopping $SERVICE (current PID: $OLD_PID)..."
+            $SUDO systemctl stop $SERVICE || true
+
+            # ---------- 4. Kill ANY other app.jar instance (nohup leftovers, manual runs) ----------
+            if pgrep -f "$JAVA_PATTERN" > /dev/null; then
+              echo "Found leftover app.jar processes:"
+              pgrep -af "$JAVA_PATTERN" || true
+              $SUDO pkill -15 -f "$JAVA_PATTERN" || true
+              for i in {1..20}; do
+                pgrep -f "$JAVA_PATTERN" > /dev/null || break
+                sleep 1
+              done
+              if pgrep -f "$JAVA_PATTERN" > /dev/null; then
+                echo "Force killing remaining app.jar processes"
+                $SUDO pkill -9 -f "$JAVA_PATTERN" || true
+                sleep 2
               fi
-              rm -f app.pid
             fi
-            
-            # Check Java version
-            java -version
-            
-            # Start the new application
-            echo 'Starting the new application...'
-            nohup java -jar app.jar --spring.config.location=file:./application.properties > app.log 2>&1 &
-            APP_PID=$!
-            echo $APP_PID > app.pid
-            
-            echo "Application started with PID: $APP_PID"
-            
-            # Wait a moment and check if it's still running
-            sleep 5
-            if ps -p $APP_PID > /dev/null; then
-              echo "Application is running successfully!"
-            else
-              echo "ERROR: Application failed to start"
-              echo "Last 20 lines of log:"
-              tail -20 app.log
+
+            # ---------- 5. Make sure the port is free ----------
+            for i in {1..30}; do
+              PORT_PID=$($SUDO ss -tlnp | grep ":$APP_PORT " | grep -oP 'pid=\K[0-9]+' | head -n1 || true)
+              [[ -z "$PORT_PID" ]] && break
+              if [[ $i -eq 1 ]]; then echo "Port $APP_PORT held by PID $PORT_PID, stopping it..."; $SUDO kill -15 $PORT_PID || true; fi
+              if [[ $i -eq 20 ]]; then echo "Force killing PID $PORT_PID"; $SUDO kill -9 $PORT_PID || true; fi
+              sleep 1
+            done
+            if $SUDO ss -tln | grep -q ":$APP_PORT "; then
+              echo "ERROR: port $APP_PORT is still in use:"
+              $SUDO ss -tlnp | grep ":$APP_PORT "
               exit 1
             fi
-            
-            echo 'Deployment completed successfully!'
+            echo "All old instances stopped, port $APP_PORT is free"
+
+            # ---------- 6. Swap in the new jar (keep a backup) ----------
+            [[ -f app.jar ]] && cp -f app.jar app.jar.bak
+            mv -f app.jar.new app.jar
+            RUN_SHA=$(sha256sum app.jar | awk '{print $1}')
+            [[ "$RUN_SHA" == "$EXPECTED_SHA" ]] || { echo "ERROR: app.jar is not the new build"; exit 1; }
+            echo "app.jar replaced with latest build"
+
+            # Clean up files from the old nohup approach
+            rm -f app.pid app.log
+
+            # ---------- 7. Start the service ----------
+            DEPLOY_START=$(date '+%Y-%m-%d %H:%M:%S')
+            echo "Starting $SERVICE at $DEPLOY_START..."
+            $SUDO systemctl start $SERVICE
+
+            # ---------- 8. Wait until Spring Boot reports it started ----------
+            STARTED=false
+            for i in {1..36}; do
+              if $SUDO journalctl -u $SERVICE --since "$DEPLOY_START" --no-pager | grep -q "Started .* in .* seconds"; then
+                STARTED=true
+                break
+              fi
+              if ! $SUDO systemctl is-active --quiet $SERVICE; then
+                echo "ERROR: $SERVICE stopped during startup"
+                $SUDO journalctl -u $SERVICE --since "$DEPLOY_START" -n 80 --no-pager
+                exit 1
+              fi
+              sleep 5
+            done
+
+            if [[ "$STARTED" != "true" ]]; then
+              echo "ERROR: application did not start within 3 minutes"
+              $SUDO journalctl -u $SERVICE --since "$DEPLOY_START" -n 80 --no-pager
+              exit 1
+            fi
+
+            # ---------- 9. Confirm exactly one instance, running the new jar ----------
+            NEW_PID=$($SUDO systemctl show -p MainPID --value $SERVICE)
+            COUNT=$(pgrep -fc "$JAVA_PATTERN" || true)
+            echo "New PID: $NEW_PID (old: $OLD_PID), app.jar processes running: $COUNT"
+
+            if [[ "$NEW_PID" == "$OLD_PID" || "$NEW_PID" == "0" ]]; then
+              echo "ERROR: service PID did not change, new code may not be running"
+              exit 1
+            fi
+            if [[ "$COUNT" -ne 1 ]]; then
+              echo "ERROR: expected 1 app.jar process, found $COUNT"
+              pgrep -af "$JAVA_PATTERN" || true
+              exit 1
+            fi
+
+            $SUDO journalctl -u $SERVICE --since "$DEPLOY_START" --no-pager | grep "Started .* in .* seconds" | tail -1
+            echo "=== Deployment completed successfully: running build $EXPECTED_SHA ==="
