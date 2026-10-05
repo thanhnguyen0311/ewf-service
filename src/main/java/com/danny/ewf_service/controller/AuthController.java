@@ -84,7 +84,6 @@ public class AuthController {
     public ResponseEntity<?> getAMZAccessToken() {
         try {
             String token = getAccessToken();
-
             System.out.println("Access token: " + token.substring(0, 20) + "...");
             return ResponseEntity.ok().body(token);
         } catch (IllegalArgumentException ex) {
