@@ -4,22 +4,18 @@ import com.danny.ewf_service.configuration.security.JwtUtility;
 import com.danny.ewf_service.payload.request.user.RegisterRequest;
 import com.danny.ewf_service.payload.response.user.UserResponseDto;
 import com.danny.ewf_service.service.auth.AuthServiceImpl;
-import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 import static com.danny.ewf_service.service.amz.TokenService.getAccessToken;
 
@@ -81,6 +77,7 @@ public class AuthController {
 
 
     @GetMapping("/amz/token")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getAMZAccessToken() {
         try {
             String token = getAccessToken();

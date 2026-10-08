@@ -306,6 +306,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public String findComponentFromProduct(String groupSku, String dimension) {
+
+
+        return "";
+    }
+
+    @Override
     public List<ProductSearchResponseDto> getAllProductsSearch() {
         List<Product> products = productRepository.findAllProducts();
         List<ProductSearchResponseDto> productSearchResponseDtoList = productMapper.productToProductSearchResponseDtoList(products);

@@ -2,6 +2,7 @@ package com.danny.ewf_service.service.impl;
 
 import com.danny.ewf_service.converter.IOrderMapper;
 import com.danny.ewf_service.entity.Order;
+import com.danny.ewf_service.payload.request.OrderRequestDto;
 import com.danny.ewf_service.payload.response.OrderListResponseDto;
 import com.danny.ewf_service.repository.OrderRepository;
 import com.danny.ewf_service.service.OrderService;
@@ -32,14 +33,35 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderListResponseDto> getAllOrders() {
         PageRequest pageRequest = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        Page<Order> orderPage = orderRepository.findAll(pageRequest);
+        Page<Order> orderPage = orderRepository.findAllByChannel("unknown",pageRequest);
 
         List<Order> orders = orderPage.getContent();
 
-
         return IOrderMapper.orderToOrderListResponseDtos(orders);
+    }
 
-
+    @Override
+    public void updateAmzOrders(List<OrderRequestDto> orderRequestDtos) {
+        for (OrderRequestDto orderRequestDto : orderRequestDtos) {
+            Order order = new Order();
+            order.setChannel("amazon");
+            order.setContactName(orderRequestDto.getContactName());
+            order.setAddress1(orderRequestDto.getAddress1());
+            order.setAddress2(orderRequestDto.getAddress2());
+            order.setCity(orderRequestDto.getCity());
+            order.setState(orderRequestDto.getState());
+            order.setGroupSku(orderRequestDto.getGroupSku());
+            order.setTotalPrice(orderRequestDto.getPrices());
+            order.setCustomer(orderRequestDto.getContactName());
+            order.setPhone(orderRequestDto.getPhone());
+            order.setPoNumber(orderRequestDto.getPoNumber());
+            order.setQuantity(orderRequestDto.getQuantity());
+            order.setZipcode(orderRequestDto.getZip());
+            order.setMasterTrackingNumber(orderRequestDto.getTrackingNumber());
+            order.setTrackingNumber(orderRequestDto.getTrackingNumber());
+            order.setCarrier(orderRequestDto.getCarrier());
+            orderRepository.save(order);
+        }
 
     }
 

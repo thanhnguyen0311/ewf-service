@@ -53,4 +53,5 @@ public interface  ProductService {
 
     void generateProductMetaData() throws IOException, InterruptedException;
 
+    String findComponentFromProduct(String groupSku, String dimension);
 }

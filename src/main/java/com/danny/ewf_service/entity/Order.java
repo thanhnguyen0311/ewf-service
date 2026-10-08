@@ -1,16 +1,9 @@
 package com.danny.ewf_service.entity;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.*;
-import com.fasterxml.jackson.core.type.TypeReference;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "orders")
@@ -71,6 +64,19 @@ public class Order {
 
     @Column(name = "account_number", length = 100)
     private String accountNumber;
+
+    @Column(name = "channel", length = 100)
+    private String channel = "unknown";
+
+    @Column(name = "carrier", length = 255)
+    private String carrier;
+
+    @Column(name = "quantity")
+    private Long quantity = 1L;
+
+    @Column(name = "prices")
+    private Double totalPrice;
+
 
     @PrePersist
     protected void onCreate() {

@@ -4,6 +4,7 @@ package com.danny.ewf_service.controller;
 import com.danny.ewf_service.entity.ShopifyOrder;
 import com.danny.ewf_service.exception.ResourceNotFoundException;
 import com.danny.ewf_service.payload.request.AmzRequestDto;
+import com.danny.ewf_service.payload.request.OrderRequestDto;
 import com.danny.ewf_service.payload.request.sheet.ShopifyOrderRequestDto;
 import com.danny.ewf_service.payload.response.OrderListResponseDto;
 import com.danny.ewf_service.service.OrderService;
@@ -66,6 +67,17 @@ public class OrderController {
         try {
             List<DfShippingLabelService.LabelDetails> labelDetails = orderService.getLabels(amzRequestDto.getPoNumber(), amzRequestDto.getAccessToken());
             return ResponseEntity.ok(labelDetails);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResourceNotFoundException("Failed to retrieve Orders: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/amz/order")
+    public ResponseEntity<?> updateAMZOrder(List<OrderRequestDto> orderRequestDtos) {
+        try {
+            orderService.updateAmzOrders(orderRequestDtos);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
             throw new ResourceNotFoundException("Failed to retrieve Orders: " + e.getMessage());
