@@ -77,7 +77,6 @@ public class AuthController {
 
 
     @GetMapping("/amz/token")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getAMZAccessToken() {
         try {
             String token = getAccessToken();
