@@ -43,27 +43,39 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updateAmzOrders(List<OrderRequestDto> orderRequestDtos) {
         for (OrderRequestDto orderRequestDto : orderRequestDtos) {
-            Order order = new Order();
-            order.setChannel("amazon");
-            order.setContactName(orderRequestDto.getContactName());
-            order.setAddress1(orderRequestDto.getAddress1());
-            order.setAddress2(orderRequestDto.getAddress2());
-            order.setCity(orderRequestDto.getCity());
-            order.setState(orderRequestDto.getState());
-            order.setGroupSku(orderRequestDto.getGroupSku());
-            order.setTotalPrice(orderRequestDto.getPrices());
-            order.setCustomer(orderRequestDto.getContactName());
-            order.setPhone(orderRequestDto.getPhone());
-            order.setPoNumber(orderRequestDto.getPoNumber());
-            order.setQuantity(orderRequestDto.getQuantity());
-            order.setZipcode(orderRequestDto.getZip());
-            order.setMasterTrackingNumber(orderRequestDto.getTrackingNumber());
-            order.setTrackingNumber(orderRequestDto.getTrackingNumber());
-            order.setCarrier(orderRequestDto.getCarrier());
-            orderRepository.save(order);
-        }
+            try {
+                // Create a new order
+                Order order = new Order();
+                order.setChannel("amazon");
+                order.setContactName(orderRequestDto.getContactName());
+                order.setAddress1(orderRequestDto.getAddress1());
+                order.setAddress2(orderRequestDto.getAddress2());
+                order.setCity(orderRequestDto.getCity());
+                order.setState(orderRequestDto.getState());
+                order.setGroupSku(orderRequestDto.getGroupSku());
+                order.setTotalPrice(orderRequestDto.getPrices());
+                order.setCustomer(orderRequestDto.getContactName());
+                order.setPhone(orderRequestDto.getPhone());
+                order.setPoNumber(orderRequestDto.getPoNumber());
+                order.setQuantity(orderRequestDto.getQuantity());
+                order.setZipcode(orderRequestDto.getZip());
+                order.setMasterTrackingNumber(orderRequestDto.getTrackingNumber());
+                order.setTrackingNumber(orderRequestDto.getTrackingNumber());
+                order.setCarrier(orderRequestDto.getCarrier());
 
+                // Save to repository
+                orderRepository.save(order);
+            } catch (Exception e) {
+                // Log the error with the problematic data
+                System.err.println("Error saving order with PO Number: " + orderRequestDto.getPoNumber());
+                e.printStackTrace();
+                // Optionally, throw a custom error to fail the entire operation if needed
+                throw new RuntimeException(
+                        "Failed to save order with PO Number " + orderRequestDto.getPoNumber() + ": " + e.getMessage(), e);
+            }
+        }
     }
+
 
     @Override
     public List<DfShippingLabelService.LabelDetails> getLabels(String PODNumber, String accessToken) throws TesseractException, IOException, InterruptedException {
