@@ -33,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderListResponseDto> getAllOrders() {
         PageRequest pageRequest = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        Page<Order> orderPage = orderRepository.findAllByChannel("unknown",pageRequest);
+        Page<Order> orderPage = orderRepository.findAllByChannel("unknow", pageRequest);
 
         List<Order> orders = orderPage.getContent();
 
