@@ -73,7 +73,7 @@ public class OrderController {
     }
 
     @PostMapping("/amz/order")
-    public ResponseEntity<?> updateAMZOrder(List<OrderRequestDto> orderRequestDtos) {
+    public ResponseEntity<?> updateAMZOrder(@RequestBody List<OrderRequestDto> orderRequestDtos) {
         try {
             orderService.updateAmzOrders(orderRequestDtos);
             return ResponseEntity.ok().build();
