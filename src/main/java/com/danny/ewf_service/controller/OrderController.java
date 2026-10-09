@@ -79,7 +79,7 @@ public class OrderController {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ResourceNotFoundException("Failed to retrieve Orders: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Error updating Amazon orders: " + e.getMessage());
         }
     }
 }
