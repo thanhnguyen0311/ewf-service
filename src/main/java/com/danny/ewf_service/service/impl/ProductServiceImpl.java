@@ -23,6 +23,7 @@ import com.danny.ewf_service.repository.ProductComponentRepository;
 import com.danny.ewf_service.repository.ProductRepository;
 import com.danny.ewf_service.service.*;
 import com.danny.ewf_service.utils.CsvWriter;
+import com.danny.ewf_service.utils.SkuDimensionMapper;
 import com.danny.ewf_service.utils.imports.SKUGenerator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -295,7 +296,6 @@ public class ProductServiceImpl implements ProductService {
             }
             ProductMetaDto productMetaDto = new ProductMetaDto();
             productMetaDto.setSku(product.getSku());
-//            productMetaDto.setDescription(productDetail.getDescription());
             productMetaDto.setTitle(product.getTitle());
             ProductMetaResponseDto productMetaResponseDto = claudeService.getProductMeta(productMetaDto);
             productDetail.setMetaTitle(productMetaResponseDto.getMetaTitle());
@@ -306,10 +306,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String findComponentFromProduct(String groupSku, String dimension) {
-
-
-        return "";
+    public String findComponentFromProduct(String groupSku, String dimension) throws IOException, InterruptedException {
+        String componentSku = SkuDimensionMapper.findComponentSku(groupSku, dimension);
+        System.out.println(groupSku + " " + dimension + " -> " + componentSku);
+        return componentSku;
     }
 
     @Override

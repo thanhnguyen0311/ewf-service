@@ -12,6 +12,9 @@ import com.danny.ewf_service.service.ShopifyOrderService;
 import com.danny.ewf_service.service.impl.DfShippingLabelService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +27,9 @@ public class OrderController {
 
     @Autowired
     private final OrderService orderService;
+
+    @Autowired
+    private final DfShippingLabelService labelService;
 
     @Autowired
     private final ShopifyOrderService shopifyOrderService;
@@ -81,5 +87,15 @@ public class OrderController {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body("Error updating Amazon orders: " + e.getMessage());
         }
+    }
+
+    @GetMapping(value = "/{po}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> getLabelPdf(@PathVariable String po) throws Exception {
+        byte[] pdf = labelService.getEditedLabelPdfByPo(po);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.inline().filename("labels-" + po + ".pdf").build().toString())
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

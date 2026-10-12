@@ -83,21 +83,6 @@ public class ImportController {
         try {
             String filepath = "/data/skus.csv";
             String filepath2 = "/data/product_report_day.csv";
-            String token = getAccessToken();
-
-            System.out.println("Access token: " + token.substring(0, 20) + "...");
-
-            // Example SP-API call (North America endpoint)
-            HttpRequest apiRequest = HttpRequest.newBuilder()
-                    .uri(URI.create("https://sellingpartnerapi-na.amazon.com/vendor/directFulfillment/shipping/v1/shippingLabels/4B1VPRCV"))
-                    .header("x-amz-access-token", token)
-                    .GET()
-                    .build();
-
-            HttpClient httpClient = HttpClient.newHttpClient();
-            HttpResponse<String> apiResponse = httpClient.send(apiRequest, HttpResponse.BodyHandlers.ofString());
-            System.out.println(apiResponse.statusCode() + " " + apiResponse.body());
-
 
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/chairs.csv");
 //            imagesImport.updateProductImages(products);
