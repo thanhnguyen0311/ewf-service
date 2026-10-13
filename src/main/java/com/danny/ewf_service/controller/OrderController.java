@@ -99,12 +99,12 @@ public class OrderController {
                 .body(pdf);
     }
 
-    @PostMapping(value = "/{po}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> getLabelsPdf(@PathVariable String po) throws Exception {
-        byte[] pdf = labelService.getEditedLabelPdfByPo(po);
+    @PostMapping(value = "/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> getLabelsPdf(@RequestBody List<String> poNumbers) throws Exception {
+        byte[] pdf = labelService.getEditedLabelPdfByPos(poNumbers);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        ContentDisposition.inline().filename("labels-" + po + ".pdf").build().toString())
+                        ContentDisposition.inline().filename("labels.pdf").build().toString())
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
