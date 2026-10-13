@@ -20,4 +20,8 @@ public class ProductMetadata {
     @Column(name = "amz_searchapi")
     private String amzSearchapi;
 
+    @Column(name = "reviews")
+    private Long reviews;
+
+
 }

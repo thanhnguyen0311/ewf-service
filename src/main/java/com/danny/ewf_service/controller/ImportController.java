@@ -1,5 +1,6 @@
 package com.danny.ewf_service.controller;
 
+import com.danny.ewf_service.entity.product.Product;
 import com.danny.ewf_service.service.impl.DfShippingLabelService;
 import com.danny.ewf_service.repository.BayLocationRepository;
 import com.danny.ewf_service.service.ClaudeService;
@@ -25,6 +26,7 @@ import java.net.URI;
 
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
+import java.util.List;
 
 import static com.danny.ewf_service.service.amz.TokenService.getAccessToken;
 
@@ -84,7 +86,9 @@ public class ImportController {
             String filepath = "/data/skus.csv";
             String filepath2 = "/data/product_report_day.csv";
 
-//            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/chairs.csv");
+//            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
+//            productExport.exportReview(products, "review.csv");
+//            amazonDataExport.extractDataFromAmazon(products);
 //            imagesImport.updateProductImages(products);
 //            shopifyExport.exportProductListing(products,"new_product.csv",true);
 //            shopifyExport.exportProductCustomfields(products,"new_product_customfields.csv");

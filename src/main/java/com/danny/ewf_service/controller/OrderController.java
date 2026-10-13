@@ -98,4 +98,14 @@ public class OrderController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
+
+    @PostMapping(value = "/{po}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> getLabelsPdf(@PathVariable String po) throws Exception {
+        byte[] pdf = labelService.getEditedLabelPdfByPo(po);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.inline().filename("labels-" + po + ".pdf").build().toString())
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
 }
