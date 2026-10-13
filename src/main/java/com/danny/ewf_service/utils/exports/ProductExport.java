@@ -94,6 +94,14 @@ public class ProductExport {
         csvWriter.exportToCsv(rows, filePath);
     }
 
+    public void exportReview(List<Product> products, String filePath){
+        List<String[]> rows = new ArrayList<>();
+        for (Product product : products) {
+            rows.add(new String[]{product.getSku(), product.getAsin(), String.valueOf(product.getMetadata().getReviews())});
+        }
+        csvWriter.exportToCsv(rows, filePath);
+    }
+
     public void exportMergedProducts(String filePath){
         List<Product> products = productRepository.findAllProducts();
         List<String[]> rows = new ArrayList<>();

@@ -49,6 +49,7 @@ import org.springframework.stereotype.Service;
 import java.awt.Color;
 import java.awt.Font;
 import java.io.ByteArrayOutputStream;
+import java.util.Objects;
 
 /**
  * PO number -> Amazon DF getShippingLabel -> tracking number + customer name / address / DWT
@@ -196,10 +197,31 @@ public class DfShippingLabelService {
 
     // ---------- 3. PO -> labels with SKU text -> one PDF (in memory) ----------
 
-    /** Fetches every label for the PO, adds the SKU lines, returns a PDF (one label per page). */
-    public byte[] getEditedLabelPdfByPo(String poNumber)
+    public byte[] getEditedLabelPdfByPos(List<String> poNumbers)
             throws IOException, InterruptedException, TesseractException {
         String accessToken = TokenService.getAccessToken();
+
+        // Trim, drop blanks and duplicates, keep the original order
+        List<String> pos = poNumbers.stream()
+                .filter(
+                        Objects::nonNull)
+                .map(String::trim)
+                .filter(po -> !po.isEmpty())
+                .distinct()
+                .toList();
+
+        List<BufferedImage> edited = new ArrayList<>();
+        for (String po : pos) {
+            edited.addAll(buildEditedLabels(po, accessToken));
+        }
+        if (edited.isEmpty()) {
+            throw new IOException("No labels found for POs " + pos);
+        }
+        return toPdf(edited);
+    }
+
+    private List<BufferedImage> buildEditedLabels(String poNumber, String accessToken)
+            throws IOException, InterruptedException, TesseractException {
         List<BufferedImage> edited = new ArrayList<>();
         for (LabelDetails d : getLabelDetailsByPo(poNumber, accessToken)) {
             String sku = (d.groupSku() == null || d.dwt() == null)
@@ -207,8 +229,15 @@ public class DfShippingLabelService {
                     : SkuDimensionMapper.findComponentSku(d.groupSku(), d.dwt());
             edited.add(addSkuText(d.label(), d.groupSku(), sku));
         }
-        return toPdf(edited);
+        return edited;
     }
+
+    /** Fetches every label for the PO, adds the SKU lines, returns a PDF (one label per page). */
+    public byte[] getEditedLabelPdfByPo(String poNumber)
+            throws IOException, InterruptedException, TesseractException {
+        return getEditedLabelPdfByPos(List.of(poNumber));
+    }
+
     /** Calls getShippingLabel and decodes each base64 label into an image. Nothing is written to disk. */
     private List<BufferedImage> fetchLabelImages(String poNumber, String accessToken)
             throws IOException, InterruptedException {
@@ -251,11 +280,11 @@ public class DfShippingLabelService {
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_OFF); // crisp for thermal printers
         g.setColor(Color.BLACK);
-        g.setFont(new Font("SansSerif", Font.PLAIN, (int) (22 * s)));
+        g.setFont(new Font("SansSerif", Font.BOLD, (int) (48 * s)));
 
         int x = (int) (10 * s);
-        g.drawString("Group SKU : " + groupSku, x, (int) (1065 * s));
-        g.drawString("SKU : " + sku, x, (int) (1093 * s));
+        g.drawString("Group SKU : " + groupSku, x, (int) (1085 * s));
+        g.drawString("SKU : " + sku, x, (int) (1140 * s));
 
         g.dispose();
         return out;
