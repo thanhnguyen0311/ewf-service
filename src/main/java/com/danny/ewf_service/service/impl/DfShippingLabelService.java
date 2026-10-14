@@ -64,11 +64,21 @@ public class DfShippingLabelService {
 
     private static final String BASE_URL =
             "https://sellingpartnerapi-na.amazon.com/vendor/directFulfillment/shipping/v1/shippingLabels/";
+    private static final Font SKU_FONT = loadSkuFont();
 
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private final ObjectMapper mapper = new ObjectMapper();
     private final String tessDataPath;
 
+
+    private static Font loadSkuFont() {
+        try (var in = DfShippingLabelService.class.getResourceAsStream("src/main/resources/JetBrainsMono-Bold.ttf")) {
+            if (in == null) throw new IOException("font not found");
+            return Font.createFont(Font.TRUETYPE_FONT, in);
+        } catch (Exception e) {
+            return new Font(Font.MONOSPACED, Font.BOLD, 32); // fallback
+        }
+    }
 
     /** Uses TESSDATA_PREFIX if set, otherwise the eng.traineddata bundled in resources/tessdata. */
     public DfShippingLabelService() {
@@ -227,7 +237,7 @@ public class DfShippingLabelService {
             String sku = (d.groupSku() == null || d.dwt() == null)
                     ? null
                     : SkuDimensionMapper.findComponentSku(d.groupSku(), d.dwt());
-            edited.add(addSkuText(d.label(), d.groupSku(), sku));
+            edited.add(addSkuText(d.label(), d.groupSku(), sku, poNumber));
         }
         return edited;
     }
@@ -268,7 +278,7 @@ public class DfShippingLabelService {
     }
 
     /** Draws "Group SKU" and "SKU" below "BILLING: P/P". Returns a new image; the original is untouched. */
-    public BufferedImage addSkuText(BufferedImage label, String groupSku, String sku) {
+    public BufferedImage addSkuText(BufferedImage label, String groupSku, String sku, String poNumber) {
         // Grayscale copy: works for 1-bit labels and keeps the PDF small
         BufferedImage out = new BufferedImage(label.getWidth(), label.getHeight(),
                 BufferedImage.TYPE_BYTE_GRAY);
@@ -280,11 +290,12 @@ public class DfShippingLabelService {
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_OFF); // crisp for thermal printers
         g.setColor(Color.BLACK);
-        g.setFont(new Font("SansSerif", Font.BOLD, (int) (32 * s)));
+        g.setFont(SKU_FONT.deriveFont((float) (32 * s)));
 
         int x = (int) (10 * s);
-        g.drawString("Group SKU : " + groupSku, x, (int) (1085 * s));
-        g.drawString("SKU : " + sku, x, (int) (1140 * s));
+        g.drawString("Group: " + groupSku, x, (int) (1085 * s));
+        g.drawString("SKU : " + sku, x, (int) (1125 * s));
+        g.drawString("PO : " + poNumber , x, (int) (350 * s));
 
         g.dispose();
         return out;
