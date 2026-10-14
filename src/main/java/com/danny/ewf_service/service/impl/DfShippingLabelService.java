@@ -280,7 +280,7 @@ public class DfShippingLabelService {
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_OFF); // crisp for thermal printers
         g.setColor(Color.BLACK);
-        g.setFont(new Font("SansSerif", Font.BOLD, (int) (48 * s)));
+        g.setFont(new Font("SansSerif", Font.BOLD, (int) (32 * s)));
 
         int x = (int) (10 * s);
         g.drawString("Group SKU : " + groupSku, x, (int) (1085 * s));
