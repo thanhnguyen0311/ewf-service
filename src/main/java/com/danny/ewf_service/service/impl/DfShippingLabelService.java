@@ -290,12 +290,20 @@ public class DfShippingLabelService {
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_OFF); // crisp for thermal printers
         g.setColor(Color.BLACK);
-        g.setFont(SKU_FONT.deriveFont((float) (32 * s)));
 
-        int x = (int) (10 * s);
-        g.drawString("Group: " + groupSku, x, (int) (1085 * s));
-        g.drawString("SKU : " + sku, x, (int) (1125 * s));
-        g.drawString("PO : " + poNumber , x, (int) (350 * s));
+        int x = (int) (270 * s);
+
+// Group line: smaller font
+        g.setFont(SKU_FONT.deriveFont((float) (24 * s)));
+        g.drawString("Group: " + groupSku, x, (int) (1070 * s));
+
+// SKU line: original size
+        if (sku == null) {
+            g.dispose();
+            return out;
+        }
+        g.setFont(SKU_FONT.deriveFont((float) (32 * s)));
+        g.drawString("SKU : " + sku, x, (int) (1110 * s));
 
         g.dispose();
         return out;
