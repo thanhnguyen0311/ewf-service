@@ -1,5 +1,5 @@
 package com.danny.ewf_service.controller;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.danny.ewf_service.entity.ShopifyOrder;
 import com.danny.ewf_service.exception.ResourceNotFoundException;
@@ -18,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 @RequestMapping("/api/v1/orders")
@@ -33,6 +35,8 @@ public class OrderController {
 
     @Autowired
     private final ShopifyOrderService shopifyOrderService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("")
     public ResponseEntity<?> getOrders() {
@@ -101,11 +105,17 @@ public class OrderController {
 
     @PostMapping(value = "/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getLabelsPdf(@RequestBody List<String> poNumbers) throws Exception {
-        byte[] pdf = labelService.getEditedLabelPdfByPos(poNumbers);
+        var result = labelService.getEditedLabelPdfWithMappingByPos(poNumbers);
+
+        String json = objectMapper.writeValueAsString(result.mapping());
+        String encoded = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         ContentDisposition.inline().filename("labels.pdf").build().toString())
+                .header("X-Label-Mapping", encoded)
+                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "X-Label-Mapping")
                 .contentType(MediaType.APPLICATION_PDF)
-                .body(pdf);
+                .body(result.pdf());
     }
 }
