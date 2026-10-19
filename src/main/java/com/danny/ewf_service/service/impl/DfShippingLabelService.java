@@ -33,9 +33,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -49,7 +47,6 @@ import org.springframework.stereotype.Service;
 import java.awt.Color;
 import java.awt.Font;
 import java.io.ByteArrayOutputStream;
-import java.util.Objects;
 
 /**
  * PO number -> Amazon DF getShippingLabel -> tracking number + customer name / address / DWT
@@ -69,6 +66,11 @@ public class DfShippingLabelService {
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private final ObjectMapper mapper = new ObjectMapper();
     private final String tessDataPath;
+    /** Result of processing one PO: edited images + group SKU + component SKU per package (in label order). */
+    public record PoLabels(String groupSku, List<String> skus, List<BufferedImage> images) {}
+
+    /** PDF bytes plus { PO : { groupSku : [sku, sku, ...] } } */
+    public record LabelPdfResult(byte[] pdf, Map<String, Map<String, List<String>>> mapping) {}
 
 
     private static Font loadSkuFont() {
@@ -142,6 +144,7 @@ public class DfShippingLabelService {
             return new LabelDetails(poNumber, packageId, trackingNumber, shipMethodName, customerName,
                     addressLine, city, state, zip, dwt, weightLbs, packageOf, rawOcrText, v, label);
         }
+
     }
 
     // ---------- 1. PO number -> API -> tracking + label details ----------
@@ -209,38 +212,57 @@ public class DfShippingLabelService {
 
     public byte[] getEditedLabelPdfByPos(List<String> poNumbers)
             throws IOException, InterruptedException, TesseractException {
+        return getEditedLabelPdfWithMappingByPos(poNumbers).pdf();
+    }
+
+    private PoLabels buildEditedLabels(String poNumber, String accessToken)
+            throws IOException, InterruptedException, TesseractException {
+        List<BufferedImage> edited = new ArrayList<>();
+        List<String> skus = new ArrayList<>();
+        String groupSku = null;
+
+        for (LabelDetails d : getLabelDetailsByPo(poNumber, accessToken)) {
+            groupSku = d.groupSku(); // same for every label of the PO
+            String sku = (d.groupSku() == null || d.dwt() == null)
+                    ? null
+                    : SkuDimensionMapper.findComponentSku(d.groupSku(), d.dwt());
+            skus.add(sku); // keeps label order; null = not found by DWT
+            edited.add(addSkuText(d.label(), d.groupSku(), sku, poNumber));
+        }
+        return new PoLabels(groupSku, skus, edited);
+    }
+
+    public LabelPdfResult getEditedLabelPdfWithMappingByPos(List<String> poNumbers)
+            throws IOException, InterruptedException, TesseractException {
         String accessToken = TokenService.getAccessToken();
 
-        // Trim, drop blanks and duplicates, keep the original order
         List<String> pos = poNumbers.stream()
-                .filter(
-                        Objects::nonNull)
+                .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(po -> !po.isEmpty())
                 .distinct()
                 .toList();
 
         List<BufferedImage> edited = new ArrayList<>();
+        Map<String, Map<String, List<String>>> mapping = new LinkedHashMap<>(); // keeps PO order
+
         for (String po : pos) {
-            edited.addAll(buildEditedLabels(po, accessToken));
+            PoLabels r = buildEditedLabels(po, accessToken);
+            edited.addAll(r.images());
+
+            // Jackson can't serialize a null map key, so use a placeholder
+            String groupKey = r.groupSku() != null ? r.groupSku() : "UNKNOWN";
+            Map<String, List<String>> inner = new LinkedHashMap<>();
+            inner.put(groupKey, r.skus());
+            mapping.put(po, inner);
         }
+
         if (edited.isEmpty()) {
             throw new IOException("No labels found for POs " + pos);
         }
-        return toPdf(edited);
+        return new LabelPdfResult(toPdf(edited), mapping);
     }
 
-    private List<BufferedImage> buildEditedLabels(String poNumber, String accessToken)
-            throws IOException, InterruptedException, TesseractException {
-        List<BufferedImage> edited = new ArrayList<>();
-        for (LabelDetails d : getLabelDetailsByPo(poNumber, accessToken)) {
-            String sku = (d.groupSku() == null || d.dwt() == null)
-                    ? null
-                    : SkuDimensionMapper.findComponentSku(d.groupSku(), d.dwt());
-            edited.add(addSkuText(d.label(), d.groupSku(), sku, poNumber));
-        }
-        return edited;
-    }
 
     /** Fetches every label for the PO, adds the SKU lines, returns a PDF (one label per page). */
     public byte[] getEditedLabelPdfByPo(String poNumber)

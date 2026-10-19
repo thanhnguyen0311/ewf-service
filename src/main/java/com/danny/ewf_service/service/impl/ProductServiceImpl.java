@@ -443,18 +443,18 @@ public class ProductServiceImpl implements ProductService {
 
         productPrice = totalQB3 + totalShipCost;
 
+
         if (price.getPromotion() != null && price.getPromotion() > 0.0) {
             comparePrice = productPrice;
             productPrice = productPrice * (100-price.getPromotion()) / 100;
         }
         else {
-//            if (price.getAmazonPrice() != null) {
-//                if (productPrice < 500.0) {
-//                    if (productPrice < price.getAmazonPrice()) {
-//                        productPrice = price.getAmazonPrice();
-//                    }
-//                }
-//            }
+            if (price.getAmazonPrice() != null) {
+                if (productPrice < price.getAmazonPrice()*0.95) {
+                    productPrice = price.getAmazonPrice()*0.95;
+                }
+
+            }
 
             if (price.getEwfdirectManualPrice() != null && price.getEwfdirectManualPrice() > 0) {
                 productPrice = price.getEwfdirectManualPrice();

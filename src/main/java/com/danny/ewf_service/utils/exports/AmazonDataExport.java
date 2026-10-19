@@ -41,7 +41,7 @@ public class AmazonDataExport {
     }
 
     public void extractDataFromAmazon(List<Product> products){
-        if (products.isEmpty()) products = productRepository.findProductsByWholesalesEwfdirect();
+        if (products.isEmpty()) products = productRepository.findAllProducts();
 
         System.out.println("Found " + products.size() + " products with ASIN");
         String searchApiRequest = "https://www.searchapi.io/api/v1/search?api_key=" + searchApiToken + "&asin=";
@@ -51,7 +51,7 @@ public class AmazonDataExport {
 
         for (Product product : products) {
             if (product.getAsin().isEmpty()) continue;
-
+            if (product.getShippingMethod() != null && !product.getShippingMethod().equals("LTL")) continue;
             metadata = product.getMetadata();
             if (metadata == null) metadata = new ProductMetadata();
             try {

@@ -26,6 +26,7 @@ import java.net.URI;
 
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.danny.ewf_service.service.amz.TokenService.getAccessToken;
@@ -85,7 +86,7 @@ public class ImportController {
         try {
             String filepath = "/data/skus.csv";
             String filepath2 = "/data/product_report_day.csv";
-
+//            amazonDataExport.extractDataFromAmazon(new ArrayList<>());
 //            List<Product> products = productService.getListProductFromCsvFile("src/main/resources/data/skus.csv");
 //            productExport.exportReview(products, "review.csv");
 //            amazonDataExport.extractDataFromAmazon(products);
@@ -103,7 +104,7 @@ public class ImportController {
 //            });
 //            productsImport.updateSaleChannel("src/main/resources/data/skus.csv");
 //            shopifyExport.exportProductCustomLabel("custom_label.csv");
-//            shopifyExport.exportShopifyProductsPrice("shopify_products_price_06_23.csv");
+            shopifyExport.exportShopifyProductsPrice("shopify_products_price_06_23.csv");
 //            shopifyExport.exportProductType("product_type.csv");
 
 
