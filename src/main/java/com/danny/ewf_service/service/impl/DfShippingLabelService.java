@@ -66,11 +66,17 @@ public class DfShippingLabelService {
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private final ObjectMapper mapper = new ObjectMapper();
     private final String tessDataPath;
-    /** Result of processing one PO: edited images + group SKU + component SKU per package (in label order). */
-    public record PoLabels(String groupSku, List<String> skus, List<BufferedImage> images) {}
+    /** Result of processing one PO: edited images + group SKU + quantity + component SKU per package (in label order). */
+    public record PoLabels(String groupSku, Long quantity, List<String> skus, List<BufferedImage> images) {}
 
-    /** PDF bytes plus { PO : { groupSku : [sku, sku, ...] } } */
-    public record LabelPdfResult(byte[] pdf, Map<String, Map<String, List<String>>> mapping) {}
+    /** What the mapping holds for one PO. */
+    public record PoMapping(String groupSku, Long quantity, List<String> skus) {}
+
+    /** PDF bytes plus { PO : { groupSku, quantity, skus } } */
+    public record LabelPdfResult(byte[] pdf, Map<String, PoMapping> mapping) {}
+
+    /** Values read from the DF order: items[0].vendorProductIdentifier and items[0].orderedQuantity.amount */
+    public record OrderInfo(String groupSku, Long quantity) {}
 
 
     private static Font loadSkuFont() {
@@ -133,16 +139,20 @@ public class DfShippingLabelService {
     public record LabelDetails(
             String poNumber, String packageId, String trackingNumber, String shipMethodName,
             String customerName, String addressLine, String city, String state, String zip,
-            String dwt, String weightLbs, String packageOf, String rawOcrText, String groupSku,
+            String dwt, String weightLbs, String packageOf, String rawOcrText, String groupSku, Long quantity,
             @JsonIgnore BufferedImage label) {
         public LabelDetails withPackageOf(String v) {
             return new LabelDetails(poNumber, packageId, trackingNumber, shipMethodName, customerName,
-                    addressLine, city, state, zip, dwt, weightLbs, v, rawOcrText, groupSku, label);
+                    addressLine, city, state, zip, dwt, weightLbs, v, rawOcrText, groupSku, quantity, label);
         }
 
         public LabelDetails withGroupSku(String v) {
             return new LabelDetails(poNumber, packageId, trackingNumber, shipMethodName, customerName,
-                    addressLine, city, state, zip, dwt, weightLbs, packageOf, rawOcrText, v, label);
+                    addressLine, city, state, zip, dwt, weightLbs, packageOf, rawOcrText, v, quantity, label);
+        }
+        public LabelDetails withQuantity(Long v) {
+            return new LabelDetails(poNumber, packageId, trackingNumber, shipMethodName, customerName,
+                    addressLine, city, state, zip, dwt, weightLbs, packageOf, rawOcrText, groupSku, v, label);
         }
 
     }
@@ -156,7 +166,7 @@ public class DfShippingLabelService {
         JsonNode payload = getJson(url, accessToken, poNumber).path("payload");
         String po = payload.path("purchaseOrderNumber").asText(poNumber);
 
-        String groupSku = getGroupSkuByPo(po, accessToken);   // once per PO
+        OrderInfo orderInfo = getOrderInfoByPo(po, accessToken);   // once per PO
 
         JsonNode labels = payload.path("labelData");
         List<LabelDetails> result = new ArrayList<>();
@@ -176,7 +186,8 @@ public class DfShippingLabelService {
             if (d.packageOf() == null) {
                 d = d.withPackageOf((i + 1) + " of " + labels.size());
             }
-            result.add(d.withGroupSku(groupSku));
+            result.add(d.withGroupSku(orderInfo.groupSku())
+                    .withQuantity(orderInfo.quantity()));
         }
         return result;
     }
@@ -194,8 +205,8 @@ public class DfShippingLabelService {
         return new LabelDetails(po, packageId, tracking, shipMethodName,
                 p.customerName(), p.addressLine(), p.city(), p.state(), p.zip(),
                 p.dwt(), p.weightLbs(), p.packageOf(), text,
-                null,     // groupSku is filled in by getLabelDetailsByPo
-                label);   // original, full-size label (not the cropped/scaled header)
+                null, null,  // groupSku and quantity are filled in by getLabelDetailsByPo
+                label);
     }
 
     private static BufferedImage scale(BufferedImage src, int factor) {
@@ -220,18 +231,19 @@ public class DfShippingLabelService {
         List<BufferedImage> edited = new ArrayList<>();
         List<String> skus = new ArrayList<>();
         String groupSku = null;
+        Long quantity = null;
 
         for (LabelDetails d : getLabelDetailsByPo(poNumber, accessToken)) {
-            groupSku = d.groupSku(); // same for every label of the PO
+            groupSku = d.groupSku();   // same for every label of the PO
+            quantity = d.quantity();   // same for every label of the PO
             String sku = (d.groupSku() == null || d.dwt() == null)
                     ? null
                     : SkuDimensionMapper.findComponentSku(d.groupSku(), d.dwt());
             skus.add(sku); // keeps label order; null = not found by DWT
             edited.add(addSkuText(d.label(), d.groupSku(), sku, poNumber));
         }
-        return new PoLabels(groupSku, skus, edited);
+        return new PoLabels(groupSku, quantity, skus, edited);
     }
-
     public LabelPdfResult getEditedLabelPdfWithMappingByPos(List<String> poNumbers)
             throws IOException, InterruptedException, TesseractException {
         String accessToken = TokenService.getAccessToken();
@@ -244,17 +256,15 @@ public class DfShippingLabelService {
                 .toList();
 
         List<BufferedImage> edited = new ArrayList<>();
-        Map<String, Map<String, List<String>>> mapping = new LinkedHashMap<>(); // keeps PO order
+        Map<String, PoMapping> mapping = new LinkedHashMap<>(); // keeps PO order
 
         for (String po : pos) {
             PoLabels r = buildEditedLabels(po, accessToken);
             edited.addAll(r.images());
 
-            // Jackson can't serialize a null map key, so use a placeholder
-            String groupKey = r.groupSku() != null ? r.groupSku() : "UNKNOWN";
-            Map<String, List<String>> inner = new LinkedHashMap<>();
-            inner.put(groupKey, r.skus());
-            mapping.put(po, inner);
+            // groupSku is now a value, not a map key, so null is fine for Jackson
+            String groupSku = r.groupSku() != null ? r.groupSku() : "UNKNOWN";
+            mapping.put(po, new PoMapping(groupSku, r.quantity(), r.skus()));
         }
 
         if (edited.isEmpty()) {
@@ -262,7 +272,6 @@ public class DfShippingLabelService {
         }
         return new LabelPdfResult(toPdf(edited), mapping);
     }
-
 
     /** Fetches every label for the PO, adds the SKU lines, returns a PDF (one label per page). */
     public byte[] getEditedLabelPdfByPo(String poNumber)
@@ -378,8 +387,8 @@ public class DfShippingLabelService {
         return mapper.readTree(response.body());
     }
 
-    /** orderDetails.items[0].vendorProductIdentifier, or null if missing. */
-    public String getGroupSkuByPo(String poNumber, String accessToken)
+    /** One call to the orders API -> group SKU + ordered quantity (either may be null if missing). */
+    public OrderInfo getOrderInfoByPo(String poNumber, String accessToken)
             throws IOException, InterruptedException {
         String url = ORDERS_URL + URLEncoder.encode(poNumber.trim(), StandardCharsets.UTF_8);
         JsonNode root = getJson(url, accessToken, poNumber);
@@ -387,9 +396,25 @@ public class DfShippingLabelService {
         JsonNode order = root.has("payload") ? root.path("payload") : root;
 
         JsonNode items = order.path("orderDetails").path("items");
-        if (!items.isArray() || items.isEmpty()) return null;
+        if (!items.isArray() || items.isEmpty()) return new OrderInfo(null, null);
 
-        String sku = items.get(0).path("vendorProductIdentifier").asText("");
-        return sku.isBlank() ? null : sku;
+        JsonNode item = items.get(0);
+
+        String sku = item.path("vendorProductIdentifier").asText("");
+        String groupSku = sku.isBlank() ? null : sku;
+
+        JsonNode amount = item.path("orderedQuantity").path("amount");
+        Long quantity = (amount.isMissingNode() || amount.isNull() || !amount.canConvertToLong()
+                                                                      && !amount.isTextual())
+                ? null
+                : amount.asLong();
+
+        return new OrderInfo(groupSku, quantity);
+    }
+
+    /** orderDetails.items[0].vendorProductIdentifier, or null if missing. */
+    public String getGroupSkuByPo(String poNumber, String accessToken)
+            throws IOException, InterruptedException {
+        return getOrderInfoByPo(poNumber, accessToken).groupSku();
     }
 }
